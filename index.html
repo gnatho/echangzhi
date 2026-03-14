@@ -51,6 +51,147 @@
             font-family: monospace;
         }
 
+        /* Spin Wheel Button - top left corner */
+        .spin-wheel-btn {
+            position: fixed;
+            top: 4px;
+            left: 6px;
+            z-index: 100;
+            padding: 4px 8px;
+            font-size: 10px;
+            background-color: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+
+        .spin-wheel-btn:hover {
+            background-color: #5b4cdb;
+        }
+
+        /* Spin Wheel Modal */
+        .wheel-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .wheel-modal.active {
+            display: flex;
+        }
+
+        /* Close button */
+        .wheel-close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: #ff4757;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            font-size: 24px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1001;
+        }
+
+        .wheel-close-btn:hover {
+            background: #ff3344;
+        }
+
+        /* Spin Wheel Container */
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+        }
+
+        .wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 4px solid #333;
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            overflow: hidden;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            width: 50%;
+            height: 50%;
+            transform-origin: 100% 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        }
+
+        /* Wheel pointer */
+        .wheel-pointer {
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #ff4757;
+            z-index: 10;
+        }
+
+        /* Spin button */
+        .wheel-spin-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .wheel-spin-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .wheel-spin-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Result display */
+        .wheel-result {
+            margin-top: 20px;
+            font-size: 32px;
+            font-weight: bold;
+            color: white;
+            min-height: 40px;
+        }
+
         select {
             padding: 6px 8px;
             font-size: 14px;
@@ -311,6 +452,18 @@
 <body>
 
     <div class="version">v0.2</div>
+    <button class="spin-wheel-btn" onclick="openWheelModal()">Spin</button>
+
+    <!-- Spin Wheel Modal -->
+    <div class="wheel-modal" id="wheelModal">
+        <button class="wheel-close-btn" onclick="closeWheelModal()">×</button>
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel"></div>
+            <button class="wheel-spin-btn" id="spinBtn" onclick="spinWheel()">SPIN</button>
+        </div>
+        <div class="wheel-result" id="wheelResult"></div>
+    </div>
 
     <div class="controls">
         <select id="modeSelector">
@@ -758,6 +911,138 @@ orWords:[
 
         // Run on load
         init();
+
+        // ==================== SPIN WHEEL FUNCTIONALITY ====================
+        // Wheel segments with weighted probabilities (pluses more often)
+        // Total: 24 segments
+        // +1: 8 times (33.3%)
+        // +2: 6 times (25%)
+        // +3: 4 times (16.7%)
+        // 0: 4 times (16.7%)
+        // -1: 2 times (8.3%)
+        const wheelSegments = [
+            '+1', '+1', '+1', '+1', '+1', '+1', '+1', '+1',  // 8 x +1
+            '+2', '+2', '+2', '+2', '+2', '+2',              // 6 x +2
+            '+3', '+3', '+3', '+3',                           // 4 x +3
+            '0', '0', '0', '0',                               // 4 x 0
+            '-1', '-1'                                         // 2 x -1
+        ];
+
+        // Shuffle the segments
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Color palette for wheel segments
+        const segmentColors = [
+            '#27ae60', '#2ecc71', '#229954', '#1e8449', // greens for +
+            '#3498db', '#2980b9', '#1abc9c', '#16a085', // blues for +
+            '#9b59b6', '#8e44ad', '#e74c3c', '#c0392b', // purples/reds for +3
+            '#f39c12', '#f1c40f', // yellows/oranges for 0
+            '#e67e22', '#d35400'  // orange for -1
+        ];
+
+        let currentRotation = 0;
+        let isSpinning = false;
+
+        // Create the wheel
+        function createWheel() {
+            const wheel = document.getElementById('wheel');
+            const segments = shuffleArray([...wheelSegments]);
+            const numSegments = segments.length;
+            const segmentAngle = 360 / numSegments;
+
+            wheel.innerHTML = '';
+
+            segments.forEach((value, index) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.backgroundColor = segmentColors[index % segmentColors.length];
+                segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
+                segment.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%)';
+                
+                // Position and rotate the text
+                const textSpan = document.createElement('span');
+                textSpan.style.transform = `skewY(${90 - segmentAngle}deg) rotate(${segmentAngle / 2}deg)`;
+                textSpan.style.position = 'absolute';
+                textSpan.style.top = '35%';
+                textSpan.style.left = '55%';
+                textSpan.style.transformOrigin = 'center';
+                textSpan.textContent = value;
+                
+                segment.appendChild(textSpan);
+                wheel.appendChild(segment);
+            });
+
+            // Store segments for result calculation
+            wheel.dataset.segments = JSON.stringify(segments);
+        }
+
+        // Open wheel modal
+        function openWheelModal() {
+            const modal = document.getElementById('wheelModal');
+            const result = document.getElementById('wheelResult');
+            const spinBtn = document.getElementById('spinBtn');
+            
+            result.textContent = '';
+            spinBtn.disabled = false;
+            spinBtn.textContent = 'SPIN';
+            isSpinning = false;
+            
+            createWheel();
+            modal.classList.add('active');
+        }
+
+        // Close wheel modal
+        function closeWheelModal() {
+            const modal = document.getElementById('wheelModal');
+            modal.classList.remove('active');
+        }
+
+        // Spin the wheel
+        function spinWheel() {
+            if (isSpinning) return;
+            
+            isSpinning = true;
+            const wheel = document.getElementById('wheel');
+            const spinBtn = document.getElementById('spinBtn');
+            const result = document.getElementById('wheelResult');
+            
+            spinBtn.disabled = true;
+            result.textContent = '';
+
+            // Calculate random spin (5-10 full rotations + random angle)
+            const spins = 5 + Math.random() * 5;
+            const randomAngle = Math.random() * 360;
+            const totalRotation = currentRotation + (spins * 360) + randomAngle;
+            
+            currentRotation = totalRotation;
+            wheel.style.transform = `rotate(${totalRotation}deg)`;
+
+            // Calculate result after spin completes
+            setTimeout(() => {
+                const segments = JSON.parse(wheel.dataset.segments);
+                const numSegments = segments.length;
+                const segmentAngle = 360 / numSegments;
+                
+                // The pointer is at the top, so we need to find which segment is there
+                // The wheel rotates clockwise, so we calculate the final position
+                const normalizedRotation = totalRotation % 360;
+                const pointerPosition = (360 - normalizedRotation) % 360;
+                const resultIndex = Math.floor(pointerPosition / segmentAngle);
+                
+                const finalResult = segments[resultIndex];
+                
+                result.textContent = finalResult;
+                spinBtn.disabled = false;
+                spinBtn.textContent = 'SPIN AGAIN';
+                isSpinning = false;
+            }, 4000); // Match the CSS transition duration
+        }
     </script>
 </body>
 </html>
