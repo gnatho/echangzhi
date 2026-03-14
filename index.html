@@ -67,7 +67,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(10, 10, 20, 0.92);
             z-index: 1000;
             justify-content: center;
             align-items: center;
@@ -104,44 +104,38 @@
         /* Spin Wheel Container */
         .wheel-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: min(90vw, 82vh);
+            height: min(90vw, 82vh);
         }
 
         .wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 4px solid #333;
+            border: 5px solid #1a1a2e;
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 8px 40px rgba(0,0,0,0.6);
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
             overflow: hidden;
         }
 
-        .wheel-segment {
-            position: absolute;
-            width: 50%;
-            height: 50%;
-            transform-origin: 100% 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-weight: bold;
-            font-size: 14px;
-            color: white;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        .wheel svg {
+            width: 100%;
+            height: 100%;
+            display: block;
         }
 
         /* Wheel pointer */
         .wheel-pointer {
             position: absolute;
-            top: -10px;
+            top: -14px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 15px solid transparent;
-            border-right: 15px solid transparent;
-            border-top: 25px solid #ff4757;
+            border-left: 18px solid transparent;
+            border-right: 18px solid transparent;
+            border-top: 32px solid #ff4757;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
             z-index: 10;
         }
 
@@ -151,15 +145,16 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: min(14vw, 12vh, 80px);
+            height: min(14vw, 12vh, 80px);
             background: white;
-            border: 3px solid #333;
+            border: 4px solid #1a1a2e;
             border-radius: 50%;
-            font-size: 14px;
+            font-size: clamp(11px, 2.5vw, 16px);
             font-weight: bold;
             cursor: pointer;
             z-index: 5;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
 
         .wheel-spin-btn:hover {
@@ -173,11 +168,13 @@
 
         /* Result display */
         .wheel-result {
-            margin-top: 20px;
-            font-size: 32px;
-            font-weight: bold;
+            margin-top: 16px;
+            font-size: clamp(28px, 8vw, 52px);
+            font-weight: 900;
             color: white;
-            min-height: 40px;
+            min-height: 44px;
+            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
+            letter-spacing: 2px;
         }
 
         select {
@@ -925,48 +922,114 @@ orWords:[
             return array;
         }
 
-        // Color palette for wheel segments
-        const segmentColors = [
-            '#27ae60', '#2ecc71', '#229954', '#1e8449', // greens for +
-            '#3498db', '#2980b9', '#1abc9c', '#16a085', // blues for +
-            '#9b59b6', '#8e44ad', '#e74c3c', '#c0392b', // purples/reds for +3
-            '#f39c12', '#f1c40f', // yellows/oranges for 0
-            '#e67e22', '#d35400'  // orange for -1
-        ];
+        // Color palette keyed by segment value
+        const segmentColorMap = {
+            '+3': ['#FFD700', '#FFC200', '#FFB800', '#FFAA00'], // gold — special
+            '+2': ['#00b894', '#00a381', '#00c49a', '#009e7a'], // teal-green
+            '+1': ['#0984e3', '#0773cc', '#1a90f0', '#0660b8'], // blue
+            '0':  ['#636e72', '#74828a', '#555f63', '#7f8c8d'], // neutral grey
+            '-1': ['#2d3436', '#3a3f42', '#252b2d', '#404850'], // near-black / somber
+        };
+        // Counters to cycle through shades per value
+        const segmentColorIndex = { '+3': 0, '+2': 0, '+1': 0, '0': 0, '-1': 0 };
+
+        function colorForSegment(value) {
+            const palette = segmentColorMap[value] || ['#888'];
+            const idx = segmentColorIndex[value] % palette.length;
+            segmentColorIndex[value]++;
+            return palette[idx];
+        }
 
         let currentRotation = 0;
         let isSpinning = false;
 
-        // Create the wheel
+        // Create the wheel using SVG arcs
         function createWheel() {
             const wheel = document.getElementById('wheel');
             const segments = shuffleArray([...wheelSegments]);
             const numSegments = segments.length;
-            const segmentAngle = 360 / numSegments;
+            const TWO_PI = 2 * Math.PI;
+            const segmentAngle = TWO_PI / numSegments;
+            const cx = 150, cy = 150, r = 146;
 
-            wheel.innerHTML = '';
+            // Reset color counters
+            Object.keys(segmentColorIndex).forEach(k => segmentColorIndex[k] = 0);
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('viewBox', '0 0 300 300');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
 
             segments.forEach((value, index) => {
-                const segment = document.createElement('div');
-                segment.className = 'wheel-segment';
-                segment.style.backgroundColor = segmentColors[index % segmentColors.length];
-                segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
-                segment.style.clipPath = 'polygon(0 0, 100% 0, 100% 100%)';
-                
-                // Position and rotate the text
-                const textSpan = document.createElement('span');
-                textSpan.style.transform = `skewY(${90 - segmentAngle}deg) rotate(${segmentAngle / 2}deg)`;
-                textSpan.style.position = 'absolute';
-                textSpan.style.top = '35%';
-                textSpan.style.left = '55%';
-                textSpan.style.transformOrigin = 'center';
-                textSpan.textContent = value;
-                
-                segment.appendChild(textSpan);
-                wheel.appendChild(segment);
+                const startAngle = index * segmentAngle - Math.PI / 2;
+                const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
+
+                const x1 = cx + r * Math.cos(startAngle);
+                const y1 = cy + r * Math.sin(startAngle);
+                const x2 = cx + r * Math.cos(endAngle);
+                const y2 = cy + r * Math.sin(endAngle);
+                const largeArc = segmentAngle > Math.PI ? 1 : 0;
+
+                const fill = colorForSegment(value);
+
+                // Draw pie slice
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', `M ${cx} ${cy} L ${x1.toFixed(3)} ${y1.toFixed(3)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z`);
+                path.setAttribute('fill', fill);
+                // Subtle white divider, slightly stronger on +3 for pop
+                path.setAttribute('stroke', value === '+3' ? 'rgba(255,220,0,0.5)' : 'rgba(255,255,255,0.25)');
+                path.setAttribute('stroke-width', '1');
+                svg.appendChild(path);
+
+                const midAngle = startAngle + segmentAngle / 2;
+                const textR = r * 0.65;
+                const tx = cx + textR * Math.cos(midAngle);
+                const ty = cy + textR * Math.sin(midAngle);
+                const rotateDeg = (midAngle * 180 / Math.PI) + 90;
+
+                if (value === '+3') {
+                    // Star glyph for special segments
+                    const star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    star.setAttribute('x', tx.toFixed(3));
+                    star.setAttribute('y', ty.toFixed(3));
+                    star.setAttribute('text-anchor', 'middle');
+                    star.setAttribute('dominant-baseline', 'central');
+                    star.setAttribute('font-size', '15');
+                    star.setAttribute('transform', `rotate(${rotateDeg.toFixed(2)}, ${tx.toFixed(3)}, ${ty.toFixed(3)})`);
+                    star.textContent = '★+3';
+                    star.setAttribute('fill', '#1a1a2e');
+                    star.setAttribute('font-weight', 'bold');
+                    star.setAttribute('font-family', 'Segoe UI, sans-serif');
+                    svg.appendChild(star);
+                } else {
+                    const textColor = value === '-1' ? '#aab0b5' : 'white';
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('x', tx.toFixed(3));
+                    text.setAttribute('y', ty.toFixed(3));
+                    text.setAttribute('text-anchor', 'middle');
+                    text.setAttribute('dominant-baseline', 'central');
+                    text.setAttribute('fill', textColor);
+                    text.setAttribute('font-size', '13');
+                    text.setAttribute('font-weight', 'bold');
+                    text.setAttribute('font-family', 'Segoe UI, sans-serif');
+                    text.setAttribute('transform', `rotate(${rotateDeg.toFixed(2)}, ${tx.toFixed(3)}, ${ty.toFixed(3)})`);
+                    text.textContent = value;
+                    svg.appendChild(text);
+                }
             });
 
-            // Store segments for result calculation
+            // Gold rim for the wheel circle
+            const rim = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+            rim.setAttribute('cx', cx);
+            rim.setAttribute('cy', cy);
+            rim.setAttribute('r', r);
+            rim.setAttribute('fill', 'none');
+            rim.setAttribute('stroke', 'rgba(255,255,255,0.15)');
+            rim.setAttribute('stroke-width', '2');
+            svg.appendChild(rim);
+
+            wheel.innerHTML = '';
+            wheel.appendChild(svg);
             wheel.dataset.segments = JSON.stringify(segments);
         }
 
