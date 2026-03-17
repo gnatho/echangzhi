@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Word Grid Game</title>
+    <title>Word Grid Game - Upgraded</title>
     <style>
         * {
             box-sizing: border-box;
@@ -18,8 +18,8 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
+            font-family: 'Nunito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
             display: flex;
             flex-direction: column;
             touch-action: manipulation;
@@ -29,34 +29,49 @@
         .controls {
             padding: 8px 10px;
             background: white;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
             display: flex;
             flex-wrap: wrap;
-            gap: 6px;
+            gap: 8px;
             align-items: center;
             z-index: 10;
             flex-shrink: 0;
-            min-height: 40px;
+            min-height: 50px;
+            border-bottom: 3px solid #e1e8ed;
         }
 
-        /* Version text - discrete top right corner */
         .version {
             position: fixed;
             top: 4px;
             right: 6px;
             font-size: 10px;
-            color: #999;
+            color: #aaa;
             z-index: 100;
             user-select: none;
             font-family: monospace;
         }
 
-        /* Spin Wheel Button - top right corner */
+        /* Spin Wheel Button */
         .spin-wheel-btn {
             position: fixed;
-            top: 20px;
-            right: 6px;
+            top: 15px;
+            right: 15px;
             z-index: 100;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            color: #d32f2f;
+            font-weight: 900;
+            border: 2px solid #ff758c;
+            border-radius: 20px;
+            padding: 8px 20px;
+            box-shadow: 0 4px 10px rgba(255, 117, 140, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .spin-wheel-btn:hover {
+            transform: scale(1.05) translateY(-2px);
+            box-shadow: 0 6px 15px rgba(255, 117, 140, 0.4);
         }
 
         /* Spin Wheel Modal */
@@ -67,55 +82,61 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(10, 10, 20, 0.92);
+            background: rgba(20, 30, 48, 0.95);
             z-index: 1000;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            backdrop-filter: blur(5px);
         }
 
         .wheel-modal.active {
             display: flex;
+            animation: fadeIn 0.3s ease-out forwards;
         }
 
         /* Close button */
         .wheel-close-btn {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 40px;
-            height: 40px;
+            top: 25px;
+            right: 25px;
+            width: 45px;
+            height: 45px;
             background: #ff4757;
             color: white;
             border: none;
             border-radius: 50%;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 1001;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            transition: transform 0.2s;
         }
 
         .wheel-close-btn:hover {
+            transform: scale(1.1) rotate(90deg);
             background: #ff3344;
         }
 
         /* Spin Wheel Container */
         .wheel-container {
             position: relative;
-            width: min(90vw, 82vh);
-            height: min(90vw, 82vh);
+            width: min(85vw, 75vh);
+            height: min(85vw, 75vh);
         }
 
         .wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 5px solid #1a1a2e;
-            box-shadow: 0 0 0 3px rgba(255,255,255,0.15), 0 8px 40px rgba(0,0,0,0.6);
+            border: 8px solid #ffffff;
+            box-shadow: 0 0 0 4px #e1e8ed, 0 15px 50px rgba(0,0,0,0.5);
             transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
             overflow: hidden;
+            background: white;
         }
 
         .wheel svg {
@@ -127,319 +148,209 @@
         /* Wheel pointer */
         .wheel-pointer {
             position: absolute;
-            top: -14px;
+            top: -20px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 18px solid transparent;
-            border-right: 18px solid transparent;
-            border-top: 32px solid #ff4757;
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+            border-left: 22px solid transparent;
+            border-right: 22px solid transparent;
+            border-top: 40px solid #ff4757;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
             z-index: 10;
         }
 
-        /* Spin button */
+        /* Spin button inside wheel */
         .wheel-spin-btn {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: min(14vw, 12vh, 80px);
-            height: min(14vw, 12vh, 80px);
+            width: min(16vw, 14vh, 90px);
+            height: min(16vw, 14vh, 90px);
             background: white;
-            border: 4px solid #1a1a2e;
+            border: 5px solid #ff4757;
+            color: #ff4757;
             border-radius: 50%;
-            font-size: clamp(11px, 2.5vw, 16px);
-            font-weight: bold;
+            font-size: clamp(14px, 3vw, 20px);
+            font-weight: 900;
             cursor: pointer;
             z-index: 5;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: transform 0.1s, background 0.2s;
         }
 
-        .wheel-spin-btn:hover {
-            background: #f0f0f0;
+        .wheel-spin-btn:active {
+            transform: translate(-50%, -50%) scale(0.95);
+        }
+        
+        .wheel-spin-btn:hover:not(:disabled) {
+            background: #fff0f2;
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .wheel-spin-btn:disabled {
-            background: #ccc;
+            border-color: #ccc;
+            color: #aaa;
             cursor: not-allowed;
         }
 
-        /* Result display */
-        .wheel-result {
-            margin-top: 16px;
-            font-size: clamp(28px, 8vw, 52px);
-            font-weight: 900;
-            color: white;
-            min-height: 44px;
-            text-shadow: 0 2px 12px rgba(0,0,0,0.6);
-            letter-spacing: 2px;
-        }
-
-        select {
-            padding: 6px 8px;
-            font-size: 14px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            max-width: 45vw;
-        }
-
-        button {
-            padding: 6px 12px;
-            font-size: 14px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        /* FULL SCREEN RESULT OVERLAY */
+        .fullscreen-result {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.95);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
             cursor: pointer;
         }
 
-        button:active {
-            background-color: #0056b3;
+        .fullscreen-result.active {
+            display: flex;
         }
 
-        /* Grid Layout - Clean CSS Grid */
+        .fullscreen-result .result-text {
+            font-size: clamp(100px, 30vw, 250px);
+            font-weight: 900;
+            text-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            opacity: 0;
+            transform: scale(0.5);
+        }
+
+        .fullscreen-result.active .result-text {
+            animation: burstIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .fullscreen-result .tap-continue {
+            margin-top: 30px;
+            font-size: 24px;
+            color: #888;
+            font-weight: bold;
+            opacity: 0;
+            animation: fadeInPulse 2s infinite;
+            animation-delay: 1s;
+        }
+
+        select {
+            padding: 8px 12px;
+            font-size: 15px;
+            border-radius: 8px;
+            border: 2px solid #ced4da;
+            background-color: white;
+            color: #495057;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+        }
+        select:focus { border-color: #80bdff; }
+
+        button.control-btn {
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: bold;
+            background-color: #4facfe;
+            background-image: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        button.control-btn:active { transform: scale(0.95); }
+
+        /* Grid Layout */
         .grid-container {
             flex: 1 1 auto;
             display: grid;
             grid-template-columns: repeat(6, 1fr);
             grid-template-rows: repeat(5, 1fr);
-            gap: 4px;
-            padding: 4px;
+            gap: 6px;
+            padding: 8px;
             min-height: 0;
             min-width: 0;
         }
 
         .cell {
-            /* Grid cell styling */
             background-color: white;
-            border-radius: 6px;
+            border-radius: 12px;
+            border: 2px solid transparent;
             display: flex;
             justify-content: center;
             align-items: center;
             font-weight: bold;
-            color: #333;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            color: #2c3e50;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.1);
             cursor: pointer;
             user-select: none;
-            transition: transform 0.1s;
-            /* Prevent overflow */
+            transition: transform 0.1s, box-shadow 0.1s;
             overflow: hidden;
             min-width: 0;
             min-height: 0;
         }
 
-        .cell:active {
-            transform: scale(0.95);
+        .cell:hover {
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+            border-color: #e1e8ed;
         }
 
-        /* Word text styling */
+        .cell:active {
+            transform: scale(0.92);
+        }
+
         .word-text {
-            font-size: clamp(30px, 7.5vmin, 60px);
-            font-weight: bold;
+            font-size: clamp(28px, 7vmin, 55px);
+            font-weight: 800;
             line-height: 1.1;
             text-align: center;
             word-break: break-word;
-            padding: 2px;
+            padding: 4px;
         }
 
-        /* Colors for scores */
-        .score-2 { background-color: #d4edda; color: #155724; }
-        .score-1 { background-color: #cce5ff; color: #004085; }
-        .score-0 { background-color: #e2e3e5; color: #383d41; }
-        .score-n1 { background-color: #f8d7da; color: #721c24; }
+        /* Friendly Colors for scores */
+        .score-2 { background-color: #e8f8f5; border-color: #2ecc71; color: #27ae60; } /* Emerald */
+        .score-1 { background-color: #ebf5fb; border-color: #3498db; color: #2980b9; } /* Sky Blue */
+        .score-0 { background-color: #f5eef8; border-color: #9b59b6; color: #8e44ad; } /* Amethyst */
+        .score-n1 { background-color: #fdedec; border-color: #e74c3c; color: #c0392b; } /* Coral Red */
 
         .score-text {
-            font-size: clamp(42px, 12vmin, 96px);
+            font-size: clamp(40px, 11vmin, 90px);
             font-weight: 900;
             line-height: 1;
         }
 
-        /* SVG Star sizing */
         .cell svg {
-            width: clamp(60px, 15vmin, 120px);
-            height: clamp(60px, 15vmin, 120px);
+            width: clamp(55px, 14vmin, 110px);
+            height: clamp(55px, 14vmin, 110px);
         }
 
-        /* Animation keyframes */
-        @keyframes popIn {
-            0% { transform: scale(0); opacity: 0; }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        /* Animations */
+        @keyframes popIn { 0% { transform: scale(0); } 50% { transform: scale(1.15); } 100% { transform: scale(1); } }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 25% { transform: scale(1.1); } 50% { transform: scale(0.9); } 75% { transform: scale(1.05); } }
+        @keyframes starSpin { 0% { transform: scale(0) rotate(-180deg); } 60% { transform: scale(1.2) rotate(20deg); } 100% { transform: scale(1) rotate(0deg); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-6px) rotate(-2deg); } 40%, 80% { transform: translateX(6px) rotate(2deg); } }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
+        @keyframes burstIn { 0% { opacity: 0; transform: scale(0.2) rotate(-15deg); } 60% { opacity: 1; transform: scale(1.1) rotate(5deg); } 80% { transform: scale(0.95) rotate(-2deg); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+        @keyframes fadeInPulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
 
-        @keyframes bounce {
-            0%, 100% { transform: scale(1); }
-            25% { transform: scale(1.1); }
-            50% { transform: scale(0.95); }
-            75% { transform: scale(1.05); }
-        }
+        .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-bounce { animation: bounce 0.5s ease-out forwards; }
+        .animate-star { animation: starSpin 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+        .animate-shake { animation: shake 0.5s ease-out forwards; }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
 
-        @keyframes starSpin {
-            0% { transform: scale(0) rotate(0deg); opacity: 0; }
-            50% { transform: scale(1.3) rotate(180deg); }
-            75% { transform: scale(0.9) rotate(270deg); }
-            100% { transform: scale(1) rotate(360deg); opacity: 1; }
-        }
-
-        @keyframes starPulse {
-            0%, 100% { filter: drop-shadow(0 0 3px rgba(255,215,0,0.8)); }
-            50% { filter: drop-shadow(0 0 15px rgba(255,215,0,1)) drop-shadow(0 0 25px rgba(255,215,0,0.6)); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-
-        @keyframes fadeIn {
-            0% { opacity: 0; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1); }
-        }
-
-        /* Animation classes */
-        .animate-pop {
-            animation: popIn 0.4s ease-out forwards;
-        }
-
-        .animate-bounce {
-            animation: bounce 0.5s ease-out forwards;
-        }
-
-        .animate-star {
-            animation: starSpin 0.6s ease-out forwards;
-        }
-
-        .animate-star-pulse {
-            animation: starPulse 1s ease-in-out infinite;
-        }
-
-        .animate-shake {
-            animation: shake 0.5s ease-out forwards;
-        }
-
-        .animate-fade {
-            animation: fadeIn 0.3s ease-out forwards;
-        }
-
-        /* Desktop styles */
-        @media (min-width: 768px) and (min-height: 500px) {
-            .controls {
-                padding: 15px;
-                min-height: 60px;
-            }
-            
-            select {
-                padding: 10px;
-                font-size: 18px;
-                max-width: none;
-            }
-            
-            button {
-                padding: 10px 20px;
-                font-size: 18px;
-            }
-            
-            .grid-container {
-                gap: 8px;
-                padding: 10px;
-            }
-            
-            .cell {
-                border-radius: 8px;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            }
-            
-            .word-text {
-                font-size: clamp(42px, 7.5vh, 72px);
-            }
-            
-            .score-text {
-                font-size: clamp(60px, 12vh, 144px);
-            }
-            
-            .cell svg {
-                width: clamp(84px, 15vh, 168px);
-                height: clamp(84px, 15vh, 168px);
-            }
-        }
-
-        /* Mobile landscape optimization */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .controls {
-                padding: 4px 8px;
-                min-height: 32px;
-            }
-            
-            select {
-                padding: 4px 6px;
-                font-size: 12px;
-            }
-            
-            button {
-                padding: 4px 8px;
-                font-size: 12px;
-            }
-            
-            .grid-container {
-                gap: 2px;
-                padding: 2px;
-            }
-            
-            .cell {
-                border-radius: 4px;
-            }
-            
-            .word-text {
-                font-size: clamp(24px, 6vh, 42px);
-            }
-            
-            .score-text {
-                font-size: clamp(36px, 9vh, 72px);
-            }
-            
-            .cell svg {
-                width: clamp(48px, 9vh, 84px);
-                height: clamp(48px, 9vh, 84px);
-            }
-        }
-
-        /* Very small screens */
-        @media (max-width: 360px) {
-            .controls {
-                padding: 4px 6px;
-                min-height: 32px;
-            }
-            
-            select {
-                padding: 4px;
-                font-size: 11px;
-            }
-            
-            button {
-                padding: 4px 6px;
-                font-size: 11px;
-            }
-            
-            .grid-container {
-                gap: 2px;
-                padding: 2px;
-            }
-            
-            .cell {
-                border-radius: 3px;
-            }
-        }
     </style>
 </head>
 <body>
 
-    <div class="version">v0.3</div>
-    <button class="spin-wheel-btn" onclick="openWheelModal()">Spin</button>
+    <div class="version">v1.1 (Upgraded)</div>
+    <button class="spin-wheel-btn" onclick="openWheelModal()">Spin Wheel</button>
 
-    <!-- Spin Wheel Modal -->
     <div class="wheel-modal" id="wheelModal">
         <button class="wheel-close-btn" onclick="closeWheelModal()">×</button>
         <div class="wheel-container">
@@ -447,12 +358,16 @@
             <div class="wheel" id="wheel"></div>
             <button class="wheel-spin-btn" id="spinBtn" onclick="spinWheel()">SPIN</button>
         </div>
-        <div class="wheel-result" id="wheelResult"></div>
+    </div>
+
+    <div id="fullscreenResult" class="fullscreen-result" onclick="closeFullscreenResult()">
+        <div id="fsResultText" class="result-text">+3</div>
+        <div class="tap-continue">Tap anywhere to continue</div>
     </div>
 
     <div class="controls">
         <select id="modeSelector">
-            <option value="phonemes">Phonemes</option>
+            <option value="phonemes">Phonics</option>
             <option value="levels">Levels</option>
         </select>
         <select id="wordSetSelector">
@@ -462,11 +377,11 @@
             <option value="longI">Long I</option>
             <option value="longO">Long O</option>
             <option value="longU">Long U</option>
-            <option value="rControlled">R-Controlled Vowels</option>
+            <option value="rControlled">R-Controlled</option>
             <option value="diphthongs">Diphthongs</option>
-            <option value="digraphs">Consonant Digraphs</option>
-            <option value="beginBlends">Beginning Blends</option>
-            <option value="endBlends">Ending Blends</option>
+            <option value="digraphs">Digraphs</option>
+            <option value="beginBlends">Begin Blends</option>
+            <option value="endBlends">End Blends</option>
             <option value="arWords">R as in are</option>
             <option value="orWords">OR as in ore</option>
         </select>
@@ -491,16 +406,97 @@
             <option value="8">Unit 8</option>
             <option value="9">Unit 9</option>
         </select>
-        <button onclick="resetGrid()">Reset Grid</button>
+        <button class="control-btn" onclick="resetGrid()">Reset Grid</button>
     </div>
 
-    <div class="grid-container" id="grid">
-        <!-- Cells will be generated here by JS -->
-    </div>
+    <div class="grid-container" id="grid"></div>
 
     <script>
-        // 1. Define phoneme sets with bracket notation for highlighting
-        // Format: "word with [phoneme] highlighted" -> phoneme will be red
+        // ==================== AUDIO SYNTHESIZER ====================
+        let audioCtx = null;
+        
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playTone(freq, type, duration, vol=0.1) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Specific Sound Effects
+        function soundTick() { playTone(800, 'triangle', 0.05, 0.05); }
+        function soundPop() { playTone(400, 'sine', 0.15, 0.2); }
+        function soundNeutral() { playTone(300, 'triangle', 0.2, 0.15); }
+        
+        function soundWin() {
+            if(!audioCtx) return;
+            // Cheerful arpeggio
+            const now = audioCtx.currentTime;
+            const notes = [440, 554.37, 659.25, 880]; // A4, C#5, E5, A5
+            notes.forEach((freq, i) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0, now + i*0.1);
+                gain.gain.linearRampToValueAtTime(0.15, now + i*0.1 + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + i*0.1 + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now + i*0.1);
+                osc.stop(now + i*0.1 + 0.3);
+            });
+        }
+
+        function soundLose() {
+            if(!audioCtx) return;
+            // Womp womp
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.exponentialRampToValueAtTime(150, now + 0.5);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.5);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+
+        function soundGoldenStar() {
+            const now = audioCtx.currentTime;
+            for(let i=0; i<12; i++) {
+                setTimeout(() => {
+                    playTone(1000 + (i * 200), 'sine', 0.1, 0.08);
+                }, i * 50);
+            }
+        }
+
+        // Listen for first interaction to enable audio
+        document.body.addEventListener('click', initAudio, { once: true });
+        document.body.addEventListener('touchstart', initAudio, { once: true });
+
+
+        // ==================== WORD DATA ====================
         const phonemeSets = {
             shortVowels: [
                 "c[a]t", "b[e]d", "p[i]g", "h[o]t", "b[u]s",
@@ -593,47 +589,26 @@
                 "ba[nd]", "pri[nt]", "bu[st]", "ri[sk]", "cla[sp]", "gi[ft]", "fo[ld]",
                 "he[nd]", "hu[nt]", "lo[st]", "de[sk]", "wi[sp]", "shi[ft]", "go[ld]"
             ],
-       arWords: [
-    "c[ar]", "f[ar]", "b[ar]", "st[ar]", "j[ar]", 
-    "p[ark]", "d[ark]", "h[ard]", "c[ard]", "f[arm]", 
-    "y[ard]", "sh[arp]", "m[art]", "p[ar]t", "b[arn]", 
-    "m[ar]ch", "h[ar]p", "t[ar]t", "l[ar]k", "sc[ar]", 
-    "ch[ar]t", "sm[ar]t", "sp[ar]k", "sh[ar]k", "g[ar]den", 
-    "p[ar]ty", "c[ar]go", "l[ar]ge", "st[ar]t", "m[ar]k"
-], 
-orWords:[
-    "f[or]", "n[or]", "b[or]n", "c[or]n", "h[or]n", 
-    "f[or]k", "p[or]k", "s[ort]", "sh[or]t", "p[or]t", 
-    "f[or]m", "st[or]m", "t[or]ch", "m[ore]", "sh[ore]", 
-    "sc[or]e", "sn[or]e", "st[or]e", "c[or]k", "f[or]ce", 
-    "n[or]th", "h[or]se", "ch[or]d", "l[or]d", "f[or]t", 
-    "t[or]n", "w[or]n", "p[or]ch", "sp[or]t", "sh[or]n"
-]
+            arWords: [
+                "c[ar]", "f[ar]", "b[ar]", "st[ar]", "j[ar]", 
+                "p[ark]", "d[ark]", "h[ard]", "c[ard]", "f[arm]", 
+                "y[ard]", "sh[arp]", "m[art]", "p[ar]t", "b[arn]", 
+                "m[ar]ch", "h[ar]p", "t[ar]t", "l[ar]k", "sc[ar]", 
+                "ch[ar]t", "sm[ar]t", "sp[ar]k", "sh[ar]k", "g[ar]den", 
+                "p[ar]ty", "c[ar]go", "l[ar]ge", "st[ar]t", "m[ar]k"
+            ], 
+            orWords:[
+                "f[or]", "n[or]", "b[or]n", "c[or]n", "h[or]n", 
+                "f[or]k", "p[or]k", "s[ort]", "sh[or]t", "p[or]t", 
+                "f[or]m", "st[or]m", "t[or]ch", "m[ore]", "sh[ore]", 
+                "sc[or]e", "sn[or]e", "st[or]e", "c[or]k", "f[or]ce", 
+                "n[or]th", "h[or]se", "ch[or]d", "l[or]d", "f[or]t", 
+                "t[or]n", "w[or]n", "p[or]ch", "sp[or]t", "sh[or]n"
+            ]
         };
 
-        // Format word with red highlighting for bracketed text
-        function formatWord(word) {
-            return word.replace(/\[([^\]]+)\]/g, '<span style="color: red;">$1</span>');
-        }
-
-        // Score weights: +2=25%, +1=35%, 0=30%, -1=10% (reduced -1 probability)
-        // One +2 will be replaced with a star award
-        const scoreWeights = [
-            { score: '+2', weight: 25 },
-            { score: '+1', weight: 35 },
-            { score: '0', weight: 30 },
-            { score: '-1', weight: 10 }
-        ];
-
-        // SVG Star for special +2 award (responsive sizing via CSS)
-        const starSVG = `<svg viewBox="0 0 24 24" style="fill: #FFD700; filter: drop-shadow(0 0 3px rgba(255,215,0,0.8));">
-            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-        </svg>`;
-
-        // Level/Unit word sets from database (Super Minds Starter-Level 6)
-        // Structure: levelUnits[level][unit] = [words...]
         const levelUnits = {
-            0: { // Super Minds Starter
+            0: {
                 0: ["blue", "green", "yellow", "orange", "red", "pink", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten"],
                 1: ["window", "door", "chair", "pencil", "book", "table"],
                 2: ["eyes", "ears", "arms", "legs", "mouth", "nose", "head"],
@@ -645,7 +620,7 @@ orWords:[
                 8: ["hat", "coat", "sweater", "scarf", "gloves", "jeans", "T-shirt", "boots"],
                 9: ["play soccer", "run", "paint a picture", "swim", "read", "dance"]
             },
-            1: { // Super Minds Level 1
+            1: {
                 0: ["Whisper", "Thunder", "Misty", "Flash"],
                 1: ["ruler", "pen", "book", "eraser", "pencil case", "pencil", "desk", "notebook", "bag", "paper"],
                 2: ["computer game", "kite", "plane", "bike", "doll", "monster", "train", "go-kart", "car", "ball"],
@@ -657,7 +632,7 @@ orWords:[
                 8: ["arm", "hand", "knee", "fingers", "leg", "foot", "toes", "head"],
                 9: ["paint a picture", "listen to music", "catch a fish", "take a photo", "eat ice cream", "play the guitar", "read a book", "make a sandcastle", "look for shells"]
             },
-            2: { // Super Minds Level 2
+            2: {
                 0: ["bookcase", "wall", "board", "clock", "door", "cabinet", "window", "chair", "crayon", "floor"],
                 1: ["get up", "get dressed", "have breakfast", "brush your teeth", "go to school", "have lunch", "play in the park", "have dinner", "go to bed"],
                 2: ["polar bear", "bear", "zebra", "crocodile", "hippo", "tiger", "parrot", "monkey", "snake"],
@@ -669,7 +644,7 @@ orWords:[
                 8: ["badminton", "ping-pong", "tennis", "basketball", "baseball", "volleyball", "swimming", "soccer", "field hockey", "track and field"],
                 9: ["read a comic book", "go hiking", "visit my cousins", "help in the yard", "take horseback riding lessons", "build a tree house", "keep a scrapbook", "learn to swim", "go camping"]
             },
-            3: { // Super Minds Level 3
+            3: {
                 0: ["upstairs", "twenty-one - fifty", "downstairs", "fifty-one - one hundred", "basement"],
                 1: ["English", "math", "geography", "science", "IT", "music", "art", "PE", "history"],
                 2: ["apple juice", "roll", "cheese", "water", "soup", "vegetables", "lemonade", "salad"],
@@ -681,7 +656,7 @@ orWords:[
                 8: ["Egypt", "Argentina", "India", "Australia", "Mexico", "Brazil", "Chile", "Spain", "China", "Turkey"],
                 9: ["thunderstorm", "cloudy", "lightning", "rainy", "windy", "umbrella", "raincoat", "foggy", "boots"]
             },
-            4: { // Super Minds Level 4
+            4: {
                 0: ["Ferris wheel", "roller coaster", "carousel", "bumper cars", "band", "mayor", "microphone", "journalist", "photographer"],
                 1: ["sword", "bow and arrow", "helmet", "crown", "necklace", "belt", "bracelet", "shield", "knight", "queen"],
                 2: ["mountain", "forest", "town", "field", "lake", "island", "river", "path"],
@@ -693,7 +668,7 @@ orWords:[
                 8: ["comet", "star", "rocket", "planet", "moon", "telescope", "astronaut", "space station"],
                 9: ["row a boat", "sail a boat", "dive into the water", "dry your clothes", "make a fire", "make a raft", "swing on a rope", "put up a tent", "collect wood"]
             },
-            5: { // Super Minds Level 5
+            5: {
                 0: ["goggles", "shelf", "apron", "explosion", "bubbles", "liquid", "instructions", "test tube", "powder", "gloves"],
                 1: ["smoke", "volcano", "temple", "theater", "statue", "columns", "horse and cart", "vase", "servant", "fountain"],
                 2: ["beak", "toucan", "vine", "sloth", "anaconda", "branch", "jaguar", "anteater", "beetle", "pool"],
@@ -705,7 +680,7 @@ orWords:[
                 8: ["farmer", "janitor", "engineer", "dentist", "artist", "designer", "computer programmer", "mechanic", "businesswoman", "businessman"],
                 9: ["sail", "sailor", "captain", "barometer", "mast", "rat", "lifeboat", "porthole", "cabin"]
             },
-            6: { // Super Minds Level 6
+            6: {
                 0: ["basketball hoop", "school bell", "net", "soccer field", "running track", "gym", "trash can", "tennis court", "bike rack", "railing"],
                 1: ["palm tree", "hook", "eyepatch", "binoculars", "key", "hammock", "coins", "shovel", "treasure chest", "hole", "stone"],
                 2: ["hang glider", "parachute", "monorail", "solar panel", "ultralight", "wind turbine", "cable car", "jet pack", "surfboard", "inline skates", "unicycle", "floating skateboard"],
@@ -719,33 +694,39 @@ orWords:[
             }
         };
 
-        // Calculate grid layout based on word count
+        function formatWord(word) {
+            return word.replace(/\[([^\]]+)\]/g, '<span style="color: #e74c3c;">$1</span>');
+        }
+
+        const scoreWeights = [
+            { score: '+2', weight: 25 },
+            { score: '+1', weight: 35 },
+            { score: '0', weight: 30 },
+            { score: '-1', weight: 10 }
+        ];
+
+        const starSVG = `<svg viewBox="0 0 24 24" style="fill: #f1c40f; filter: drop-shadow(0 2px 4px rgba(241,196,15,0.6));">
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>`;
+
         function calculateGridLayout(wordCount) {
             if (wordCount <= 4) return { cols: 2, rows: 2 };
             if (wordCount <= 6) return { cols: 3, rows: 2 };
-            if (wordCount <= 8) return { cols: 4, rows: 2 };
             if (wordCount <= 9) return { cols: 3, rows: 3 };
-            if (wordCount <= 10) return { cols: 5, rows: 2 };
             if (wordCount <= 12) return { cols: 4, rows: 3 };
-            if (wordCount <= 15) return { cols: 5, rows: 3 };
             if (wordCount <= 16) return { cols: 4, rows: 4 };
-            if (wordCount <= 18) return { cols: 6, rows: 3 };
             if (wordCount <= 20) return { cols: 5, rows: 4 };
             return { cols: 6, rows: Math.ceil(wordCount / 6) };
         }
 
-        // DOM Elements
         const gridElement = document.getElementById('grid');
         const modeSelector = document.getElementById('modeSelector');
         const selectorElement = document.getElementById('wordSetSelector');
         const levelSelector = document.getElementById('levelSelector');
         const unitSelector = document.getElementById('unitSelector');
 
-        // Track star award for current game
-        let starCellIndex = -1;  // The cell index that will have the star
-        let clickedCells = 0;
+        let starCellIndex = -1;
 
-        // Initialize the app
         function init() {
             generateGrid();
             modeSelector.addEventListener('change', handleModeChange);
@@ -754,7 +735,6 @@ orWords:[
             unitSelector.addEventListener('change', generateGrid);
         }
 
-        // Handle mode change between Phonemes and Levels
         function handleModeChange() {
             const mode = modeSelector.value;
             if (mode === 'phonemes') {
@@ -769,198 +749,134 @@ orWords:[
             generateGrid();
         }
 
-        // Generate the grid
         function generateGrid() {
             const mode = modeSelector.value;
             let words = [];
-            let usePhonemeHighlighting = true;
+            let usePhonemes = true;
             
             if (mode === 'phonemes') {
                 const selectedSet = selectorElement.value;
-                words = [...phonemeSets[selectedSet]];
+                words = [...(phonemeSets[selectedSet] || [])];
+                
+                // If there are more than 30 words, let's just pick 30 randomly so the grid doesn't get too small,
+                // but you can adjust this slice if you want all of them on screen at once.
+                if(words.length > 30) {
+                   words = words.sort(() => 0.5 - Math.random()).slice(0, 30);
+                }
             } else {
-                const level = levelSelector.value;
-                const unit = unitSelector.value;
-                words = [...(levelUnits[level]?.[unit] || [])];
-                usePhonemeHighlighting = false;
+                words = [...(levelUnits[levelSelector.value]?.[unitSelector.value] || [])];
+                usePhonemes = false;
             }
             
-            // Shuffle words (Fisher-Yates shuffle)
             for (let i = words.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [words[i], words[j]] = [words[j], words[i]];
             }
 
-            gridElement.innerHTML = ''; // Clear current grid
-
-            // Calculate grid layout
+            gridElement.innerHTML = '';
             const layout = calculateGridLayout(words.length);
             gridElement.style.gridTemplateColumns = `repeat(${layout.cols}, 1fr)`;
             gridElement.style.gridTemplateRows = `repeat(${layout.rows}, 1fr)`;
 
-            // Reset game state and pre-select star cell
-            clickedCells = 0;
             starCellIndex = Math.floor(Math.random() * words.length);
 
-            // Create cells
             for (let i = 0; i < words.length; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'cell';
-                cell.dataset.cellIndex = i;  // Store cell index
+                cell.dataset.cellIndex = i;
                 
-                const word = words[i];
-                
-                // Format word - with or without phoneme highlighting
-                if (usePhonemeHighlighting) {
-                    cell.innerHTML = `<span class="word-text">${formatWord(word)}</span>`;
+                if (usePhonemes) {
+                    cell.innerHTML = `<span class="word-text">${formatWord(words[i])}</span>`;
                 } else {
-                    cell.innerHTML = `<span class="word-text">${word}</span>`;
+                    cell.innerHTML = `<span class="word-text">${words[i]}</span>`;
                 }
                 
-                // Attach click listener
-                cell.addEventListener('click', function() {
-                    handleCellClick(this);
-                }, { once: true });
-
+                cell.addEventListener('click', function() { handleCellClick(this); }, { once: true });
                 gridElement.appendChild(cell);
             }
         }
 
-        // Get weighted random score
         function getWeightedRandomScore() {
             const totalWeight = scoreWeights.reduce((sum, item) => sum + item.weight, 100);
             let random = Math.random() * totalWeight;
-            
             for (const item of scoreWeights) {
                 random -= item.weight;
-                if (random <= 0) {
-                    return item.score;
-                }
+                if (random <= 0) return item.score;
             }
-            return '+1'; // fallback
+            return '+1';
         }
 
         function handleCellClick(cellElement) {
-            // Get the cell index
+            initAudio(); // Ensure audio is ready
+            
             const cellIndex = parseInt(cellElement.dataset.cellIndex);
+            const isStar = cellIndex === starCellIndex;
+            const score = isStar ? '+2' : getWeightedRandomScore();
             
-            // 1. Check if this is the special star cell
-            const isStarAward = cellIndex === starCellIndex;
+            let colorClass = '', animationClass = '';
             
-            // 2. Get weighted random score
-            const score = getWeightedRandomScore();
-            
-            // 3. Determine color class and animation
-            let colorClass = '';
-            let animationClass = '';
-            
-            if (isStarAward) {
-                // This is the special star cell - always show star
+            if (isStar) {
                 colorClass = 'score-2';
                 animationClass = 'animate-star';
+                soundGoldenStar();
             } else if (score === '+2') {
                 colorClass = 'score-2';
                 animationClass = 'animate-bounce';
+                soundWin();
             } else if (score === '+1') {
                 colorClass = 'score-1';
                 animationClass = 'animate-pop';
+                soundPop();
             } else if (score === '0') {
                 colorClass = 'score-0';
                 animationClass = 'animate-fade';
+                soundNeutral();
             } else {
                 colorClass = 'score-n1';
                 animationClass = 'animate-shake';
+                soundLose();
             }
 
-            // 4. Update UI with animation
-            cellElement.className = 'cell ' + colorClass + ' ' + animationClass;
+            cellElement.className = `cell ${colorClass} ${animationClass}`;
             
-            if (isStarAward) {
-                // Show star for special +2 award with pulse effect
+            if (isStar) {
                 cellElement.innerHTML = starSVG;
-                // Add pulse animation after spin completes
-                setTimeout(() => {
-                    cellElement.classList.add('animate-star-pulse');
-                }, 600);
             } else {
                 cellElement.innerHTML = `<span class="score-text">${score}</span>`;
             }
-            
-            // Track clicked cells
-            clickedCells++;
         }
 
-        function resetGrid() {
-            generateGrid();
-        }
-
-        // Run on load
+        function resetGrid() { generateGrid(); }
         init();
 
-        // ==================== SPIN WHEEL FUNCTIONALITY ====================
-        // Wheel segments with weighted probabilities (pluses more often)
-        // Total: 24 segments
-        // +1: 8 times (33.3%)
-        // +2: 6 times (25%)
-        // +3: 4 times (16.7%)
-        // 0: 4 times (16.7%)
-        // -1: 2 times (8.3%)
-        const wheelSegments = [
-            '+1', '+1', '+1', '+1', '+1', '+1', '+1', '+1',  // 8 x +1
-            '+2', '+2', '+2', '+2', '+2', '+2',              // 6 x +2
-            '+3', '+3', '+3', '+3',                           // 4 x +3
-            '0', '0', '0', '0',                               // 4 x 0
-            '-1', '-1'                                         // 2 x -1
-        ];
+        // ==================== UPGRADED SPIN WHEEL ====================
+        // Exactly 12 segments. Carefully ordered so NO identical values are adjacent.
+        const wheelSegments = ['+1', '+2', '+1', '+3', '+1', '0', '+2', '-1', '+1', '+3', '+2', '0'];
 
-        // Shuffle the segments
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        // Color palette keyed by segment value
-        const segmentColorMap = {
-            '+3': ['#FFD700', '#FFC200', '#FFB800', '#FFAA00'], // gold — special
-            '+2': ['#00b894', '#00a381', '#00c49a', '#009e7a'], // teal-green
-            '+1': ['#0984e3', '#0773cc', '#1a90f0', '#0660b8'], // blue
-            '0':  ['#636e72', '#74828a', '#555f63', '#7f8c8d'], // neutral grey
-            '-1': ['#2d3436', '#3a3f42', '#252b2d', '#404850'], // near-black / somber
+        // Friendly bright color palette
+        const friendlyColors = {
+            '+3': '#f1c40f', // Sun Yellow
+            '+2': '#2ecc71', // Emerald Green
+            '+1': '#3498db', // Sky Blue
+            '0':  '#9b59b6', // Amethyst Purple
+            '-1': '#e74c3c'  // Coral Red
         };
-        // Counters to cycle through shades per value
-        const segmentColorIndex = { '+3': 0, '+2': 0, '+1': 0, '0': 0, '-1': 0 };
-
-        function colorForSegment(value) {
-            const palette = segmentColorMap[value] || ['#888'];
-            const idx = segmentColorIndex[value] % palette.length;
-            segmentColorIndex[value]++;
-            return palette[idx];
-        }
 
         let currentRotation = 0;
         let isSpinning = false;
+        let tickInterval;
 
-        // Create the wheel using SVG arcs
         function createWheel() {
             const wheel = document.getElementById('wheel');
-            const segments = shuffleArray([...wheelSegments]);
-            const numSegments = segments.length;
+            const numSegments = wheelSegments.length; // 12
             const TWO_PI = 2 * Math.PI;
             const segmentAngle = TWO_PI / numSegments;
-            const cx = 150, cy = 150, r = 146;
-
-            // Reset color counters
-            Object.keys(segmentColorIndex).forEach(k => segmentColorIndex[k] = 0);
+            const cx = 150, cy = 150, r = 148;
 
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('viewBox', '0 0 300 300');
-            svg.setAttribute('width', '100%');
-            svg.setAttribute('height', '100%');
 
-            segments.forEach((value, index) => {
+            wheelSegments.forEach((value, index) => {
                 const startAngle = index * segmentAngle - Math.PI / 2;
                 const endAngle = (index + 1) * segmentAngle - Math.PI / 2;
 
@@ -968,131 +884,126 @@ orWords:[
                 const y1 = cy + r * Math.sin(startAngle);
                 const x2 = cx + r * Math.cos(endAngle);
                 const y2 = cy + r * Math.sin(endAngle);
-                const largeArc = segmentAngle > Math.PI ? 1 : 0;
-
-                const fill = colorForSegment(value);
 
                 // Draw pie slice
                 const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-                path.setAttribute('d', `M ${cx} ${cy} L ${x1.toFixed(3)} ${y1.toFixed(3)} A ${r} ${r} 0 ${largeArc} 1 ${x2.toFixed(3)} ${y2.toFixed(3)} Z`);
-                path.setAttribute('fill', fill);
-                // Subtle white divider, slightly stronger on +3 for pop
-                path.setAttribute('stroke', value === '+3' ? 'rgba(255,220,0,0.5)' : 'rgba(255,255,255,0.25)');
-                path.setAttribute('stroke-width', '1');
+                path.setAttribute('d', `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 0 1 ${x2} ${y2} Z`);
+                path.setAttribute('fill', friendlyColors[value]);
+                path.setAttribute('stroke', '#ffffff');
+                path.setAttribute('stroke-width', '2');
                 svg.appendChild(path);
 
+                // Add text
                 const midAngle = startAngle + segmentAngle / 2;
-                const textR = r * 0.65;
+                const textR = r * 0.70;
                 const tx = cx + textR * Math.cos(midAngle);
                 const ty = cy + textR * Math.sin(midAngle);
                 const rotateDeg = (midAngle * 180 / Math.PI) + 90;
 
-                if (value === '+3') {
-                    // Star glyph for special segments
-                    const star = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    star.setAttribute('x', tx.toFixed(3));
-                    star.setAttribute('y', ty.toFixed(3));
-                    star.setAttribute('text-anchor', 'middle');
-                    star.setAttribute('dominant-baseline', 'central');
-                    star.setAttribute('font-size', '15');
-                    star.setAttribute('transform', `rotate(${rotateDeg.toFixed(2)}, ${tx.toFixed(3)}, ${ty.toFixed(3)})`);
-                    star.textContent = '+3';
-                    star.setAttribute('fill', '#1a1a2e');
-                    star.setAttribute('font-weight', 'bold');
-                    star.setAttribute('font-family', 'Segoe UI, sans-serif');
-                    svg.appendChild(star);
-                } else {
-                    const textColor = value === '-1' ? '#aab0b5' : 'white';
-                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-                    text.setAttribute('x', tx.toFixed(3));
-                    text.setAttribute('y', ty.toFixed(3));
-                    text.setAttribute('text-anchor', 'middle');
-                    text.setAttribute('dominant-baseline', 'central');
-                    text.setAttribute('fill', textColor);
-                    text.setAttribute('font-size', '13');
-                    text.setAttribute('font-weight', 'bold');
-                    text.setAttribute('font-family', 'Segoe UI, sans-serif');
-                    text.setAttribute('transform', `rotate(${rotateDeg.toFixed(2)}, ${tx.toFixed(3)}, ${ty.toFixed(3)})`);
-                    text.textContent = value;
-                    svg.appendChild(text);
-                }
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', tx);
+                text.setAttribute('y', ty);
+                text.setAttribute('text-anchor', 'middle');
+                text.setAttribute('dominant-baseline', 'central');
+                text.setAttribute('fill', 'white');
+                text.setAttribute('font-size', value === '+3' ? '24' : '20');
+                text.setAttribute('font-weight', '900');
+                text.setAttribute('transform', `rotate(${rotateDeg}, ${tx}, ${ty})`);
+                
+                // Add a slight text shadow for better readability
+                text.setAttribute('style', 'text-shadow: 1px 1px 3px rgba(0,0,0,0.3);');
+                text.textContent = value;
+                svg.appendChild(text);
             });
-
-            // Gold rim for the wheel circle
-            const rim = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-            rim.setAttribute('cx', cx);
-            rim.setAttribute('cy', cy);
-            rim.setAttribute('r', r);
-            rim.setAttribute('fill', 'none');
-            rim.setAttribute('stroke', 'rgba(255,255,255,0.15)');
-            rim.setAttribute('stroke-width', '2');
-            svg.appendChild(rim);
 
             wheel.innerHTML = '';
             wheel.appendChild(svg);
-            wheel.dataset.segments = JSON.stringify(segments);
         }
 
-        // Open wheel modal
         function openWheelModal() {
+            initAudio(); // Ensure audio is ready
             const modal = document.getElementById('wheelModal');
-            const result = document.getElementById('wheelResult');
             const spinBtn = document.getElementById('spinBtn');
-            
-            result.textContent = '';
             spinBtn.disabled = false;
             spinBtn.textContent = 'SPIN';
             isSpinning = false;
-            
             createWheel();
             modal.classList.add('active');
         }
 
-        // Close wheel modal
         function closeWheelModal() {
-            const modal = document.getElementById('wheelModal');
-            modal.classList.remove('active');
+            if (isSpinning) return;
+            document.getElementById('wheelModal').classList.remove('active');
         }
 
-        // Spin the wheel
+        function closeFullscreenResult() {
+            document.getElementById('fullscreenResult').classList.remove('active');
+            closeWheelModal(); // Auto-close wheel modal as well
+        }
+
         function spinWheel() {
             if (isSpinning) return;
+            initAudio();
             
             isSpinning = true;
             const wheel = document.getElementById('wheel');
             const spinBtn = document.getElementById('spinBtn');
-            const result = document.getElementById('wheelResult');
-            
             spinBtn.disabled = true;
-            result.textContent = '';
 
-            // Calculate random spin (5-10 full rotations + random angle)
-            const spins = 5 + Math.random() * 5;
-            const randomAngle = Math.random() * 360;
-            const totalRotation = currentRotation + (spins * 360) + randomAngle;
+            // Pick a winning segment index (0 to 11)
+            const targetIndex = Math.floor(Math.random() * 12);
+            const finalResult = wheelSegments[targetIndex];
             
-            currentRotation = totalRotation;
-            wheel.style.transform = `rotate(${totalRotation}deg)`;
+            // Calculate math to land exactly in the center of the target segment
+            // 1 segment = 30 degrees. 
+            // Pointer is at the top (which corresponds to segment 0 initially).
+            const segmentAngle = 360 / 12; // 30
+            const targetAngle = 360 - (targetIndex * segmentAngle) - (segmentAngle / 2);
+            
+            // Add 5 full spins
+            const spins = 5;
+            const newRotation = currentRotation + (spins * 360) + targetAngle - (currentRotation % 360);
+            currentRotation = newRotation;
+            
+            // Start spinning
+            wheel.style.transform = `rotate(${newRotation}deg)`;
 
-            // Calculate result after spin completes
+            // Play ticking sound while spinning
+            let ticks = 0;
+            const maxTicks = 20;
+            tickInterval = setInterval(() => {
+                soundTick();
+                ticks++;
+                if (ticks >= maxTicks) clearInterval(tickInterval); // slow down ticks towards the end
+            }, 180);
+
+            // Wait for animation to finish (4s)
             setTimeout(() => {
-                const segments = JSON.parse(wheel.dataset.segments);
-                const numSegments = segments.length;
-                const segmentAngle = 360 / numSegments;
+                clearInterval(tickInterval);
                 
-                // The pointer is at the top, so we need to find which segment is there
-                // The wheel rotates clockwise, so we calculate the final position
-                const normalizedRotation = totalRotation % 360;
-                const pointerPosition = (360 - normalizedRotation) % 360;
-                const resultIndex = Math.floor(pointerPosition / segmentAngle);
+                // Set and show full screen result
+                const fsOverlay = document.getElementById('fullscreenResult');
+                const fsText = document.getElementById('fsResultText');
                 
-                const finalResult = segments[resultIndex];
-                
-                result.textContent = finalResult;
+                fsText.textContent = finalResult;
+                fsText.style.color = friendlyColors[finalResult];
+                fsOverlay.classList.add('active');
+
+                // Play appropriate result sound
+                if (finalResult === '+2' || finalResult === '+3') {
+                    soundWin();
+                } else if (finalResult === '-1') {
+                    soundLose();
+                } else if (finalResult === '+1') {
+                    soundPop();
+                } else {
+                    soundNeutral();
+                }
+
                 spinBtn.disabled = false;
-                spinBtn.textContent = 'SPIN AGAIN';
+                spinBtn.textContent = 'AGAIN';
                 isSpinning = false;
-            }, 4000); // Match the CSS transition duration
+            }, 4000);
         }
     </script>
 </body>
