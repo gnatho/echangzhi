@@ -87,6 +87,14 @@ function formatWord(word) {
     return word.replace(/\[([^\]]+)\]/g, '<span style="color: #e74c3c;">$1</span>');
 }
 
+// ==================== SPELLING MEDIA HELPER ====================
+function getSimpleFileName(word) {
+    return word
+        .toLowerCase()
+        .replace(/ /g, '_')     // Replace spaces with underscores
+        .replace(/-/g, '-');    // Keep hyphens as-is
+}
+
 const scoreWeights = [
     { score: '+2', weight: 25 },
     { score: '+1', weight: 35 },
@@ -116,6 +124,9 @@ const levelSelector = document.getElementById('levelSelector');
 const unitSelector = document.getElementById('unitSelector');
 const grammarActivitySelector = document.getElementById('grammarActivitySelector');
 const grammarContainer = document.getElementById('grammarContainer');
+const keyboardModeSelector = document.getElementById('keyboardModeSelector');
+const pictureToggleBtn = document.getElementById('pictureToggleBtn');
+const audioToggleBtn = document.getElementById('audioToggleBtn');
 
 let starCellIndex = -1;
 
@@ -127,6 +138,7 @@ function init() {
     levelSelector.addEventListener('change', handleModeChange);
     unitSelector.addEventListener('change', handleModeChange);
     grammarActivitySelector.addEventListener('change', generateGrammarActivity);
+    keyboardModeSelector.addEventListener('change', handleKeyboardModeChange);
 }
 
 function handleModeChange() {
@@ -137,6 +149,13 @@ function handleModeChange() {
     levelSelector.style.display = 'none';
     unitSelector.style.display = 'none';
     grammarActivitySelector.style.display = 'none';
+    keyboardModeSelector.style.display = 'none';
+    pictureToggleBtn.style.display = 'none';
+    audioToggleBtn.style.display = 'none';
+    
+    // Reset button text
+    const resetBtn = document.querySelector('.control-btn[onclick="resetGrid()"]');
+    if (resetBtn) resetBtn.textContent = 'Reset Grid';
     
     // Hide containers
     gridElement.style.display = 'none';
@@ -156,7 +175,55 @@ function handleModeChange() {
         unitSelector.style.display = 'block';
         grammarActivitySelector.style.display = 'block';
         grammarContainer.style.display = 'flex';
+        
+        // Show spelling toggles if spelling is selected
+        if (grammarActivitySelector.value === 'spelling') {
+            keyboardModeSelector.style.display = 'block';
+            pictureToggleBtn.style.display = 'block';
+            audioToggleBtn.style.display = 'block';
+        }
+        
         generateGrammarActivity();
+    }
+}
+
+function handleKeyboardModeChange() {
+    if (grammarActivitySelector.value === 'spelling') {
+        spellingState.keyboardMode = keyboardModeSelector.value;
+        generateAvailableLetters();
+        renderSpellingUI();
+    }
+}
+
+function togglePicture() {
+    if (grammarActivitySelector.value === 'spelling') {
+        spellingState.showPicture = !spellingState.showPicture;
+        
+        if (spellingState.showPicture) {
+            pictureToggleBtn.classList.add('active');
+            pictureToggleBtn.textContent = '📷 Picture: ON';
+        } else {
+            pictureToggleBtn.classList.remove('active');
+            pictureToggleBtn.textContent = '📷 Picture: OFF';
+        }
+        
+        renderSpellingUI();
+    }
+}
+
+function toggleAudio() {
+    if (grammarActivitySelector.value === 'spelling') {
+        spellingState.showAudio = !spellingState.showAudio;
+        
+        if (spellingState.showAudio) {
+            audioToggleBtn.classList.add('active');
+            audioToggleBtn.textContent = '🔊 Audio: ON';
+            // Play audio when turned on
+            playSpellingAudio();
+        } else {
+            audioToggleBtn.classList.remove('active');
+            audioToggleBtn.textContent = '🔊 Audio: OFF';
+        }
     }
 }
 
@@ -420,15 +487,34 @@ function spinWheel() {
 let grammarState = {
     activities: [],
     currentIndex: 0,
-    selectedTile: null,
-    currentWords: [],
-    correctSentence: []
+    currentWords: [],       // Words still in sentence display (not yet placed)
+    placedWords: [],        // Words placed in answer slots (in order)
+    correctSentence: []    // The correct sentence order
 };
 
 function generateGrammarActivity() {
     const level = levelSelector.value;
     const unit = unitSelector.value;
     const activityType = grammarActivitySelector.value;
+    
+    // Show/hide spelling-specific controls
+    if (activityType === 'spelling') {
+        keyboardModeSelector.style.display = 'block';
+        pictureToggleBtn.style.display = 'block';
+        audioToggleBtn.style.display = 'block';
+        // Update Reset button to show "Next Word"
+        const resetBtn = document.querySelector('.control-btn[onclick="resetGrid()"]');
+        if (resetBtn) resetBtn.textContent = 'Next Word';
+        showSpellingActivity();
+        return;
+    } else {
+        keyboardModeSelector.style.display = 'none';
+        pictureToggleBtn.style.display = 'none';
+        audioToggleBtn.style.display = 'none';
+        // Reset button text
+        const resetBtn = document.querySelector('.control-btn[onclick="resetGrid()"]');
+        if (resetBtn) resetBtn.textContent = 'Reset Grid';
+    }
     
     // Get activities for this level/unit
     let allActivities = grammarUnits[level]?.[unit] || [];
@@ -465,21 +551,37 @@ function showReorderActivity() {
     const words = activity.sentence.split(' ');
     grammarState.correctSentence = [...words];
     grammarState.currentWords = words.sort(() => 0.5 - Math.random());
-    grammarState.selectedTile = null;
+    grammarState.placedWords = new Array(words.length).fill(null);
     
     grammarContainer.innerHTML = '';
     
     // Add instructions
     const instructions = document.createElement('div');
     instructions.className = 'grammar-instructions';
-    instructions.textContent = 'Tap two words to swap their positions. Put the sentence in the correct order.';
+    instructions.textContent = 'Tap words below to fill in the blanks. Tap a filled slot to return the word.';
     grammarContainer.appendChild(instructions);
     
     // Add progress dots
     const progress = createProgressDots();
     grammarContainer.appendChild(progress);
     
-    // Add sentence display area
+    // Add answer slots area (empty placeholders at top)
+    const answerSlots = document.createElement('div');
+    answerSlots.className = 'answer-slots';
+    answerSlots.id = 'answerSlots';
+    
+    grammarState.correctSentence.forEach((word, index) => {
+        const slot = document.createElement('div');
+        slot.className = 'answer-slot';
+        slot.dataset.slotIndex = index;
+        slot.dataset.word = ''; // Empty initially
+        slot.addEventListener('click', () => handleSlotClick(slot));
+        answerSlots.appendChild(slot);
+    });
+    
+    grammarContainer.appendChild(answerSlots);
+    
+    // Add sentence display area (shuffled words at bottom)
     const sentenceDisplay = document.createElement('div');
     sentenceDisplay.className = 'sentence-display';
     sentenceDisplay.id = 'sentenceDisplay';
@@ -489,6 +591,7 @@ function showReorderActivity() {
         tile.className = 'word-tile';
         tile.textContent = word;
         tile.dataset.index = index;
+        tile.dataset.word = word;
         tile.addEventListener('click', () => handleReorderTileClick(tile));
         sentenceDisplay.appendChild(tile);
     });
@@ -509,48 +612,117 @@ function handleReorderTileClick(tile) {
     soundPop();
     
     const index = parseInt(tile.dataset.index);
+    const word = tile.dataset.word;
     
-    if (grammarState.selectedTile === null) {
-        // First tile selected
-        grammarState.selectedTile = index;
-        tile.classList.add('selected');
-    } else if (grammarState.selectedTile === index) {
-        // Same tile clicked - deselect
-        grammarState.selectedTile = null;
-        tile.classList.remove('selected');
-    } else {
-        // Second tile selected - swap
-        const firstIndex = grammarState.selectedTile;
-        const secondIndex = index;
-        
-        // Swap in array
-        [grammarState.currentWords[firstIndex], grammarState.currentWords[secondIndex]] = 
-        [grammarState.currentWords[secondIndex], grammarState.currentWords[firstIndex]];
-        
-        // Update display
-        const display = document.getElementById('sentenceDisplay');
-        const tiles = display.querySelectorAll('.word-tile');
-        tiles.forEach((t, i) => {
-            t.textContent = grammarState.currentWords[i];
-            t.classList.remove('selected');
-        });
-        
-        grammarState.selectedTile = null;
+    // Find the first empty slot
+    const slots = document.querySelectorAll('.answer-slot');
+    let emptySlot = null;
+    let emptySlotIndex = -1;
+    
+    for (let i = 0; i < slots.length; i++) {
+        if (!slots[i].classList.contains('filled')) {
+            emptySlot = slots[i];
+            emptySlotIndex = i;
+            break;
+        }
+    }
+    
+    if (emptySlot === null) {
+        // All slots are filled
+        soundNeutral();
+        return;
+    }
+    
+    // Move word to the empty slot
+    emptySlot.textContent = word;
+    emptySlot.dataset.word = word;
+    emptySlot.classList.add('filled');
+    
+    // Update placedWords array
+    grammarState.placedWords[emptySlotIndex] = word;
+    
+    // Remove word from currentWords array
+    grammarState.currentWords.splice(index, 1);
+    
+    // Remove tile from display
+    tile.remove();
+    
+    // Check if all slots are filled
+    checkAllSlotsFilled();
+}
+
+function handleSlotClick(slot) {
+    initAudio();
+    
+    // Only process if slot is filled
+    if (!slot.classList.contains('filled')) {
+        soundNeutral();
+        return;
+    }
+    
+    const slotIndex = parseInt(slot.dataset.slotIndex);
+    const word = slot.dataset.word;
+    
+    // Return word to the sentence display (add to currentWords)
+    grammarState.currentWords.push(word);
+    
+    // Clear the slot
+    slot.textContent = '';
+    slot.dataset.word = '';
+    slot.classList.remove('filled', 'correct', 'incorrect');
+    
+    // Clear placedWords at this index
+    grammarState.placedWords[slotIndex] = null;
+    
+    // Add word back to sentence display
+    const sentenceDisplay = document.getElementById('sentenceDisplay');
+    const tile = document.createElement('div');
+    tile.className = 'word-tile';
+    tile.textContent = word;
+    tile.dataset.index = grammarState.currentWords.length - 1;
+    tile.dataset.word = word;
+    tile.addEventListener('click', () => handleReorderTileClick(tile));
+    sentenceDisplay.appendChild(tile);
+    
+    soundPop();
+}
+
+function checkAllSlotsFilled() {
+    const allFilled = grammarState.placedWords.every(word => word !== null);
+    if (allFilled) {
+        soundWin();
     }
 }
 
 function checkReorderAnswer() {
     initAudio();
     
-    const isCorrect = grammarState.currentWords.join(' ') === grammarState.correctSentence.join(' ');
-    const display = document.getElementById('sentenceDisplay');
-    const tiles = display.querySelectorAll('.word-tile');
+    // Check if all slots are filled
+    const allFilled = grammarState.placedWords.every(word => word !== null);
+    if (!allFilled) {
+        // Not all slots filled - show feedback
+        const checkBtn = grammarContainer.querySelector('.control-btn');
+        checkBtn.textContent = 'Fill all blanks first!';
+        checkBtn.style.background = 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)';
+        soundNeutral();
+        
+        setTimeout(() => {
+            checkBtn.textContent = 'Check Answer';
+            checkBtn.style.background = '';
+        }, 1500);
+        return;
+    }
     
-    tiles.forEach((tile, index) => {
-        if (grammarState.currentWords[index] === grammarState.correctSentence[index]) {
-            tile.classList.add('correct');
+    const isCorrect = grammarState.placedWords.join(' ') === grammarState.correctSentence.join(' ');
+    const slots = document.querySelectorAll('.answer-slot');
+    
+    slots.forEach((slot, index) => {
+        if (grammarState.placedWords[index] === grammarState.correctSentence[index]) {
+            slot.classList.add('correct');
+            slot.classList.remove('incorrect');
         } else {
-            tile.classList.add('incorrect');
+            slot.classList.add('incorrect');
+            slot.classList.remove('correct');
         }
     });
     
@@ -564,10 +736,10 @@ function checkReorderAnswer() {
         soundLose();
         // Allow retry after a moment
         setTimeout(() => {
-            tiles.forEach(tile => {
-                tile.classList.remove('correct', 'incorrect');
+            slots.forEach(slot => {
+                slot.classList.remove('correct', 'incorrect');
             });
-        }, 1000);
+        }, 1500);
     }
 }
 
@@ -698,8 +870,534 @@ function showGrammarComplete() {
 function resetGrid() { 
     const mode = modeSelector.value;
     if (mode === 'grammar') {
-        generateGrammarActivity();
+        const activityType = grammarActivitySelector.value;
+        if (activityType === 'spelling') {
+            // In spelling mode, button acts as "Next Word"
+            spellingState.currentIndex++;
+            showCurrentSpellingWord();
+        } else {
+            generateGrammarActivity();
+        }
     } else {
         generateGrid();
     }
+}
+
+// ==================== SPELLING ACTIVITY ====================
+let spellingState = {
+    words: [],
+    currentIndex: 0,
+    currentWord: '',
+    typedLetters: [],      // Stores the letter at each position
+    availableLetters: [],  // Array of {letter, used} objects for limited mode
+    usedLetterIndices: [], // Track which letter indices are used
+    keyboardMode: 'full', // 'full' or 'limited'
+    showPicture: false,
+    showAudio: false,
+    hintsUsed: 0
+};
+
+// Spelling activity entry point - called from generateGrammarActivity
+function showSpellingActivity() {
+    const level = levelSelector.value;
+    const unit = unitSelector.value;
+    
+    // Get words from levelUnits for spelling
+    spellingState.words = [...(levelUnits[level]?.[unit] || [])];
+    
+    // Filter out multi-word phrases (like "play soccer", "go to school")
+    // and only keep single words for spelling
+    spellingState.words = spellingState.words.filter(w => !w.includes(' ') && w.length > 1);
+    
+    // Also add words from phoneme sets as backup
+    if (spellingState.words.length < 3) {
+        const allPhonemeWords = [];
+        Object.values(phonemeSets).forEach(set => {
+            set.forEach(word => {
+                const cleanWord = word.replace(/\[|\]/g, '');
+                if (!cleanWord.includes(' ') && cleanWord.length > 2) {
+                    allPhonemeWords.push(cleanWord);
+                }
+            });
+        });
+        // Add some random phoneme words
+        spellingState.words = [...spellingState.words, ...allPhonemeWords.sort(() => 0.5 - Math.random()).slice(0, 10)];
+    }
+    
+    // Shuffle and limit to 5 words
+    spellingState.words = spellingState.words.sort(() => 0.5 - Math.random()).slice(0, 5);
+    
+    if (spellingState.words.length === 0) {
+        grammarContainer.innerHTML = '<div class="grammar-feedback incorrect">No spelling words found for this unit. Try a different level/unit.</div>';
+        return;
+    }
+    
+    spellingState.currentIndex = 0;
+    // Get keyboard mode from the selector
+    spellingState.keyboardMode = keyboardModeSelector.value;
+    // Picture enabled by default, remember state
+    spellingState.showPicture = true;
+    spellingState.showAudio = false;
+    spellingState.hintsUsed = 0;
+    
+    // Sync toggle button states (enabled by default for picture)
+    pictureToggleBtn.classList.add('active');
+    pictureToggleBtn.textContent = '📷 Picture: ON';
+    audioToggleBtn.classList.remove('active');
+    audioToggleBtn.textContent = '🔊 Audio';
+    
+    showCurrentSpellingWord();
+}
+
+function showCurrentSpellingWord() {
+    if (spellingState.currentIndex >= spellingState.words.length) {
+        showSpellingComplete();
+        return;
+    }
+    
+    spellingState.currentWord = spellingState.words[spellingState.currentIndex];
+    // Initialize typedLetters array with undefined values matching word length
+    spellingState.typedLetters = new Array(spellingState.currentWord.length).fill(undefined);
+    spellingState.usedLetterIndices = [];
+    
+    // Generate available letters based on keyboard mode
+    generateAvailableLetters();
+    
+    renderSpellingUI();
+}
+
+function generateAvailableLetters() {
+    const wordLetters = spellingState.currentWord.toUpperCase().split('');
+    
+    if (spellingState.keyboardMode === 'limited') {
+        // Only use letters from the word, shuffled - exactly the letters needed
+        // Store as objects with index for tracking
+        spellingState.availableLetters = wordLetters.map((letter, index) => ({
+            letter: letter,
+            id: index,
+            used: false
+        }));
+        // Shuffle the letters
+        spellingState.availableLetters.sort(() => 0.5 - Math.random());
+    } else {
+        // Full keyboard - all letters A-Z
+        spellingState.availableLetters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    }
+    // Reset used indices
+    spellingState.usedLetterIndices = [];
+}
+
+function renderSpellingUI() {
+    grammarContainer.innerHTML = '';
+    
+    // Add instructions
+    const instructions = document.createElement('div');
+    instructions.className = 'grammar-instructions';
+    instructions.textContent = 'Tap the letters to spell the word. Tap a letter slot to remove the letter.';
+    grammarContainer.appendChild(instructions);
+    
+    // Add progress dots
+    const progress = createSpellingProgressDots();
+    grammarContainer.appendChild(progress);
+    
+    // Word display area (picture placeholder)
+    const wordDisplay = document.createElement('div');
+    wordDisplay.className = 'spelling-word-display';
+    
+    // Picture display - load actual image
+    const pictureDiv = document.createElement('div');
+    pictureDiv.className = `spelling-picture ${spellingState.showPicture ? 'show' : ''}`;
+    
+    if (spellingState.showPicture) {
+        const imageName = getSimpleFileName(spellingState.currentWord);
+        const img = document.createElement('img');
+        img.src = `static/imgs/words/${imageName}.jpg`;
+        img.alt = spellingState.currentWord;
+        img.className = 'spelling-word-img';
+        img.onerror = () => {
+            // Fallback to emoji if image not found
+            pictureDiv.innerHTML = '🖼️';
+            pictureDiv.classList.add('fallback');
+        };
+        img.onload = () => {
+            // Clear placeholder and show image
+            if (!pictureDiv.contains(img)) {
+                pictureDiv.innerHTML = '';
+                pictureDiv.appendChild(img);
+            }
+        };
+        // Start with loading state
+        pictureDiv.innerHTML = '⏳';
+    } else {
+        pictureDiv.innerHTML = '🖼️';
+    }
+    
+    pictureDiv.title = 'Click to hear the word';
+    pictureDiv.style.cursor = 'pointer';
+    pictureDiv.addEventListener('click', () => {
+        playSpellingAudio();
+    });
+    wordDisplay.appendChild(pictureDiv);
+    
+    grammarContainer.appendChild(wordDisplay);
+    
+    // Add answer slots
+    const answerContainer = document.createElement('div');
+    answerContainer.className = 'spelling-answer-container';
+    answerContainer.id = 'spellingAnswerSlots';
+    
+    for (let i = 0; i < spellingState.currentWord.length; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'spelling-letter-slot';
+        slot.dataset.index = i;
+        
+        if (spellingState.typedLetters[i]) {
+            slot.textContent = spellingState.typedLetters[i];
+            slot.classList.add('filled');
+        }
+        
+        slot.addEventListener('click', () => handleSpellingSlotClick(i));
+        answerContainer.appendChild(slot);
+    }
+    
+    grammarContainer.appendChild(answerContainer);
+    
+    // Add keyboard
+    const keyboardDiv = document.createElement('div');
+    keyboardDiv.className = `spelling-keyboard ${spellingState.keyboardMode === 'limited' ? 'limited' : ''}`;
+    keyboardDiv.id = 'spellingKeyboard';
+    
+    // Create keyboard rows
+    const row1 = 'QWERTYUIOP'.split('');
+    const row2 = 'ASDFGHJKL'.split('');
+    const row3 = 'ZXCVBNM'.split('');
+    
+    let rows;
+    if (spellingState.keyboardMode === 'limited') {
+        // Single row with available letters
+        rows = [spellingState.availableLetters];
+    } else {
+        // Full QWERTY keyboard
+        rows = [row1, row2, row3];
+    }
+    
+    rows.forEach((row) => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'spelling-keyboard-row';
+        
+        row.forEach((letterObj, letterIdx) => {
+            const key = document.createElement('div');
+            key.className = 'spelling-key';
+            
+            // Handle both string (full keyboard) and object (limited) cases
+            let letter, letterId, isUsed;
+            
+            if (spellingState.keyboardMode === 'limited') {
+                // letterObj is {letter, id, used}
+                letter = letterObj.letter;
+                letterId = letterObj.id;
+                isUsed = letterObj.used;
+            } else {
+                // letterObj is a plain string
+                letter = letterObj;
+                letterId = letterIdx;
+                isUsed = false; // Full keyboard doesn't track used
+            }
+            
+            key.textContent = letter;
+            key.dataset.letterId = letterId; // Store the ID for tracking
+            
+            // Mark used letters in limited mode
+            if (isUsed) {
+                key.classList.add('used');
+            }
+            
+            key.addEventListener('click', () => handleSpellingKeyClick(letter, letterId));
+            rowDiv.appendChild(key);
+        });
+        
+        keyboardDiv.appendChild(rowDiv);
+    });
+    
+    grammarContainer.appendChild(keyboardDiv);
+    
+    // Add hint button
+    const hintBtn = document.createElement('button');
+    hintBtn.className = 'spelling-hint-btn';
+    hintBtn.textContent = '💡 Hint';
+    hintBtn.onclick = useSpellingHint;
+    grammarContainer.appendChild(hintBtn);
+}
+
+function createSpellingProgressDots() {
+    const progressDiv = document.createElement('div');
+    progressDiv.className = 'grammar-progress';
+    
+    for (let i = 0; i < spellingState.words.length; i++) {
+        const dot = document.createElement('div');
+        dot.className = 'progress-dot';
+        if (i < spellingState.currentIndex) {
+            dot.classList.add('completed');
+        } else if (i === spellingState.currentIndex) {
+            dot.classList.add('current');
+        }
+        progressDiv.appendChild(dot);
+    }
+    
+    return progressDiv;
+}
+
+function handleSpellingKeyClick(letter, letterId) {
+    initAudio();
+    soundPop();
+    
+    // Find first empty slot (undefined)
+    const emptyIndex = spellingState.typedLetters.findIndex(l => l === undefined);
+    
+    if (emptyIndex === -1) {
+        // All slots filled - replace last letter
+        const lastIndex = spellingState.typedLetters.length - 1;
+        const oldLetterData = spellingState.typedLetters[lastIndex];
+        
+        // Remove old letter from used (either plain letter or object with id)
+        if (oldLetterData && oldLetterData.id !== undefined) {
+            const oldUsedIdx = spellingState.usedLetterIndices.indexOf(oldLetterData.id);
+            if (oldUsedIdx > -1) {
+                spellingState.usedLetterIndices.splice(oldUsedIdx, 1);
+            }
+            // Mark the letter as available again in availableLetters
+            const availLetter = spellingState.availableLetters.find(l => l.id === oldLetterData.id);
+            if (availLetter) availLetter.used = false;
+        }
+        
+        // Store letter with its ID for limited mode
+        if (spellingState.keyboardMode === 'limited') {
+            spellingState.typedLetters[lastIndex] = { letter: letter, id: letterId };
+        } else {
+            spellingState.typedLetters[lastIndex] = letter;
+        }
+    } else {
+        // Store letter with its ID for limited mode
+        if (spellingState.keyboardMode === 'limited') {
+            spellingState.typedLetters[emptyIndex] = { letter: letter, id: letterId };
+        } else {
+            spellingState.typedLetters[emptyIndex] = letter;
+        }
+        
+        // Mark letter as used in limited mode
+        if (spellingState.keyboardMode === 'limited') {
+            spellingState.usedLetterIndices.push(letterId);
+            // Mark in availableLetters
+            const availLetter = spellingState.availableLetters.find(l => l.id === letterId);
+            if (availLetter) availLetter.used = true;
+        }
+    }
+    
+    // Update UI
+    updateSpellingUI();
+    
+    // Check if word is complete (no undefined values)
+    const allFilled = spellingState.typedLetters.every(l => l !== undefined);
+    if (allFilled) {
+        setTimeout(checkSpellingAnswer, 300);
+    }
+}
+
+function handleSpellingSlotClick(index) {
+    initAudio();
+    
+    const letterData = spellingState.typedLetters[index];
+    if (!letterData) {
+        soundNeutral();
+        return;
+    }
+    
+    // Remove letter from typed
+    spellingState.typedLetters[index] = undefined;
+    
+    // Remove from used letters (handle both plain string and object)
+    if (letterData && letterData.id !== undefined) {
+        const usedIdx = spellingState.usedLetterIndices.indexOf(letterData.id);
+        if (usedIdx > -1) {
+            spellingState.usedLetterIndices.splice(usedIdx, 1);
+        }
+        // Mark as available again
+        const availLetter = spellingState.availableLetters.find(l => l.id === letterData.id);
+        if (availLetter) availLetter.used = false;
+    }
+    
+    soundPop();
+    updateSpellingUI();
+}
+
+function updateSpellingUI() {
+    // Update slots
+    const slots = document.querySelectorAll('.spelling-letter-slot');
+    slots.forEach((slot, index) => {
+        const letterData = spellingState.typedLetters[index];
+        // Handle both plain string and object with letter/id
+        const letter = letterData ? (letterData.letter || letterData) : null;
+        if (letter) {
+            slot.textContent = letter;
+            slot.classList.add('filled');
+        } else {
+            slot.textContent = '';
+            slot.classList.remove('filled');
+        }
+    });
+    
+    // Update keyboard - mark used keys
+    const keys = document.querySelectorAll('.spelling-key');
+    keys.forEach(key => {
+        const letterId = parseInt(key.dataset.letterId);
+        if (!isNaN(letterId) && spellingState.usedLetterIndices.includes(letterId)) {
+            key.classList.add('used');
+        } else {
+            key.classList.remove('used');
+        }
+    });
+}
+
+function checkSpellingAnswer() {
+    initAudio();
+    
+    // Extract letters from typedLetters (handle both plain string and object)
+    const typedWord = spellingState.typedLetters.map(l => l ? (l.letter || l) : '').join('');
+    const correctWord = spellingState.currentWord.toUpperCase();
+    
+    const slots = document.querySelectorAll('.spelling-letter-slot');
+    
+    if (typedWord === correctWord) {
+        // Correct!
+        slots.forEach(slot => slot.classList.add('correct'));
+        soundWin();
+        
+        setTimeout(() => {
+            spellingState.currentIndex++;
+            showCurrentSpellingWord();
+        }, 1500);
+    } else {
+        // Incorrect - show which are wrong
+        slots.forEach((slot, index) => {
+            const typed = spellingState.typedLetters[index] ? (spellingState.typedLetters[index].letter || spellingState.typedLetters[index]) : '';
+            const expected = correctWord[index];
+            
+            if (typed !== expected) {
+                slot.classList.add('incorrect');
+            } else {
+                slot.classList.add('correct');
+            }
+        });
+        
+        soundLose();
+        
+        // Reset after showing answer
+        setTimeout(() => {
+            // Clear typed letters (reset to undefined array)
+            spellingState.typedLetters = new Array(spellingState.currentWord.length).fill(undefined);
+            spellingState.usedLetterIndices = [];
+            
+            // Reset available letters in limited mode
+            if (spellingState.keyboardMode === 'limited') {
+                spellingState.availableLetters.forEach(l => l.used = false);
+            }
+            
+            // Update UI
+            slots.forEach(slot => {
+                slot.classList.remove('correct', 'incorrect', 'filled');
+                slot.textContent = '';
+            });
+            
+            // Reset keyboard
+            const keys = document.querySelectorAll('.spelling-key');
+            keys.forEach(key => key.classList.remove('used'));
+        }, 1500);
+    }
+}
+
+function useSpellingHint() {
+    initAudio();
+    
+    // Find first incorrect letter
+    const correctWord = spellingState.currentWord.toUpperCase();
+    
+    for (let i = 0; i < correctWord.length; i++) {
+        const currentTyped = spellingState.typedLetters[i] ? (spellingState.typedLetters[i].letter || spellingState.typedLetters[i]) : '';
+        
+        if (currentTyped !== correctWord[i]) {
+            // Find an unused letter from available letters that matches
+            const availableLetter = spellingState.availableLetters.find(l => !l.used && l.letter === correctWord[i]);
+            
+            if (availableLetter) {
+                // Replace with correct letter
+                const oldLetterData = spellingState.typedLetters[i];
+                
+                // Remove old letter from used if exists
+                if (oldLetterData && oldLetterData.id !== undefined) {
+                    const oldUsedIdx = spellingState.usedLetterIndices.indexOf(oldLetterData.id);
+                    if (oldUsedIdx > -1) {
+                        spellingState.usedLetterIndices.splice(oldUsedIdx, 1);
+                    }
+                    // Mark old as available
+                    const oldAvail = spellingState.availableLetters.find(l => l.id === oldLetterData.id);
+                    if (oldAvail) oldAvail.used = false;
+                }
+                
+                // Store with ID for limited mode
+                if (spellingState.keyboardMode === 'limited') {
+                    spellingState.typedLetters[i] = { letter: correctWord[i], id: availableLetter.id };
+                } else {
+                    spellingState.typedLetters[i] = correctWord[i];
+                }
+                
+                // Mark as used
+                spellingState.usedLetterIndices.push(availableLetter.id);
+                availableLetter.used = true;
+                
+                soundPop();
+                updateSpellingUI();
+                
+                // Check if complete (no undefined values)
+                const allFilled = spellingState.typedLetters.every(l => l !== undefined);
+                const typedWord = spellingState.typedLetters.map(l => l ? (l.letter || l) : '').join('');
+                if (allFilled && typedWord === correctWord) {
+                    setTimeout(checkSpellingAnswer, 300);
+                }
+            }
+            
+            return;
+        }
+    }
+}
+
+function playSpellingAudio() {
+    initAudio(); // Ensure audio context is ready
+    
+    const audioName = getSimpleFileName(spellingState.currentWord);
+    const audioPath = `static/audio/${audioName}.mp3`;
+    
+    // Try to play audio file
+    const audio = new Audio(audioPath);
+    audio.play().catch(() => {
+        // Fallback to text-to-speech if audio file not found
+        if ('speechSynthesis' in window) {
+            window.speechSynthesis.cancel();
+            const utterance = new SpeechSynthesisUtterance(spellingState.currentWord);
+            utterance.rate = 0.8;
+            utterance.pitch = 1;
+            window.speechSynthesis.speak(utterance);
+        }
+    });
+}
+
+function showSpellingComplete() {
+    grammarContainer.innerHTML = `
+        <div class="grammar-feedback correct">
+            🎉 Great job! You spelled all the words! 🎉
+        </div>
+        <button class="control-btn" style="margin-top: 20px;" onclick="showSpellingActivity()">
+            Try Again
+        </button>
+    `;
+    soundWin();
 }

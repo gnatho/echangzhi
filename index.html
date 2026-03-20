@@ -71,7 +71,15 @@
         <select id="grammarActivitySelector" style="display: none;">
             <option value="reorder">Sentence Reorder</option>
             <option value="fill">Fill in Blank</option>
+            <option value="spelling">Spelling</option>
         </select>
+        <!-- Spelling-specific toggles (hidden by default) -->
+        <select id="keyboardModeSelector" style="display: none;">
+            <option value="full">Full Keyboard</option>
+            <option value="limited">Only Given Letters</option>
+        </select>
+        <button id="pictureToggleBtn" class="control-btn" style="display: none; padding: 6px 12px; font-size: 14px;" onclick="togglePicture()">📷 Picture</button>
+        <button id="audioToggleBtn" class="control-btn" style="display: none; padding: 6px 12px; font-size: 14px;" onclick="toggleAudio()">🔊 Audio</button>
         <button class="control-btn" onclick="resetGrid()">Reset Grid</button>
     </div>
 

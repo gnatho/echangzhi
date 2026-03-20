@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASD Vocab Matcher</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f8ff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            color: #333;
+        }
+        #game-board {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        h1 { margin-top: 0; color: #2c3e50; }
+        #score-board {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #27ae60;
+        }
+        #target-word {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+            color: #2980b9;
+            text-transform: uppercase;
+            min-height: 60px;
+        }
+        .wasd-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 80px);
+            grid-template-rows: repeat(2, 80px);
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .key-btn {
+            background-color: #ecf0f1;
+            border: 3px solid #bdc3c7;
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            transition: all 0.1s;
+        }
+        .key-btn .label {
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        /* Grid placements */
+        #btn-w { grid-column: 2; grid-row: 1; }
+        #btn-a { grid-column: 1; grid-row: 2; }
+        #btn-s { grid-column: 2; grid-row: 2; }
+        #btn-d { grid-column: 3; grid-row: 2; }
+
+        /* Feedback colors */
+        .correct { background-color: #2ecc71 !important; border-color: #27ae60 !important; color: white; }
+        .wrong { background-color: #e74c3c !important; border-color: #c0392b !important; color: white; }
+        .active-press { transform: scale(0.95); background-color: #e0e6ed; }
+        
+        #instructions {
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-board">
+        <h1>WASD Vocab Matcher</h1>
+        <div id="score-board">Score: <span id="score">0</span></div>
+        <div id="target-word">Ready?</div>
+        
+        <div class="wasd-grid">
+            <div id="btn-w" class="key-btn"><span class="label">W</span><span id="emoji-w"></span></div>
+            <div id="btn-a" class="key-btn"><span class="label">A</span><span id="emoji-a"></span></div>
+            <div id="btn-s" class="key-btn"><span class="label">S</span><span id="emoji-s"></span></div>
+            <div id="btn-d" class="key-btn"><span class="label">D</span><span id="emoji-d"></span></div>
+        </div>
+
+        <div id="instructions">
+            Press <strong>W, A, S,</strong> or <strong>D</strong> to choose the picture that matches the English word.<br>
+            <em>(Single taps only!)</em>
+        </div>
+    </div>
+
+    <script>
+        // --- ESL VOCABULARY LIST ---
+        // Teachers: You can easily add more words and emojis here!
+        const vocabList = [
+            { word: "Cat", emoji: "🐱" }, { word: "Dog", emoji: "🐶" },
+            { word: "Apple", emoji: "🍎" }, { word: "Car", emoji: "🚗" },
+            { word: "House", emoji: "🏠" }, { word: "Tree", emoji: "🌳" },
+            { word: "Sun", emoji: "☀️" }, { word: "Book", emoji: "📖" },
+            { word: "Shoes", emoji: "👟" }, { word: "Clock", emoji: "⏰" },
+            { word: "Pencil", emoji: "✏️" }, { word: "Fish", emoji: "🐟" },
+            { word: "Bird", emoji: "🐦" }, { word: "Train", emoji: "🚆" },
+            { word: "Bread", emoji: "🍞" }, { word: "Star", emoji: "⭐" }
+        ];
+
+        let score = 0;
+        let currentCorrectKey = '';
+        let isAcceptingInput = false; // Prevents long-press rapid firing
+
+        const scoreDisplay = document.getElementById('score');
+        const targetWordDisplay = document.getElementById('target-word');
+        const elements = {
+            'w': { btn: document.getElementById('btn-w'), emoji: document.getElementById('emoji-w') },
+            'a': { btn: document.getElementById('btn-a'), emoji: document.getElementById('emoji-a') },
+            's': { btn: document.getElementById('btn-s'), emoji: document.getElementById('emoji-s') },
+            'd': { btn: document.getElementById('btn-d'), emoji: document.getElementById('emoji-d') }
+        };
+
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        function loadNextQuestion() {
+            // Reset button styles
+            Object.values(elements).forEach(el => {
+                el.btn.classList.remove('correct', 'wrong', 'active-press');
+            });
+
+            // Pick 1 correct answer and 3 random wrong answers
+            let shuffledVocab = shuffle([...vocabList]);
+            let correctItem = shuffledVocab[0];
+            let wrongItems = shuffledVocab.slice(1, 4);
+            
+            let options = shuffle([correctItem, ...wrongItems]);
+            let keys = ['w', 'a', 's', 'd'];
+
+            // Assign options to WASD keys
+            keys.forEach((key, index) => {
+                elements[key].emoji.textContent = options[index].emoji;
+                if (options[index].word === correctItem.word) {
+                    currentCorrectKey = key;
+                }
+            });
+
+            targetWordDisplay.textContent = correctItem.word;
+            isAcceptingInput = true; // Unlock input for the new question
+        }
+
+        function handleInput(key) {
+            if (!isAcceptingInput) return; // Ignore if processing previous answer or long-pressing
+            
+            const validKeys = ['w', 'a', 's', 'd'];
+            if (!validKeys.includes(key)) return;
+
+            // Lock input to prevent long-press spamming
+            isAcceptingInput = false; 
+
+            elements[key].btn.classList.add('active-press');
+
+            if (key === currentCorrectKey) {
+                // Correct!
+                elements[key].btn.classList.add('correct');
+                score += 10;
+            } else {
+                // Wrong! Show red on wrong guess, green on the correct one
+                elements[key].btn.classList.add('wrong');
+                elements[currentCorrectKey].btn.classList.add('correct');
+                score = Math.max(0, score - 5); // Optional: lose points for wrong answers
+            }
+
+            scoreDisplay.textContent = score;
+
+            // Wait 1.2 seconds so the student can see what the right answer was before moving on
+            setTimeout(() => {
+                loadNextQuestion();
+            }, 1200);
+        }
+
+        // Event Listener for single keyboard presses
+        document.addEventListener('keydown', (event) => {
+            // event.repeat is TRUE if the user is holding the key down. We ignore it.
+            if (event.repeat) return; 
+            
+            const key = event.key.toLowerCase();
+            handleInput(key);
+        });
+
+        // Start the game immediately
+        loadNextQuestion();
+    </script>
+</body>
+</html>

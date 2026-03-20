@@ -409,6 +409,69 @@ button.control-btn:active { transform: scale(0.95); }
     max-width: 95%;
 }
 
+/* Answer Slots Container */
+.answer-slots {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+    border-radius: 16px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    min-height: 100px;
+    max-width: 95%;
+    border: 2px dashed #667eea;
+}
+
+/* Individual Answer Slot */
+.answer-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 20px;
+    background: white;
+    border: 3px dashed #667eea;
+    border-radius: 12px;
+    min-width: 60px;
+    min-height: 50px;
+    font-size: clamp(18px, 4vw, 28px);
+    font-weight: 700;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.answer-slot:hover {
+    border-style: solid;
+    background: #f8f9ff;
+    transform: translateY(-2px);
+}
+
+.answer-slot.filled {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-style: solid;
+    border-color: transparent;
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.answer-slot.filled:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(102, 126, 234, 0.4);
+}
+
+.answer-slot.correct {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    border-color: transparent;
+}
+
+.answer-slot.incorrect {
+    background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+    border-color: transparent;
+}
+
 /* Word Tiles for Reordering */
 .word-tile {
     display: flex;
@@ -611,4 +674,273 @@ button.control-btn:active { transform: scale(0.95); }
     text-align: center;
     margin-bottom: 10px;
     font-style: italic;
+}
+
+/* ==================== SPELLING ACTIVITY ==================== */
+
+/* Spelling Controls Container */
+.spelling-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Top Toggles Row */
+.spelling-toggles {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Toggle Button */
+.toggle-btn {
+    padding: 8px 16px;
+    border: 2px solid #667eea;
+    border-radius: 20px;
+    background: white;
+    color: #667eea;
+    font-size: clamp(12px, 2vw, 14px);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+    background: #f0f4ff;
+}
+
+.toggle-btn.active {
+    background: #667eea;
+    color: white;
+}
+
+/* Word Display with Picture */
+.spelling-word-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+}
+
+.spelling-picture {
+    width: 150px;
+    height: 150px;
+    background: white;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 60px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border: 3px solid #667eea;
+    display: none;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.spelling-picture.show {
+    display: flex;
+}
+
+.spelling-picture.fallback {
+    background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+}
+
+.spelling-picture img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+}
+
+/* Spelling word image styling */
+.spelling-word-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 12px;
+    animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Word Answer Slots */
+.spelling-answer-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    margin: 20px 0;
+    min-height: 60px;
+}
+
+.spelling-letter-slot {
+    width: 45px;
+    height: 55px;
+    background: white;
+    border: 3px dashed #667eea;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 700;
+    color: #667eea;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.spelling-letter-slot:hover {
+    background: #f8f9ff;
+    border-style: solid;
+}
+
+.spelling-letter-slot.filled {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-style: solid;
+    border-color: transparent;
+}
+
+.spelling-letter-slot.correct {
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    border-color: transparent;
+}
+
+.spelling-letter-slot.incorrect {
+    background: linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%);
+    border-color: transparent;
+}
+
+/* Keyboard Container */
+.spelling-keyboard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 15px;
+    max-width: 95%;
+    margin: 0 auto;
+}
+
+.spelling-keyboard-row {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.spelling-key {
+    min-width: 35px;
+    height: 45px;
+    padding: 0 10px;
+    background: linear-gradient(135deg, #ffffff 0%, #e8e8e8 100%);
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(16px, 3vw, 20px);
+    font-weight: 700;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.1s;
+    box-shadow: 0 3px 0 #999;
+}
+
+.spelling-key:hover {
+    background: linear-gradient(135deg, #f0f0f0 0%, #d8d8d8 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 0 #999;
+}
+
+.spelling-key:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #999;
+}
+
+.spelling-key.used {
+    opacity: 0.3;
+    pointer-events: none;
+    background: #ccc;
+    box-shadow: none;
+}
+
+/* Limited Keyboard (only given letters) */
+.spelling-keyboard.limited .spelling-key {
+    min-width: 50px;
+    height: 55px;
+    font-size: clamp(18px, 3vw, 24px);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 0 #4a4a8a;
+}
+
+.spelling-keyboard.limited .spelling-key:hover {
+    background: linear-gradient(135deg, #7b8ff0 0%, #8a5cb8 100%);
+    box-shadow: 0 6px 0 #4a4a8a;
+}
+
+.spelling-keyboard.limited .spelling-key:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #4a4a8a;
+}
+
+/* Hint Button */
+.spelling-hint-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border: none;
+    border-radius: 20px;
+    color: white;
+    font-size: clamp(14px, 2vw, 16px);
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: all 0.2s;
+}
+
+.spelling-hint-btn:hover {
+    transform: scale(1.05);
+}
+
+.spelling-hint-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Audio Play Button */
+.spelling-audio-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+    transition: all 0.2s;
+    display: none;
+}
+
+.spelling-audio-btn.show {
+    display: flex;
+}
+
+.spelling-audio-btn:hover {
+    transform: scale(1.1);
 }
