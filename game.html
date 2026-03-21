@@ -2,205 +2,676 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WASD Vocab Matcher</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>ESL Vocab Racer</title>
     <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f8ff;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+        * {
+            box-sizing: border-box;
             margin: 0;
-            color: #333;
+            padding: 0;
         }
-        #game-board {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
+        
+        /* Force Light Mode */
+        html {
+            color-scheme: light !important;
         }
-        h1 { margin-top: 0; color: #2c3e50; }
-        #score-board {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #27ae60;
+        
+        @media (prefers-color-scheme: dark) {
+            html {
+                color-scheme: light !important;
+            }
+            body {
+                background-color: #f0f4f8 !important;
+                color: #2c3e50 !important;
+            }
         }
-        #target-word {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 20px 0;
-            color: #2980b9;
-            text-transform: uppercase;
-            min-height: 60px;
-        }
-        .wasd-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 80px);
-            grid-template-rows: repeat(2, 80px);
-            gap: 10px;
-            justify-content: center;
-            margin-top: 20px;
-        }
-        .key-btn {
-            background-color: #ecf0f1;
-            border: 3px solid #bdc3c7;
-            border-radius: 10px;
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #2c3e50;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            transition: all 0.1s;
+            height: 100vh;
+            touch-action: manipulation;
         }
-        .key-btn .label {
-            font-size: 0.8rem;
-            color: #7f8c8d;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        /* Grid placements */
-        #btn-w { grid-column: 2; grid-row: 1; }
-        #btn-a { grid-column: 1; grid-row: 2; }
-        #btn-s { grid-column: 2; grid-row: 2; }
-        #btn-d { grid-column: 3; grid-row: 2; }
 
-        /* Feedback colors */
-        .correct { background-color: #2ecc71 !important; border-color: #27ae60 !important; color: white; }
-        .wrong { background-color: #e74c3c !important; border-color: #c0392b !important; color: white; }
-        .active-press { transform: scale(0.95); background-color: #e0e6ed; }
+        /* Selectors Panel */
+        #selectors {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
         
-        #instructions {
-            margin-top: 20px;
-            font-size: 0.9rem;
+        #selectors select {
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 8px;
+            border: 2px solid #ced4da;
+            background-color: white;
+            color: #495057;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            min-width: 120px;
+        }
+        
+        #selectors select:focus {
+            border-color: #80bdff;
+        }
+
+        /* UI Panel */
+        #hud {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ffffff, #f0f4f8);
+            box-sizing: border-box;
+            border-bottom: 4px solid #f39c12;
+            z-index: 10;
+        }
+        
+        #target-word-container {
+            text-align: center;
+        }
+        
+        #target-word-label { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; letter-spacing: 2px;}
+        #target-word { font-size: 2.5rem; font-weight: bold; color: #f39c12; text-shadow: 2px 2px 0px rgba(0,0,0,0.1); margin: 0;}
+        
+        .stat { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
+        .stat span { color: #2ecc71; }
+
+        /* Game Area */
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            flex: 1;
+            background-color: #e8ecf1;
+            overflow: hidden;
+            box-shadow: 0 0 30px rgba(0,0,0,0.1);
+            perspective: 800px;
+        }
+
+        /* The Road */
+        #road {
+            position: absolute;
+            top: -100px; 
+            left: 0;
+            width: 100%;
+            height: calc(100% + 200px);
+            background: #d5dbe3;
+            display: flex;
+            background-image: linear-gradient(0deg, transparent 50%, #bdc3c7 50%);
+            background-size: 10px 100px;
+            background-position: center;
+        }
+
+        /* Lane Markers */
+        .lane-divider {
+            width: 10px;
+            height: 100%;
+            background-image: linear-gradient(0deg, transparent 50%, #ffffff 50%);
+            background-size: 10px 80px;
+            position: absolute;
+        }
+        .divider-left { left: 33.33%; }
+        .divider-right { left: 66.66%; }
+
+        /* The Player Car */
+        #player {
+            position: absolute;
+            bottom: 30px;
+            width: 80px;
+            height: 120px;
+            background-color: #e74c3c;
+            border-radius: 15px 15px 5px 5px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2), inset 0 5px 15px rgba(255,255,255,0.4);
+            transition: left 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            z-index: 5;
+        }
+        
+        /* Windshield */
+        #player::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            width: 70%;
+            height: 30%;
+            background: #34495e;
+            border-radius: 5px 5px 0 0;
+        }
+
+        /* Evolving Gates/Obstacles */
+        .gate-row {
+            position: absolute;
+            top: -150px;
+            width: 100%;
+            display: flex;
+            height: 120px;
+            z-index: 4;
+        }
+
+        .gate {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            background: rgba(41, 128, 185, 0.15);
+            border-top: 5px solid #3498db;
+            border-bottom: 5px solid #3498db;
+            transition: background 0.2s;
+            overflow: hidden;
+        }
+        
+        .gate img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .instructions {
+            margin-top: 10px;
             color: #7f8c8d;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0 10px;
+        }
+
+        /* Steering Buttons for Tablet */
+        #steering-controls {
+            width: 100%;
+            max-width: 600px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 10;
+        }
+        
+        .steering-btn {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            transition: all 0.1s;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        
+        .steering-btn:active {
+            transform: scale(0.95);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+        
+        .steering-btn.left {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .steering-btn.right {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+
+        /* Animations for success/fail */
+        @keyframes crash {
+            0% { transform: translateX(0); background-color: #e74c3c;}
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+        .crashed { animation: crash 0.4s; }
+        
+        .correct-flash { background: rgba(46, 204, 113, 0.7) !important; }
+        .wrong-flash { background: rgba(231, 76, 60, 0.7) !important; }
+
+        /* Responsive for tablets */
+        @media (max-width: 768px) {
+            #selectors {
+                padding: 8px;
+                gap: 8px;
+            }
+            
+            #selectors select {
+                padding: 6px 10px;
+                font-size: 12px;
+                min-width: 100px;
+            }
+            
+            #hud {
+                padding: 10px 15px;
+            }
+            
+            #target-word {
+                font-size: 1.8rem;
+            }
+            
+            .stat {
+                font-size: 1rem;
+            }
+            
+            .gate {
+                font-size: 3rem;
+            }
+            
+            #player {
+                width: 60px;
+                height: 90px;
+                font-size: 1.5rem;
+            }
+            
+            .steering-btn {
+                width: 70px;
+                height: 70px;
+                font-size: 1.5rem;
+            }
+            
+            .instructions {
+                font-size: 0.8rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #selectors select {
+                padding: 5px 8px;
+                font-size: 11px;
+                min-width: 80px;
+            }
+            
+            #target-word {
+                font-size: 1.5rem;
+            }
+            
+            .gate {
+                font-size: 2.5rem;
+            }
+            
+            #player {
+                width: 50px;
+                height: 75px;
+                font-size: 1.2rem;
+            }
+            
+            .steering-btn {
+                width: 60px;
+                height: 60px;
+                font-size: 1.2rem;
+            }
         }
     </style>
 </head>
 <body>
 
-    <div id="game-board">
-        <h1>WASD Vocab Matcher</h1>
-        <div id="score-board">Score: <span id="score">0</span></div>
-        <div id="target-word">Ready?</div>
-        
-        <div class="wasd-grid">
-            <div id="btn-w" class="key-btn"><span class="label">W</span><span id="emoji-w"></span></div>
-            <div id="btn-a" class="key-btn"><span class="label">A</span><span id="emoji-a"></span></div>
-            <div id="btn-s" class="key-btn"><span class="label">S</span><span id="emoji-s"></span></div>
-            <div id="btn-d" class="key-btn"><span class="label">D</span><span id="emoji-d"></span></div>
-        </div>
-
-        <div id="instructions">
-            Press <strong>W, A, S,</strong> or <strong>D</strong> to choose the picture that matches the English word.<br>
-            <em>(Single taps only!)</em>
-        </div>
+    <div id="selectors">
+        <select id="bookSelector">
+            <option value="">Select Book</option>
+        </select>
+        <select id="unitSelector" disabled>
+            <option value="">Select Unit</option>
+        </select>
+        <button id="startBtn" onclick="startGame()" style="padding: 8px 16px; font-size: 14px; border-radius: 8px; border: none; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: bold; cursor: pointer;">Start</button>
     </div>
 
+    <div id="hud">
+        <div class="stat">Score: <span id="score">0</span></div>
+        <div id="target-word-container">
+            <div id="target-word-label">Target Word</div>
+            <div id="target-word">SELECT BOOK & UNIT</div>
+        </div>
+        <div class="stat">Speed: <span id="speed-display">1x</span></div>
+    </div>
+
+    <div id="game-container">
+        <div id="road">
+            <div class="lane-divider divider-left"></div>
+            <div class="lane-divider divider-right"></div>
+        </div>
+        <div id="gates-container"></div>
+        <div id="player">🏎️</div>
+    </div>
+
+    <div class="instructions">
+        <strong>Left/Right</strong>: Change lanes
+    </div>
+
+    <div id="steering-controls">
+        <button class="steering-btn left" ontouchstart="moveLeft()" onmousedown="moveLeft()">◀</button>
+        <button class="steering-btn right" ontouchstart="moveRight()" onmousedown="moveRight()">▶</button>
+    </div>
+
+    <script src="data.js"></script>
     <script>
-        // --- ESL VOCABULARY LIST ---
-        // Teachers: You can easily add more words and emojis here!
-        const vocabList = [
-            { word: "Cat", emoji: "🐱" }, { word: "Dog", emoji: "🐶" },
-            { word: "Apple", emoji: "🍎" }, { word: "Car", emoji: "🚗" },
-            { word: "House", emoji: "🏠" }, { word: "Tree", emoji: "🌳" },
-            { word: "Sun", emoji: "☀️" }, { word: "Book", emoji: "📖" },
-            { word: "Shoes", emoji: "👟" }, { word: "Clock", emoji: "⏰" },
-            { word: "Pencil", emoji: "✏️" }, { word: "Fish", emoji: "🐟" },
-            { word: "Bird", emoji: "🐦" }, { word: "Train", emoji: "🚆" },
-            { word: "Bread", emoji: "🍞" }, { word: "Star", emoji: "⭐" }
-        ];
-
+        // Game State
+        let playerLane = 1;
         let score = 0;
-        let currentCorrectKey = '';
-        let isAcceptingInput = false; // Prevents long-press rapid firing
+        let baseSpeed = 4;
+        let currentSpeed = baseSpeed;
+        let roadOffset = 0;
+        
+        let currentGateY = -150;
+        let gateActive = false;
+        let correctLane = -1;
+        let currentQuestion = {};
+        let vocabList = [];
+        let gameStarted = false;
 
-        const scoreDisplay = document.getElementById('score');
-        const targetWordDisplay = document.getElementById('target-word');
-        const elements = {
-            'w': { btn: document.getElementById('btn-w'), emoji: document.getElementById('emoji-w') },
-            'a': { btn: document.getElementById('btn-a'), emoji: document.getElementById('emoji-a') },
-            's': { btn: document.getElementById('btn-s'), emoji: document.getElementById('emoji-s') },
-            'd': { btn: document.getElementById('btn-d'), emoji: document.getElementById('emoji-d') }
-        };
+        // DOM Elements
+        const playerEl = document.getElementById('player');
+        const roadEl = document.getElementById('road');
+        const gatesContainer = document.getElementById('gates-container');
+        const targetWordEl = document.getElementById('target-word');
+        const scoreEl = document.getElementById('score');
+        const speedEl = document.getElementById('speed-display');
+        const bookSelector = document.getElementById('bookSelector');
+        const unitSelector = document.getElementById('unitSelector');
+        const startBtn = document.getElementById('startBtn');
 
+        // Initialize selectors
+        function initSelectors() {
+            // Populate book selector from levelUnits
+            const books = Object.keys(levelUnits);
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book;
+                option.textContent = `Book ${book}`;
+                bookSelector.appendChild(option);
+            });
+            
+            // Add phonemes option
+            const phonemesOption = document.createElement('option');
+            phonemesOption.value = 'phonemes';
+            phonemesOption.textContent = 'Phonics';
+            bookSelector.appendChild(phonemesOption);
+            
+            bookSelector.addEventListener('change', handleBookChange);
+            unitSelector.addEventListener('change', handleUnitChange);
+        }
+
+        function handleBookChange() {
+            const selectedBook = bookSelector.value;
+            unitSelector.innerHTML = '<option value="">Select Unit</option>';
+            
+            if (selectedBook === 'phonemes') {
+                // Populate with phoneme sets
+                Object.keys(phonemeSets).forEach(set => {
+                    const option = document.createElement('option');
+                    option.value = set;
+                    option.textContent = set.charAt(0).toUpperCase() + set.slice(1);
+                    unitSelector.appendChild(option);
+                });
+                unitSelector.disabled = false;
+            } else if (selectedBook !== '') {
+                // Populate with units from selected book
+                const units = Object.keys(levelUnits[selectedBook] || {});
+                units.forEach(unit => {
+                    const option = document.createElement('option');
+                    option.value = unit;
+                    option.textContent = `Unit ${parseInt(unit) + 1}`;
+                    unitSelector.appendChild(option);
+                });
+                unitSelector.disabled = false;
+            } else {
+                unitSelector.disabled = true;
+            }
+            
+            vocabList = [];
+            gameStarted = false;
+            targetWordEl.textContent = 'SELECT UNIT';
+        }
+
+        function handleUnitChange() {
+            const selectedBook = bookSelector.value;
+            const selectedUnit = unitSelector.value;
+            
+            if (selectedBook === '' || selectedUnit === '') {
+                vocabList = [];
+                targetWordEl.textContent = 'SELECT UNIT';
+                return;
+            }
+            
+            if (selectedBook === 'phonemes') {
+                vocabList = [...(phonemeSets[selectedUnit] || [])];
+                // Clean up phoneme markers
+                vocabList = vocabList.map(word => word.replace(/\[|\]/g, ''));
+            } else {
+                vocabList = [...(levelUnits[selectedBook]?.[selectedUnit] || [])];
+            }
+            
+            if (vocabList.length > 0) {
+                targetWordEl.textContent = 'PRESS START';
+                startBtn.textContent = 'Start';
+            } else {
+                targetWordEl.textContent = 'NO WORDS';
+            }
+        }
+
+        function startGame() {
+            if (vocabList.length === 0) {
+                alert('Please select a book and unit first!');
+                return;
+            }
+            
+            gameStarted = true;
+            score = 0;
+            baseSpeed = 4;
+            currentSpeed = baseSpeed;
+            scoreEl.textContent = '0';
+            startBtn.textContent = 'Restart';
+            
+            // Reset game state
+            playerLane = 1;
+            updatePlayerPosition();
+            
+            // Clear any existing gates
+            gatesContainer.innerHTML = '';
+            gateActive = false;
+            
+            // Start spawning gates
+            spawnGate();
+        }
+
+        // Helper: Shuffle Array
         function shuffle(array) {
             return array.sort(() => Math.random() - 0.5);
         }
 
-        function loadNextQuestion() {
-            // Reset button styles
-            Object.values(elements).forEach(el => {
-                el.btn.classList.remove('correct', 'wrong', 'active-press');
-            });
+        // Setup Player Position
+        function updatePlayerPosition() {
+            const laneCenters = [16.66, 50, 83.33];
+            playerEl.style.left = `calc(${laneCenters[playerLane]}% - 40px)`;
+        }
 
-            // Pick 1 correct answer and 3 random wrong answers
-            let shuffledVocab = shuffle([...vocabList]);
-            let correctItem = shuffledVocab[0];
-            let wrongItems = shuffledVocab.slice(1, 4);
+        // Get image path for a word
+        function getImagePath(word) {
+            const imageName = word
+                .toLowerCase()
+                .replace(/ /g, '_')
+                .replace(/-/g, '-');
+            return `static/imgs/words/${imageName}.jpg`;
+        }
+
+        // Spawn a new row of gates
+        function spawnGate() {
+            if (!gameStarted || vocabList.length === 0) return;
             
-            let options = shuffle([correctItem, ...wrongItems]);
-            let keys = ['w', 'a', 's', 'd'];
+            gatesContainer.innerHTML = '';
+            
+            let shuffledVocab = shuffle([...vocabList]);
+            currentQuestion = shuffledVocab[0];
+            let wrongItems = shuffledVocab.slice(1, 3);
+            
+            // Ensure we have 3 items
+            while (wrongItems.length < 2) {
+                wrongItems.push(shuffledVocab[0]);
+            }
+            
+            let options = shuffle([currentQuestion, wrongItems[0], wrongItems[1]]);
+            
+            const gateRow = document.createElement('div');
+            gateRow.className = 'gate-row';
+            gateRow.style.top = '-150px';
+            currentGateY = -150;
 
-            // Assign options to WASD keys
-            keys.forEach((key, index) => {
-                elements[key].emoji.textContent = options[index].emoji;
-                if (options[index].word === correctItem.word) {
-                    currentCorrectKey = key;
+            options.forEach((opt, index) => {
+                const gate = document.createElement('div');
+                gate.className = 'gate';
+                gate.id = `gate-${index}`;
+                
+                // Try to load image, fallback to text
+                const img = document.createElement('img');
+                img.src = getImagePath(opt);
+                img.alt = opt;
+                img.onerror = () => {
+                    // Fallback to text if image not found
+                    gate.textContent = opt.charAt(0).toUpperCase();
+                };
+                gate.appendChild(img);
+                
+                gateRow.appendChild(gate);
+
+                if (opt === currentQuestion) {
+                    correctLane = index;
                 }
             });
 
-            targetWordDisplay.textContent = correctItem.word;
-            isAcceptingInput = true; // Unlock input for the new question
+            gatesContainer.appendChild(gateRow);
+            targetWordEl.textContent = currentQuestion;
+            gateActive = true;
         }
 
-        function handleInput(key) {
-            if (!isAcceptingInput) return; // Ignore if processing previous answer or long-pressing
-            
-            const validKeys = ['w', 'a', 's', 'd'];
-            if (!validKeys.includes(key)) return;
-
-            // Lock input to prevent long-press spamming
-            isAcceptingInput = false; 
-
-            elements[key].btn.classList.add('active-press');
-
-            if (key === currentCorrectKey) {
-                // Correct!
-                elements[key].btn.classList.add('correct');
-                score += 10;
-            } else {
-                // Wrong! Show red on wrong guess, green on the correct one
-                elements[key].btn.classList.add('wrong');
-                elements[currentCorrectKey].btn.classList.add('correct');
-                score = Math.max(0, score - 5); // Optional: lose points for wrong answers
+        // Steering functions
+        function moveLeft() {
+            if (playerLane > 0) {
+                playerLane--;
+                updatePlayerPosition();
             }
-
-            scoreDisplay.textContent = score;
-
-            // Wait 1.2 seconds so the student can see what the right answer was before moving on
-            setTimeout(() => {
-                loadNextQuestion();
-            }, 1200);
         }
 
-        // Event Listener for single keyboard presses
-        document.addEventListener('keydown', (event) => {
-            // event.repeat is TRUE if the user is holding the key down. We ignore it.
-            if (event.repeat) return; 
-            
-            const key = event.key.toLowerCase();
-            handleInput(key);
+        function moveRight() {
+            if (playerLane < 2) {
+                playerLane++;
+                updatePlayerPosition();
+            }
+        }
+
+        // Handle Keyboard Input
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    moveLeft();
+                    break;
+                case 'ArrowRight':
+                    moveRight();
+                    break;
+            }
         });
 
-        // Start the game immediately
-        loadNextQuestion();
+        // Main Game Loop
+        function gameLoop() {
+            if (!gameStarted) {
+                requestAnimationFrame(gameLoop);
+                return;
+            }
+            
+            // 1. Calculate current frame speed
+            currentSpeed = baseSpeed;
+            
+            // Update Speed UI
+            speedEl.textContent = (currentSpeed / 4).toFixed(1) + 'x';
+
+            // 2. Animate the road
+            roadOffset += currentSpeed;
+            if (roadOffset > 100) roadOffset = 0;
+            roadEl.style.backgroundPosition = `center ${roadOffset}px`;
+
+            // 3. Animate Gates
+            if (!gateActive) {
+                spawnGate();
+            } else {
+                currentGateY += currentSpeed;
+                const gateRow = document.querySelector('.gate-row');
+                
+                if (gateRow) {
+                    gateRow.style.top = currentGateY + 'px';
+
+                    // Collision Detection
+                    const containerHeight = document.getElementById('game-container').offsetHeight;
+                    const hitZoneTop = containerHeight - 150;
+                    const hitZoneBottom = containerHeight - 30;
+
+                    if (currentGateY > hitZoneTop && currentGateY < hitZoneBottom && gateActive) {
+                        gateActive = false;
+                        
+                        const gateEls = document.querySelectorAll('.gate');
+                        
+                        if (playerLane === correctLane) {
+                            // CORRECT
+                            score += 100;
+                            gateEls[correctLane].classList.add('correct-flash');
+                        } else {
+                            // WRONG
+                            score = Math.max(0, score - 50);
+                            playerEl.classList.add('crashed');
+                            gateEls[playerLane].classList.add('wrong-flash');
+                            gateEls[correctLane].classList.add('correct-flash');
+                            
+                            setTimeout(() => playerEl.classList.remove('crashed'), 400);
+                        }
+                        
+                        scoreEl.textContent = score;
+                    }
+
+                    // Remove gate when it goes off screen
+                    if (currentGateY > containerHeight) {
+                        gateRow.remove();
+                        setTimeout(() => spawnGate(), 500);
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Initialize
+        initSelectors();
+        updatePlayerPosition();
+        requestAnimationFrame(gameLoop);
+
     </script>
 </body>
 </html>

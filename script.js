@@ -1120,13 +1120,6 @@ function renderSpellingUI() {
     });
     
     grammarContainer.appendChild(keyboardDiv);
-    
-    // Add hint button
-    const hintBtn = document.createElement('button');
-    hintBtn.className = 'spelling-hint-btn';
-    hintBtn.textContent = '💡 Hint';
-    hintBtn.onclick = useSpellingHint;
-    grammarContainer.appendChild(hintBtn);
 }
 
 function createSpellingProgressDots() {
