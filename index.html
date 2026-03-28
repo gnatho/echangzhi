@@ -21,9 +21,10 @@
         </div>
     </div>
 
-    <div id="fullscreenResult" class="fullscreen-result" onclick="closeFullscreenResult()">
+    <div id="fullscreenResult" class="fullscreen-result" onclick="handleOverlayClick(event)">
         <div id="fsResultText" class="result-text">+3</div>
-        <div class="tap-continue">Tap anywhere to continue</div>
+        <button id="spinAgainBtn" class="spin-again-btn" onclick="spinWheelAgain(event)">Spin again</button>
+        <div class="tap-continue">Tap outside to close</div>
     </div>
 
     <div class="controls">

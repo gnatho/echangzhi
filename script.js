@@ -418,6 +418,30 @@ function closeFullscreenResult() {
     closeWheelModal(); // Auto-close wheel modal as well
 }
 
+function handleOverlayClick(event) {
+    // Only close if clicking directly on the overlay (not on the button)
+    if (event.target.id === 'fullscreenResult' || event.target.classList.contains('tap-continue')) {
+        closeFullscreenResult();
+    }
+}
+
+function spinWheelAgain(event) {
+    // Prevent the click from bubbling to the overlay
+    event.stopPropagation();
+    
+    // Close the fullscreen result overlay
+    document.getElementById('fullscreenResult').classList.remove('active');
+    
+    // Show the wheel modal again (wheel is visible, not spinning)
+    const modal = document.getElementById('wheelModal');
+    const spinBtn = document.getElementById('spinBtn');
+    spinBtn.disabled = false;
+    spinBtn.textContent = 'SPIN';
+    isSpinning = false;
+    createWheel();
+    modal.classList.add('active');
+}
+
 function spinWheel() {
     if (isSpinning) return;
     initAudio();

@@ -375,6 +375,33 @@ body {
     animation-delay: 1s;
 }
 
+/* Spin again button */
+.spin-again-btn {
+    margin-top: 20px;
+    padding: 15px 40px;
+    font-size: 22px;
+    font-weight: 700;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: 0.5s;
+}
+
+.spin-again-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.spin-again-btn:active {
+    transform: scale(0.98);
+}
+
 select {
     padding: 8px 12px;
     font-size: 15px;
