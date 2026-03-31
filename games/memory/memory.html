@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Memory Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Force Light Mode */
+        html {
+            color-scheme: light !important;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            html {
+                color-scheme: light !important;
+            }
+            body {
+                background-color: #f0f4f8 !important;
+                color: #2c3e50 !important;
+            }
+        }
+        
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            touch-action: manipulation;
+        }
+
+        /* UI Panel */
+        #hud {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: linear-gradient(135deg, #ffffff, #f0f4f8);
+            box-sizing: border-box;
+            border-bottom: 4px solid #9b59b6;
+            z-index: 10;
+        }
+        
+        #game-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #9b59b6;
+        }
+        
+        .stat { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
+        .stat span { color: #9b59b6; }
+
+        /* Game Area */
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-color: #e8ecf1;
+            overflow: hidden;
+        }
+
+        /* Memory Grid */
+        #memory-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 600px;
+            aspect-ratio: 6 / 5;
+        }
+
+        /* Tile Styles */
+        .tile {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+        
+        .tile:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .tile.flipped {
+            background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+            border: 3px solid #9b59b6;
+        }
+        
+        .tile.matched {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            border: 3px solid #27ae60;
+        }
+        
+        .tile.selected {
+            box-shadow: 0 0 0 4px #f39c12, 0 6px 12px rgba(0,0,0,0.3);
+            transform: scale(1.1);
+        }
+        
+        .tile .symbol {
+            display: none;
+        }
+        
+        .tile.flipped .symbol,
+        .tile.matched .symbol {
+            display: block;
+        }
+        
+        .tile .back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .tile.flipped .back,
+        .tile.matched .back {
+            display: none;
+        }
+
+        /* Instructions */
+        .instructions {
+            margin-top: 10px;
+            color: #7f8c8d;
+            text-align: center;
+            font-size: 0.9rem;
+            padding: 0 10px;
+        }
+
+        /* Win Overlay */
+        #win-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        #win-overlay.show {
+            display: flex;
+        }
+        
+        #win-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        
+        #win-content h1 {
+            color: #9b59b6;
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        #win-content p {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+        
+        #play-again-btn {
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.2s;
+        }
+        
+        #play-again-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #memory-grid {
+                gap: 8px;
+            }
+            
+            .tile {
+                font-size: 1.5rem;
+            }
+            
+            .tile .back {
+                font-size: 1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            #memory-grid {
+                gap: 5px;
+            }
+            
+            .tile {
+                font-size: 1.2rem;
+            }
+            
+            .tile .back {
+                font-size: 0.8rem;
+            }
+            
+            #hud {
+                padding: 10px 15px;
+            }
+            
+            #game-title {
+                font-size: 1.2rem;
+            }
+            
+            .stat {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hud">
+        <div id="game-title">🧩 Memory</div>
+        <div class="stat">Score: <span id="score">0</span></div>
+        <div class="stat">Pairs: <span id="pairs">0</span>/15</div>
+    </div>
+
+    <div id="game-container">
+        <div id="memory-grid"></div>
+    </div>
+
+    <div class="instructions">
+        <strong>Arrow Keys / Controller:</strong> Move cursor | <strong>Space / F17:</strong> Flip tile
+    </div>
+
+    <div id="win-overlay">
+        <div id="win-content">
+            <h1>🎉 You Win!</h1>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <button id="play-again-btn" onclick="initGame()">Play Again</button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const GRID_COLS = 6;
+        const GRID_ROWS = 5;
+        const TOTAL_TILES = GRID_COLS * GRID_ROWS; // 30 tiles = 15 pairs
+        
+        let tiles = [];
+        let selectedTiles = [];
+        let matchedPairs = 0;
+        let score = 0;
+        let currentPosition = 0;
+        let isProcessing = false;
+        
+        // Emoji symbols for pairs (15 unique emojis)
+        const EMOJIS = [
+            '🍎', '🐱', '🌟', '🚗', '🎈',
+            '🌺', '🐶', '🎵', '🍕', '🌈',
+            '🦋', '⚽', '🌙', '🌸', '🎁'
+        ];
+        
+        // DOM Elements
+        const gridEl = document.getElementById('memory-grid');
+        const scoreEl = document.getElementById('score');
+        const pairsEl = document.getElementById('pairs');
+        const winOverlay = document.getElementById('win-overlay');
+        const finalScoreEl = document.getElementById('final-score');
+        
+        // Shuffle array
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+        
+        // Initialize game
+        function initGame() {
+            // Reset state
+            tiles = [];
+            selectedTiles = [];
+            matchedPairs = 0;
+            score = 0;
+            currentPosition = 0;
+            isProcessing = false;
+            
+            // Update UI
+            scoreEl.textContent = '0';
+            pairsEl.textContent = '0';
+            winOverlay.classList.remove('show');
+            
+            // Create pairs
+            const pairs = [];
+            for (let i = 0; i < TOTAL_TILES / 2; i++) {
+                pairs.push(EMOJIS[i]);
+                pairs.push(EMOJIS[i]);
+            }
+            
+            // Shuffle tiles
+            const shuffledTiles = shuffle(pairs);
+            
+            // Clear grid
+            gridEl.innerHTML = '';
+            
+            // Create tile elements
+            shuffledTiles.forEach((emoji, index) => {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.dataset.index = index;
+                tile.dataset.symbol = emoji;
+                tile.dataset.matched = 'false';
+                
+                // Back of tile (hidden face)
+                const back = document.createElement('div');
+                back.className = 'back';
+                back.textContent = '?';
+                tile.appendChild(back);
+                
+                // Symbol (visible face)
+                const symbol = document.createElement('div');
+                symbol.className = 'symbol';
+                symbol.textContent = emoji;
+                tile.appendChild(symbol);
+                
+                // Click handler
+                tile.addEventListener('click', () => handleTileClick(index));
+                
+                gridEl.appendChild(tile);
+                tiles.push({
+                    element: tile,
+                    symbol: emoji,
+                    flipped: false,
+                    matched: false
+                });
+            });
+            
+            // Update visual selection
+            updateSelection();
+        }
+        
+        // Handle tile click
+        function handleTileClick(index) {
+            if (isProcessing) return;
+            
+            const tile = tiles[index];
+            
+            // Don't allow clicking on already flipped or matched tiles
+            if (tile.flipped || tile.matched) return;
+            
+            // Don't allow selecting more than 2 tiles
+            if (selectedTiles.length >= 2) return;
+            
+            // Flip the tile
+            flipTile(index);
+            
+            // Add to selected tiles
+            selectedTiles.push(index);
+            
+            // Check for match when 2 tiles are selected
+            if (selectedTiles.length === 2) {
+                checkMatch();
+            }
+        }
+        
+        // Flip a tile
+        function flipTile(index) {
+            const tile = tiles[index];
+            tile.flipped = true;
+            tile.element.classList.add('flipped');
+        }
+        
+        // Unflip a tile
+        function unflipTile(index) {
+            const tile = tiles[index];
+            tile.flipped = false;
+            tile.element.classList.remove('flipped');
+        }
+        
+        // Check if selected tiles match
+        function checkMatch() {
+            isProcessing = true;
+            
+            const [idx1, idx2] = selectedTiles;
+            const tile1 = tiles[idx1];
+            const tile2 = tiles[idx2];
+            
+            if (tile1.symbol === tile2.symbol) {
+                // Match found!
+                tile1.matched = true;
+                tile2.matched = true;
+                tile1.element.classList.add('matched');
+                tile2.element.classList.add('matched');
+                
+                matchedPairs++;
+                score += 100;
+                scoreEl.textContent = score;
+                pairsEl.textContent = matchedPairs;
+                
+                selectedTiles = [];
+                isProcessing = false;
+                
+                // Check win condition
+                if (matchedPairs === TOTAL_TILES / 2) {
+                    setTimeout(showWin, 500);
+                }
+            } else {
+                // No match - flip back after delay
+                setTimeout(() => {
+                    unflipTile(idx1);
+                    unflipTile(idx2);
+                    selectedTiles = [];
+                    isProcessing = false;
+                }, 1000);
+            }
+        }
+        
+        // Show win overlay
+        function showWin() {
+            finalScoreEl.textContent = score;
+            winOverlay.classList.add('show');
+        }
+        
+        // Update visual selection
+        function updateSelection() {
+            tiles.forEach((tile, index) => {
+                if (index === currentPosition && !tile.matched) {
+                    tile.element.classList.add('selected');
+                } else {
+                    tile.element.classList.remove('selected');
+                }
+            });
+        }
+        
+        // Move selection
+        function moveSelection(direction) {
+            if (isProcessing) return;
+            
+            let newPosition = currentPosition;
+            
+            switch(direction) {
+                case 'up':
+                    newPosition = currentPosition - GRID_COLS;
+                    break;
+                case 'down':
+                    newPosition = currentPosition + GRID_COLS;
+                    break;
+                case 'left':
+                    newPosition = currentPosition - 1;
+                    break;
+                case 'right':
+                    newPosition = currentPosition + 1;
+                    break;
+            }
+            
+            // Boundary checks
+            if (newPosition < 0 || newPosition >= TOTAL_TILES) return;
+            
+            // Handle left/right wrapping within rows
+            if (direction === 'left') {
+                const rowStart = Math.floor(currentPosition / GRID_COLS) * GRID_COLS;
+                if (newPosition < rowStart) return;
+            }
+            if (direction === 'right') {
+                const rowEnd = Math.floor(currentPosition / GRID_COLS) * GRID_COLS + GRID_COLS - 1;
+                if (newPosition > rowEnd) return;
+            }
+            
+            currentPosition = newPosition;
+            updateSelection();
+        }
+        
+        // Select/flip current tile
+        function selectCurrentTile() {
+            handleTileClick(currentPosition);
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (e.repeat) return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                    e.preventDefault();
+                    moveSelection('up');
+                    break;
+                case 'ArrowDown':
+                    e.preventDefault();
+                    moveSelection('down');
+                    break;
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    moveSelection('left');
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    moveSelection('right');
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    selectCurrentTile();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    selectCurrentTile();
+                    break;
+            }
+            
+            // Controller keys (F17-F21)
+            switch(e.code) {
+                case 'F21': // Left
+                    e.preventDefault();
+                    moveSelection('left');
+                    break;
+                case 'F18': // Right
+                    e.preventDefault();
+                    moveSelection('right');
+                    break;
+                case 'F20': // Up
+                    e.preventDefault();
+                    moveSelection('up');
+                    break;
+                case 'F19': // Down
+                    e.preventDefault();
+                    moveSelection('down');
+                    break;
+                case 'F17': // Center/Select
+                    e.preventDefault();
+                    selectCurrentTile();
+                    break;
+            }
+        });
+        
+        // Initialize game on load
+        initGame();
+    </script>
+</body>
+</html>
