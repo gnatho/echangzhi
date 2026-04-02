@@ -252,6 +252,17 @@
                 font-size: 1rem;
             }
         }
+
+        /* Force Landscape View */
+        @media screen and (orientation: portrait) {
+            body {
+                transform: rotate(-90deg);
+                transform-origin: center center;
+                width: 100vh !important;
+                height: 100vw !important;
+                overflow: hidden;
+            }
+        }
     </style>
 </head>
 <body>

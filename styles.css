@@ -169,13 +169,15 @@ body {
     background: white;
     box-shadow: 0 4px 15px rgba(0,0,0,0.05);
     display: flex;
-    flex-wrap: wrap;
+    flex-direction: row;
+    flex-wrap: nowrap;
     gap: 8px;
     align-items: center;
     z-index: 10;
     flex-shrink: 0;
     min-height: 50px;
     border-bottom: 3px solid #e1e8ed;
+    overflow-x: auto;
 }
 
 .version {
@@ -1078,4 +1080,22 @@ button.control-btn:active { transform: scale(0.95); }
 
 .spelling-audio-btn:hover {
     transform: scale(1.1);
+}
+
+/* ── Force Landscape View ─────────────────────────────────────────────── */
+@media screen and (orientation: portrait) {
+    body {
+        transform: rotate(-90deg);
+        transform-origin: center center;
+        width: 100vh !important;
+        height: 100vw !important;
+        overflow: hidden;
+    }
+    .controls {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+    }
+    .wheel-modal {
+        flex-direction: row !important;
+    }
 }

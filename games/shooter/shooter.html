@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Crosshair Assault</title>
 <link href="https://fonts.googleapis.cn/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.staticfile.net/font-awesome/6.5.1/css/all.min.css">
@@ -383,6 +383,17 @@
     .hud-label { font-size: 7px; }
     .key-box { width: 30px; height: 30px; font-size: 11px; }
     #controls-hint { gap: 8px; bottom: 8px; }
+  }
+
+  /* Force Landscape View */
+  @media screen and (orientation: portrait) {
+    body {
+      transform: rotate(-90deg);
+      transform-origin: center center;
+      width: 100vh !important;
+      height: 100vw !important;
+      overflow: hidden;
+    }
   }
 </style>
 </head>

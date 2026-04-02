@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Advanced NKRO & HID Key Tester</title>
     <style>
         :root {
@@ -82,6 +82,21 @@
         .controls { display: flex; justify-content: space-between; margin-bottom: 10px; }
         button { background-color: #333; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
         button:hover { background-color: #444; }
+
+        /* Force Landscape View */
+        @media screen and (orientation: portrait) {
+            body {
+                transform: rotate(-90deg);
+                transform-origin: center center;
+                width: 100vh !important;
+                height: 100vw !important;
+                overflow: hidden;
+            }
+            .dashboard {
+                grid-template-columns: 1fr 1fr !important;
+                flex-direction: row !important;
+            }
+        }
     </style>
 </head>
 <body>
