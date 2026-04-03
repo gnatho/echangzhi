@@ -7,22 +7,24 @@
     <title>Chooser – Grammar Game</title>
     <link rel="stylesheet" href="chooser.css">
 </head>
-<body>
+<script src="questions.js"></script>
+<script src="chooser.js"></script>
+</body>
 
-<!-- ── Orientation Warning (shown on portrait mode) ──────────────────── -->
+<!-- ── Orientation Warning ─────────────────────────────────────────────── -->
 <div id="orientation-warning">
     <div class="rotate-icon">📱</div>
     <p>Please rotate your device to landscape mode</p>
 </div>
 
-<!-- ── Button Tester Screen ─────────────────────────────────────────── -->
+<!-- ── Button Tester Screen ─────────────────────────────────────────────── -->
 <div id="tester-screen">
     <div id="tester-content">
         <h2>🎮 Button Tester</h2>
         <p class="tester-subtitle">Test your controllers by pressing the keys</p>
-        
+
         <div class="controllers-container">
-            <!-- Player 1 Controller -->
+            <!-- Player 1 -->
             <div class="controller p1">
                 <div class="controller-label">🔴 Player 1</div>
                 <div class="btn-grid">
@@ -37,8 +39,8 @@
                     <div class="test-btn" id="p1-btn-down">DOWN</div>
                 </div>
             </div>
-            
-            <!-- Player 2 Controller -->
+
+            <!-- Player 2 -->
             <div class="controller p2">
                 <div class="controller-label">🔵 Player 2</div>
                 <div class="btn-grid">
@@ -53,28 +55,48 @@
                     <div class="test-btn" id="p2-btn-down">DOWN</div>
                 </div>
             </div>
+
+            <!-- Player 3 (left/right only) -->
+            <div class="controller p3">
+                <div class="controller-label">🟢 Player 3</div>
+                <div class="btn-row">
+                    <div class="test-btn" id="p3-btn-left">LEFT<br><small>F19</small></div>
+                    <div class="test-btn" id="p3-btn-right">RIGHT<br><small>F20</small></div>
+                </div>
+            </div>
+
+            <!-- Player 4 (left/right only) -->
+            <div class="controller p4">
+                <div class="controller-label">🟡 Player 4</div>
+                <div class="btn-row">
+                    <div class="test-btn" id="p4-btn-left">LEFT<br><small>F22</small></div>
+                    <div class="test-btn" id="p4-btn-right">RIGHT<br><small>F23</small></div>
+                </div>
+            </div>
         </div>
-        
+
         <div class="tester-instructions">
-            <p><kbd>F21</kbd> = Player 1 Left &nbsp;·&nbsp; <kbd>F18</kbd> = Player 1 Right</p>
-            <p><kbd>←</kbd> = Player 2 Left &nbsp;·&nbsp; <kbd>→</kbd> = Player 2 Right</p>
+            <p><kbd>F21</kbd> = P1 Left &nbsp;·&nbsp; <kbd>F18</kbd> = P1 Right</p>
+            <p><kbd>←</kbd> = P2 Left &nbsp;·&nbsp; <kbd>→</kbd> = P2 Right</p>
+            <p><kbd>F19</kbd> = P3 Left &nbsp;·&nbsp; <kbd>F20</kbd> = P3 Right</p>
+            <p><kbd>F22</kbd> = P4 Left &nbsp;·&nbsp; <kbd>F23</kbd> = P4 Right</p>
         </div>
-        
+
         <button id="tester-back-btn" onclick="showStartScreen()">← Back to Menu</button>
     </div>
 </div>
 
-<!-- ── Questions Editor Screen ───────────────────────────────────────── -->
+<!-- ── Questions Editor Screen ───────────────────────────────────────────── -->
 <div id="editor-screen">
     <div id="editor-content">
         <h2>📝 Questions Editor</h2>
-        
+
         <div class="editor-tabs">
-            <button class="editor-tab active" onclick="showEditorTab('questions')">Questions</button>
-            <button class="editor-tab" onclick="showEditorTab('categories')">Categories</button>
-            <button class="editor-tab" onclick="showEditorTab('import-export')">Import/Export</button>
+            <button class="editor-tab active" onclick="showEditorTab('questions', this)">Questions</button>
+            <button class="editor-tab" onclick="showEditorTab('categories', this)">Categories</button>
+            <button class="editor-tab" onclick="showEditorTab('import-export', this)">Import/Export</button>
         </div>
-        
+
         <!-- Questions Tab -->
         <div id="editor-questions" class="editor-section active">
             <div class="editor-form">
@@ -106,11 +128,10 @@
                 <button class="editor-btn primary" onclick="saveQuestion()">Save Question</button>
                 <button class="editor-btn secondary" onclick="clearQuestionForm()">Clear</button>
             </div>
-            
-            <h3 style="color: #00d9ff; margin-bottom: 10px;">Existing Questions</h3>
+            <h3 style="color:#00d9ff;margin-bottom:10px;">Existing Questions</h3>
             <div class="editor-list" id="questions-list"></div>
         </div>
-        
+
         <!-- Categories Tab -->
         <div id="editor-categories" class="editor-section">
             <div class="editor-form">
@@ -131,33 +152,30 @@
                 <button class="editor-btn primary" onclick="saveCategory()">Save Category</button>
                 <button class="editor-btn secondary" onclick="clearCategoryForm()">Clear</button>
             </div>
-            
-            <h3 style="color: #00d9ff; margin-bottom: 10px;">Existing Categories</h3>
+            <h3 style="color:#00d9ff;margin-bottom:10px;">Existing Categories</h3>
             <div class="editor-list" id="categories-list"></div>
         </div>
-        
+
         <!-- Import/Export Tab -->
         <div id="editor-import-export" class="editor-section">
             <div class="editor-form">
                 <h3>Export Questions</h3>
-                <p style="color: #8892b0; margin-bottom: 15px;">Download your questions as a JSON file</p>
+                <p style="color:#8892b0;margin-bottom:15px;">Download your questions as a JSON file</p>
                 <button class="editor-btn primary" onclick="exportQuestions()">📥 Export to JSON</button>
             </div>
-            
             <div class="editor-form">
                 <h3>Import Questions</h3>
-                <p style="color: #8892b0; margin-bottom: 15px;">Load questions from a JSON file</p>
-                <input type="file" id="import-file" accept=".json" style="color: white; margin-bottom: 15px;">
+                <p style="color:#8892b0;margin-bottom:15px;">Load questions from a JSON file</p>
+                <input type="file" id="import-file" accept=".json" style="color:white;margin-bottom:15px;">
                 <button class="editor-btn primary" onclick="importQuestions()">📤 Import from JSON</button>
             </div>
-            
             <div class="editor-form">
                 <h3>Reset to Default</h3>
-                <p style="color: #8892b0; margin-bottom: 15px;">Restore the original questions</p>
+                <p style="color:#8892b0;margin-bottom:15px;">Restore the original questions</p>
                 <button class="editor-btn danger" onclick="resetToDefault()">🔄 Reset to Default</button>
             </div>
         </div>
-        
+
         <div class="editor-actions">
             <button class="editor-btn primary" onclick="applyEditorChanges()">✓ Apply Changes</button>
             <button class="editor-btn secondary" onclick="showStartScreen()">← Back to Menu</button>
@@ -165,17 +183,24 @@
     </div>
 </div>
 
-<!-- ── Start Screen ─────────────────────────────────────────────────── -->
+<!-- ── Start Screen ──────────────────────────────────────────────────────── -->
 <div id="start-screen">
     <div id="start-content">
         <h1>🎯 Chooser</h1>
-        <p class="subtitle">Two players compete to fill in the blank with the correct word!</p>
-        
+        <p class="subtitle">Up to four players compete to fill in the blank with the correct word!</p>
+
         <!-- Settings Panel -->
         <div class="settings-panel">
             <h3>⚙️ Game Settings</h3>
-            
             <div class="settings-row">
+                <div class="setting-group">
+                    <label for="num-players">Number of Players</label>
+                    <select id="num-players">
+                        <option value="2" selected>2 Players</option>
+                        <option value="3">3 Players</option>
+                        <option value="4">4 Players</option>
+                    </select>
+                </div>
                 <div class="setting-group">
                     <label for="num-questions">Number of Questions</label>
                     <select id="num-questions">
@@ -195,58 +220,79 @@
                     </select>
                 </div>
             </div>
-            
+
             <div class="setting-group">
                 <label>Select Categories to Study</label>
-                <div class="categories-grid" id="categories-container">
-                    <!-- Categories will be populated by JavaScript -->
-                </div>
+                <div class="categories-grid" id="categories-container"></div>
             </div>
         </div>
-        
+
         <div class="controls-info">
             <h3>Controls</h3>
             <p class="p1">🔴 Player 1 — <strong>F21</strong> = Left &nbsp;·&nbsp; <strong>F18</strong> = Right</p>
             <p class="p2">🔵 Player 2 — <strong>←</strong> = Left &nbsp;·&nbsp; <strong>→</strong> = Right</p>
+            <p class="p3" style="display:none">🟢 Player 3 — <strong>F19</strong> = Left &nbsp;·&nbsp; <strong>F20</strong> = Right</p>
+            <p class="p4" style="display:none">🟡 Player 4 — <strong>F22</strong> = Left &nbsp;·&nbsp; <strong>F23</strong> = Right</p>
             <p class="note">
                 Each player may answer only <strong>once</strong> per question.<br>
-                Once both players answer, the next question loads automatically.<br>
+                Once all players answer, the next question loads automatically.<br>
                 Build a streak 🔥 for a score multiplier!
             </p>
         </div>
-        
-        <button id="test-controller-btn" onclick="showTesterScreen()" style="margin-right: 10px; padding: 12px 25px; font-size: 1rem; background: #3d3d5c; color: white; border: none; border-radius: 10px; cursor: pointer;">🎮 Test Controllers</button>
-        <button id="edit-questions-btn" onclick="showEditorScreen()" style="margin-right: 10px; padding: 12px 25px; font-size: 1rem; background: #3d3d5c; color: white; border: none; border-radius: 10px; cursor: pointer;">📝 Edit Questions</button>
+
+        <button id="test-controller-btn" onclick="showTesterScreen()" style="margin-right:10px;padding:12px 25px;font-size:1rem;background:#3d3d5c;color:white;border:none;border-radius:10px;cursor:pointer;">🎮 Test Controllers</button>
+        <button id="edit-questions-btn" onclick="showEditorScreen()" style="margin-right:10px;padding:12px 25px;font-size:1rem;background:#3d3d5c;color:white;border:none;border-radius:10px;cursor:pointer;">📝 Edit Questions</button>
         <button id="begin-btn" onclick="startGame()">▶ Begin Game</button>
     </div>
 </div>
 
-<!-- ── HUD ──────────────────────────────────────────────────────────── -->
+<!-- ── HUD ───────────────────────────────────────────────────────────────── -->
 <div id="hud">
-    <div class="hud-score p1">
-        <div>
-            <div class="score-label">Player 1</div>
-            <div class="score-val" id="p1-score-hud">0</div>
+    <!-- Left column: P1 always visible, P3 shown for 3–4 players -->
+    <div id="hud-left">
+        <div class="hud-score p1">
+            <div>
+                <div class="score-label">Player 1</div>
+                <div class="score-val" id="p1-score-hud">0</div>
+            </div>
+            <span class="streak-badge" id="p1-streak-badge">🔥1</span>
         </div>
-        <span class="streak-badge" id="p1-streak-badge">🔥1</span>
+        <div class="hud-score p3" style="display:none">
+            <div>
+                <div class="score-label">Player 3</div>
+                <div class="score-val" id="p3-score-hud">0</div>
+            </div>
+            <span class="streak-badge" id="p3-streak-badge">🔥1</span>
+        </div>
     </div>
 
+    <!-- Centre: question counter + timer -->
     <div id="hud-center">
         <div id="question-counter">Question 1 of 10</div>
         <div id="timer">5</div>
         <div id="timer-bar-wrap"><div id="timer-bar"></div></div>
     </div>
 
-    <div class="hud-score p2">
-        <span class="streak-badge" id="p2-streak-badge">🔥1</span>
-        <div>
-            <div class="score-label">Player 2</div>
-            <div class="score-val" id="p2-score-hud">0</div>
+    <!-- Right column: P2 shown for 2+ players, P4 shown for 4 players -->
+    <div id="hud-right">
+        <div class="hud-score p2" style="display:none">
+            <span class="streak-badge" id="p2-streak-badge">🔥1</span>
+            <div>
+                <div class="score-label">Player 2</div>
+                <div class="score-val" id="p2-score-hud">0</div>
+            </div>
+        </div>
+        <div class="hud-score p4" style="display:none">
+            <span class="streak-badge" id="p4-streak-badge">🔥1</span>
+            <div>
+                <div class="score-label">Player 4</div>
+                <div class="score-val" id="p4-score-hud">0</div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- ── Game ─────────────────────────────────────────────────────────── -->
+<!-- ── Game ──────────────────────────────────────────────────────────────── -->
 <div id="game-container">
     <div id="question-area">
         <div id="sentence"></div>
@@ -257,6 +303,8 @@
                 <div class="btn-dots">
                     <div class="btn-dot p1" id="left-dot-p1"></div>
                     <div class="btn-dot p2" id="left-dot-p2"></div>
+                    <div class="btn-dot p3" id="left-dot-p3"></div>
+                    <div class="btn-dot p4" id="left-dot-p4"></div>
                 </div>
             </button>
             <button class="option-btn" id="right-btn">
@@ -264,6 +312,8 @@
                 <div class="btn-dots">
                     <div class="btn-dot p1" id="right-dot-p1"></div>
                     <div class="btn-dot p2" id="right-dot-p2"></div>
+                    <div class="btn-dot p3" id="right-dot-p3"></div>
+                    <div class="btn-dot p4" id="right-dot-p4"></div>
                 </div>
             </button>
         </div>
@@ -271,19 +321,29 @@
         <div id="player-indicators">
             <div class="player-indicator player1" id="p1-indicator">
                 <div class="player-label">🔴 Player 1</div>
-                <div class="controls-hint">F21 &nbsp;/&nbsp; F18</div>
+                <div class="controls-hint">F21 / F18</div>
                 <div class="chosen-display" id="p1-choice">—</div>
             </div>
-            <div class="player-indicator player2" id="p2-indicator">
+            <div class="player-indicator player2" id="p2-indicator" style="display:none">
                 <div class="player-label">🔵 Player 2</div>
-                <div class="controls-hint">← &nbsp;/&nbsp; →</div>
+                <div class="controls-hint">← / →</div>
                 <div class="chosen-display" id="p2-choice">—</div>
+            </div>
+            <div class="player-indicator player3" id="p3-indicator" style="display:none">
+                <div class="player-label">🟢 Player 3</div>
+                <div class="controls-hint">F19 / F20</div>
+                <div class="chosen-display" id="p3-choice">—</div>
+            </div>
+            <div class="player-indicator player4" id="p4-indicator" style="display:none">
+                <div class="player-label">🟡 Player 4</div>
+                <div class="controls-hint">F22 / F23</div>
+                <div class="chosen-display" id="p4-choice">—</div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- ── End Screen ───────────────────────────────────────────────────── -->
+<!-- ── End Screen ────────────────────────────────────────────────────────── -->
 <div id="end-screen">
     <div id="end-content">
         <h1>🏆 Game Over!</h1>
@@ -294,9 +354,17 @@
                 <div class="fscore-label">🔴 Player 1</div>
                 <div class="fscore-val" id="p1-final">0</div>
             </div>
-            <div class="final-score-box p2">
+            <div class="final-score-box p2" style="display:none">
                 <div class="fscore-label">🔵 Player 2</div>
                 <div class="fscore-val" id="p2-final">0</div>
+            </div>
+            <div class="final-score-box p3" style="display:none">
+                <div class="fscore-label">🟢 Player 3</div>
+                <div class="fscore-val" id="p3-final">0</div>
+            </div>
+            <div class="final-score-box p4" style="display:none">
+                <div class="fscore-label">🟡 Player 4</div>
+                <div class="fscore-val" id="p4-final">0</div>
             </div>
         </div>
 
@@ -308,19 +376,26 @@
                     <th>✓ Answer</th>
                     <th class="p1-col">P1 Answer</th>
                     <th class="p1-col">P1 Pts</th>
-                    <th class="p2-col">P2 Answer</th>
-                    <th class="p2-col">P2 Pts</th>
+                    <th class="p2-col" style="display:none">P2 Answer</th>
+                    <th class="p2-col" style="display:none">P2 Pts</th>
+                    <th class="p3-col" style="display:none">P3 Answer</th>
+                    <th class="p3-col" style="display:none">P3 Pts</th>
+                    <th class="p4-col" style="display:none">P4 Answer</th>
+                    <th class="p4-col" style="display:none">P4 Pts</th>
                 </tr>
             </thead>
             <tbody id="results-body"></tbody>
-            <!-- BUG FIX: was colspan="4" leaving one column unaccounted; now correctly 3+empty+val+empty+val = 7 -->
             <tfoot>
                 <tr>
                     <td colspan="3"><strong>Total</strong></td>
                     <td class="p1-col"></td>
                     <td class="p1-col"><strong id="p1-total">0</strong></td>
-                    <td class="p2-col"></td>
-                    <td class="p2-col"><strong id="p2-total">0</strong></td>
+                    <td class="p2-col" style="display:none"></td>
+                    <td class="p2-col" style="display:none"><strong id="p2-total">0</strong></td>
+                    <td class="p3-col" style="display:none"></td>
+                    <td class="p3-col" style="display:none"><strong id="p3-total">0</strong></td>
+                    <td class="p4-col" style="display:none"></td>
+                    <td class="p4-col" style="display:none"><strong id="p4-total">0</strong></td>
                 </tr>
             </tfoot>
         </table>

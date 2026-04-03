@@ -1,11 +1,21 @@
 // ── Constants ──────────────────────────────────────────────────────────
 const BASE_POINTS           = 100;
 const TIME_BONUS_MULTIPLIER = 10;
-const REVEAL_DELAY          = 1500;   // ms to show correct/wrong before advancing
+const REVEAL_DELAY          = 1500;  // ms to show answer before advancing
+
+// Key mappings per player [0]=P1, [1]=P2, [2]=P3, [3]=P4
+// "code" is checked via e.code; "key" via e.key
+const PLAYER_KEYS = [
+    { left: { code: 'F21' },        right: { code: 'F18' } },
+    { left: { key:  'ArrowLeft' },  right: { key:  'ArrowRight' } },
+    { left: { code: 'F19' },        right: { code: 'F20' } },
+    { left: { code: 'F22' },        right: { code: 'F23' } },
+];
 
 // ── Configurable Settings ─────────────────────────────────────────────
 let TOTAL_QUESTIONS    = 10;
-let TIMER_DURATION     = 5;
+let TIMER_DURATION     = 10;
+let NUM_PLAYERS        = 2;
 let selectedCategories = [];
 let allQuestions       = [];
 let questionCategories = {};
@@ -15,90 +25,120 @@ let currentQuestion = 0;
 let timer           = TIMER_DURATION;
 let timerInterval   = null;
 let gameActive      = false;
-let revealActive    = false;  // blocks input during the answer-reveal phase
+let revealActive    = false;
 
-let player1Score  = 0, player2Score  = 0;
-let player1Streak = 0, player2Streak = 0;
-
-// BUG FIX: these are now properly guarded per-player (see selectOption below)
-let player1Answered = false, player2Answered = false;
-let player1Answer   = null,  player2Answer   = null;
-let player1Time     = 0,     player2Time     = 0;
+// All player state stored in arrays (index 0 = Player 1)
+let playerScores   = [0, 0, 0, 0];
+let playerStreaks   = [0, 0, 0, 0];
+let playerAnswered = [false, false, false, false];
+let playerAnswers  = [null, null, null, null];
+let playerTimes    = [0, 0, 0, 0];
 
 let gameResults      = [];
 let currentQuestions = [];
 
-// ── DOM ────────────────────────────────────────────────────────────────
-let startScreen, testerScreen, endScreen, sentenceEl, qCounterEl, timerEl, timerBarEl;
+// ── DOM References ─────────────────────────────────────────────────────
+let startScreen, testerScreen, endScreen, editorScreen;
+let sentenceEl, qCounterEl, timerEl, timerBarEl;
 let leftBtn, rightBtn, leftBtnText, rightBtnText;
-let leftDotP1, leftDotP2, rightDotP1, rightDotP2;
-let p1Indicator, p2Indicator, p1ChoiceEl, p2ChoiceEl;
-let p1ScoreHud, p2ScoreHud, p1StreakBadge, p2StreakBadge;
-let winnerEl, resultsBody, p1TotalEl, p2TotalEl, p1FinalEl, p2FinalEl;
-let gameContainer, categoriesContainer, numQuestionsSelect, timeLimitSelect;
-let editorScreen;
+let gameContainer, categoriesContainer, numQuestionsSelect, numPlayersSelect, timeLimitSelect;
+let winnerEl, resultsBody;
 
-// Button tester elements
-let p1Buttons, p2Buttons;
+// Per-player DOM arrays (index 0 = Player 1)
+let indicators   = [];  // #p{n}-indicator
+let choiceEls    = [];  // #p{n}-choice
+let scoreHuds    = [];  // #p{n}-score-hud
+let streakBadges = [];  // #p{n}-streak-badge
+let finalEls     = [];  // #p{n}-final
+let totalEls     = [];  // #p{n}-total
+let dotLeft      = [];  // #left-dot-p{n}
+let dotRight     = [];  // #right-dot-p{n}
+
+// Button tester elements per player
+let playerButtons = [];
 
 // ── Initialize DOM References ──────────────────────────────────────────
 function initDOM() {
-    startScreen      = document.getElementById('start-screen');
-    testerScreen     = document.getElementById('tester-screen');
-    endScreen        = document.getElementById('end-screen');
-    editorScreen     = document.getElementById('editor-screen');
-    sentenceEl       = document.getElementById('sentence');
-    qCounterEl       = document.getElementById('question-counter');
-    timerEl          = document.getElementById('timer');
-    timerBarEl       = document.getElementById('timer-bar');
-    leftBtn          = document.getElementById('left-btn');
-    rightBtn         = document.getElementById('right-btn');
-    leftBtnText      = leftBtn.querySelector('.btn-text');
-    rightBtnText     = rightBtn.querySelector('.btn-text');
-    leftDotP1        = document.getElementById('left-dot-p1');
-    leftDotP2        = document.getElementById('left-dot-p2');
-    rightDotP1       = document.getElementById('right-dot-p1');
-    rightDotP2       = document.getElementById('right-dot-p2');
-    p1Indicator      = document.getElementById('p1-indicator');
-    p2Indicator      = document.getElementById('p2-indicator');
-    p1ChoiceEl       = document.getElementById('p1-choice');
-    p2ChoiceEl       = document.getElementById('p2-choice');
-    p1ScoreHud       = document.getElementById('p1-score-hud');
-    p2ScoreHud       = document.getElementById('p2-score-hud');
-    p1StreakBadge    = document.getElementById('p1-streak-badge');
-    p2StreakBadge    = document.getElementById('p2-streak-badge');
-    winnerEl         = document.getElementById('winner-announcement');
-    resultsBody      = document.getElementById('results-body');
-    p1TotalEl        = document.getElementById('p1-total');
-    p2TotalEl        = document.getElementById('p2-total');
-    p1FinalEl        = document.getElementById('p1-final');
-    p2FinalEl        = document.getElementById('p2-final');
-    gameContainer    = document.getElementById('game-container');
+    startScreen  = document.getElementById('start-screen');
+    testerScreen = document.getElementById('tester-screen');
+    endScreen    = document.getElementById('end-screen');
+    editorScreen = document.getElementById('editor-screen');
+    sentenceEl   = document.getElementById('sentence');
+    qCounterEl   = document.getElementById('question-counter');
+    timerEl      = document.getElementById('timer');
+    timerBarEl   = document.getElementById('timer-bar');
+    leftBtn      = document.getElementById('left-btn');
+    rightBtn     = document.getElementById('right-btn');
+    leftBtnText  = leftBtn.querySelector('.btn-text');
+    rightBtnText = rightBtn.querySelector('.btn-text');
+    gameContainer       = document.getElementById('game-container');
     categoriesContainer = document.getElementById('categories-container');
-    numQuestionsSelect = document.getElementById('num-questions');
-    timeLimitSelect    = document.getElementById('time-limit');
+    numQuestionsSelect  = document.getElementById('num-questions');
+    numPlayersSelect    = document.getElementById('num-players');
+    timeLimitSelect     = document.getElementById('time-limit');
+    winnerEl            = document.getElementById('winner-announcement');
+    resultsBody         = document.getElementById('results-body');
 
-    // Button tester elements
-    p1Buttons = {
-        up: document.getElementById('p1-btn-up'),
-        down: document.getElementById('p1-btn-down'),
-        left: document.getElementById('p1-btn-left'),
-        right: document.getElementById('p1-btn-right'),
-        a: document.getElementById('p1-btn-a'),
-        b: document.getElementById('p1-btn-b'),
-        x: document.getElementById('p1-btn-x'),
-        y: document.getElementById('p1-btn-y')
-    };
-    p2Buttons = {
-        up: document.getElementById('p2-btn-up'),
-        down: document.getElementById('p2-btn-down'),
-        left: document.getElementById('p2-btn-left'),
-        right: document.getElementById('p2-btn-right'),
-        a: document.getElementById('p2-btn-a'),
-        b: document.getElementById('p2-btn-b'),
-        x: document.getElementById('p2-btn-x'),
-        y: document.getElementById('p2-btn-y')
-    };
+    // Build per-player DOM arrays
+    for (let i = 1; i <= 4; i++) {
+        indicators.push(document.getElementById(`p${i}-indicator`));
+        choiceEls.push(document.getElementById(`p${i}-choice`));
+        scoreHuds.push(document.getElementById(`p${i}-score-hud`));
+        streakBadges.push(document.getElementById(`p${i}-streak-badge`));
+        finalEls.push(document.getElementById(`p${i}-final`));
+        totalEls.push(document.getElementById(`p${i}-total`));
+        dotLeft.push(document.getElementById(`left-dot-p${i}`));
+        dotRight.push(document.getElementById(`right-dot-p${i}`));
+    }
+
+    // Button tester elements (only collect elements that exist)
+    ['p1', 'p2', 'p3', 'p4'].forEach(p => {
+        const btns = {};
+        ['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y'].forEach(name => {
+            const el = document.getElementById(`${p}-btn-${name}`);
+            if (el) btns[name] = el;
+        });
+        playerButtons.push(btns);
+    });
+
+    // Update controls info when player count changes
+    numPlayersSelect.addEventListener('change', updateStartScreenPlayers);
+    updateStartScreenPlayers();
+}
+
+// ── Update Start Screen for Selected Player Count ─────────────────────
+function updateStartScreenPlayers() {
+    const n = parseInt(numPlayersSelect.value);
+    // Show P3/P4 controls info only when enough players are selected
+    for (let i = 3; i <= 4; i++) {
+        const show = i <= n;
+        document.querySelectorAll(`.controls-info .p${i}`).forEach(el => {
+            el.style.display = show ? '' : 'none';
+        });
+    }
+}
+
+// ── Show/Hide All Player-Specific Elements ────────────────────────────
+function applyPlayerCount() {
+    for (let i = 1; i <= 4; i++) {
+        const show = i <= NUM_PLAYERS;
+        // HUD score panels
+        document.querySelectorAll(`.hud-score.p${i}`).forEach(el => {
+            el.style.display = show ? 'flex' : 'none';
+        });
+        // In-game player indicator panels
+        if (indicators[i - 1]) {
+            indicators[i - 1].style.display = show ? 'flex' : 'none';
+        }
+        // End-screen final score boxes
+        document.querySelectorAll(`.final-score-box.p${i}`).forEach(el => {
+            el.style.display = show ? '' : 'none';
+        });
+        // Results table player columns (headers, cells, footer)
+        document.querySelectorAll(`.p${i}-col`).forEach(el => {
+            el.style.display = show ? '' : 'none';
+        });
+    }
 }
 
 // ── Audio (Web Audio API) ──────────────────────────────────────────────
@@ -112,15 +152,17 @@ function playTone(freq, type, dur, vol = 0.22) {
         const ctx  = getAudio();
         const osc  = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.connect(gain); gain.connect(ctx.destination);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
         osc.type = type;
         osc.frequency.setValueAtTime(freq, ctx.currentTime);
         gain.gain.setValueAtTime(vol, ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
-        osc.start(ctx.currentTime); osc.stop(ctx.currentTime + dur);
+        osc.start(ctx.currentTime);
+        osc.stop(ctx.currentTime + dur);
     } catch(e) {}
 }
-function sfxClick() { playTone(440, 'square', 0.07, 0.12); }
+function sfxClick()   { playTone(440, 'square', 0.07, 0.12); }
 function sfxCorrect() {
     playTone(523, 'sine', 0.12, 0.22);
     setTimeout(() => playTone(659, 'sine', 0.15, 0.22), 90);
@@ -136,57 +178,16 @@ function sfxGameOver() {
         setTimeout(() => playTone(f, 'sine', 0.26, 0.22), i * 140));
 }
 
-// ── Load Questions from JSON ─────────────────────────────────────────
-async function loadQuestionsFromJSON() {
+// ── Load Questions from JSON ──────────────────────────────────────────
+function loadQuestionsFromJSON() {
     try {
-        const response = await fetch('questions.json');
-        const data = await response.json();
-        questionCategories = data.categories;
-        allQuestions = data.questions;
+        // Reads directly from the gameData variable loaded in questions.js
+        questionCategories = gameData.categories;
+        allQuestions = gameData.questions;
         initializeCategoryCheckboxes();
     } catch (error) {
-        console.error('Failed to load questions.json, using fallback:', error);
-        // Fallback to embedded questions with categories
-        allQuestions = [
-            { category: "simple_present", sentence: "He ___ an apple every day.", options: ["have", "has"], correct: "has" },
-            { category: "simple_present", sentence: "She ___ to school by bus.", options: ["go", "goes"], correct: "goes" },
-            { category: "simple_present", sentence: "I ___ a student at this school.", options: ["am", "is"], correct: "am" },
-            { category: "simple_present", sentence: "The train ___ at 8:00 every morning.", options: ["leave", "leaves"], correct: "leaves" },
-            { category: "simple_present", sentence: "She ___ English every day.", options: ["study", "studies"], correct: "studies" },
-            { category: "present_continuous", sentence: "They ___ playing football now.", options: ["is", "are"], correct: "are" },
-            { category: "present_continuous", sentence: "The children ___ in the garden now.", options: ["play", "are playing"], correct: "are playing" },
-            { category: "present_continuous", sentence: "I ___ TV right now.", options: ["watch", "am watching"], correct: "am watching" },
-            { category: "present_continuous", sentence: "She ___ a letter at the moment.", options: ["write", "is writing"], correct: "is writing" },
-            { category: "present_continuous", sentence: "The chef ___ dinner for us.", options: ["prepare", "is preparing"], correct: "is preparing" },
-            { category: "present_perfect", sentence: "He ___ never ___ to Paris.", options: ["has / been", "have / been"], correct: "has / been" },
-            { category: "present_perfect", sentence: "She ___ English for five years.", options: ["study", "has studied"], correct: "has studied" },
-            { category: "present_perfect", sentence: "The baby ___ all morning.", options: ["cry", "has been crying"], correct: "has been crying" },
-            { category: "present_perfect", sentence: "They ___ in London since 2010.", options: ["live", "have lived"], correct: "have lived" },
-            { category: "present_perfect", sentence: "I ___ this book before.", options: ["read", "have read"], correct: "have read" },
-            { category: "simple_past", sentence: "The cat ___ on the roof yesterday.", options: ["sit", "sat"], correct: "sat" },
-            { category: "simple_past", sentence: "We ___ to the park last Sunday.", options: ["go", "went"], correct: "went" },
-            { category: "simple_past", sentence: "She ___ her homework before dinner.", options: ["finish", "finished"], correct: "finished" },
-            { category: "simple_past", sentence: "I ___ my keys somewhere yesterday.", options: ["lose", "lost"], correct: "lost" },
-            { category: "simple_past", sentence: "He ___ his car last week.", options: ["sell", "sold"], correct: "sold" },
-            { category: "simple_past", sentence: "She ___ to the store and bought milk.", options: ["go", "went"], correct: "went" },
-            { category: "past_continuous", sentence: "We ___ dinner when the phone rang.", options: ["have", "were having"], correct: "were having" },
-            { category: "past_continuous", sentence: "I ___ TV when you called me.", options: ["watch", "was watching"], correct: "was watching" },
-            { category: "past_continuous", sentence: "She ___ a shower when the power went out.", options: ["take", "was taking"], correct: "was taking" },
-            { category: "past_continuous", sentence: "They ___ for the bus when it started raining.", options: ["wait", "were waiting"], correct: "were waiting" },
-            { category: "future", sentence: "The students ___ their exam tomorrow.", options: ["take", "will take"], correct: "will take" },
-            { category: "future", sentence: "I ___ you next weekend.", options: ["visit", "will visit"], correct: "will visit" },
-            { category: "future", sentence: "It ___ rain later today.", options: ["will", "is going to"], correct: "is going to" },
-            { category: "future", sentence: "She ___ to the party tonight.", options: ["come", "will come"], correct: "will come" }
-        ];
-        questionCategories = {
-            simple_present: { name: "Simple Present", description: "Habits, general truths" },
-            present_continuous: { name: "Present Continuous", description: "Actions happening now" },
-            present_perfect: { name: "Present Perfect", description: "Past to present" },
-            simple_past: { name: "Simple Past", description: "Completed past actions" },
-            past_continuous: { name: "Past Continuous", description: "Actions in progress" },
-            future: { name: "Future", description: "Predictions and plans" }
-        };
-        initializeCategoryCheckboxes();
+        console.error('Failed to load data:', error);
+        alert('Error: Failed to load game data.');
     }
 }
 
@@ -196,38 +197,37 @@ function initializeCategoryCheckboxes() {
     selectedCategories = [];
     Object.keys(questionCategories).forEach(catKey => {
         const cat = questionCategories[catKey];
-        const checkbox = document.createElement('label');
-        checkbox.className = 'category-checkbox checked';
-        checkbox.innerHTML = `
+        const label = document.createElement('label');
+        label.className = 'category-checkbox checked';
+        label.innerHTML = `
             <input type="checkbox" value="${catKey}" checked>
             <span class="checkmark"></span>
             <span class="cat-name">${cat.name}</span>
             <span class="cat-desc">${cat.description}</span>
         `;
-        checkbox.querySelector('input').addEventListener('change', function() {
-            checkbox.classList.toggle('checked', this.checked);
+        label.querySelector('input').addEventListener('change', function() {
+            label.classList.toggle('checked', this.checked);
             updateSelectedCategories();
         });
-        categoriesContainer.appendChild(checkbox);
+        categoriesContainer.appendChild(label);
         selectedCategories.push(catKey);
     });
 }
 
 function updateSelectedCategories() {
-    const checkboxes = categoriesContainer.querySelectorAll('input[type="checkbox"]');
     selectedCategories = [];
-    checkboxes.forEach(cb => {
+    categoriesContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
         if (cb.checked) selectedCategories.push(cb.value);
     });
 }
 
-// ── Get Filtered Questions ───────────────────────────────────────────
+// ── Get Filtered Questions ────────────────────────────────────────────
 function getFilteredQuestions() {
     if (selectedCategories.length === 0) return allQuestions;
     return allQuestions.filter(q => selectedCategories.includes(q.category));
 }
 
-// ── Button Tester Functions ──────────────────────────────────────────
+// ── Screen Navigation ─────────────────────────────────────────────────
 function showTesterScreen() {
     startScreen.style.display = 'none';
     testerScreen.classList.add('show');
@@ -239,15 +239,14 @@ function showStartScreen() {
     startScreen.style.display = 'flex';
 }
 
-function highlightButton(player, button) {
-    const buttons = player === 1 ? p1Buttons : p2Buttons;
-    const btnEl = buttons[button];
-    if (btnEl) {
-        btnEl.classList.add(player === 1 ? 'p1-active' : 'p2-active');
-        setTimeout(() => {
-            btnEl.classList.remove('p1-active', 'p2-active');
-        }, 150);
-    }
+// ── Button Tester Highlight ───────────────────────────────────────────
+function highlightButton(playerNum, buttonName) {
+    const btns = playerButtons[playerNum - 1];
+    const el   = btns && btns[buttonName];
+    if (!el) return;
+    const cls = `p${playerNum}-active`;
+    el.classList.add(cls);
+    setTimeout(() => el.classList.remove(cls), 150);
 }
 
 // ── Questions Editor Functions ────────────────────────────────────────
@@ -259,11 +258,12 @@ function showEditorScreen() {
     renderCategoriesList();
 }
 
-function showEditorTab(tabName) {
+// Fix: pass the clicked button element instead of relying on implicit global `event`
+function showEditorTab(tabName, clickedBtn) {
     document.querySelectorAll('.editor-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
     document.getElementById('editor-' + tabName).classList.add('active');
-    event.target.classList.add('active');
+    clickedBtn.classList.add('active');
 }
 
 function populateCategorySelect() {
@@ -281,9 +281,9 @@ function renderQuestionsList() {
     const list = document.getElementById('questions-list');
     list.innerHTML = '';
     allQuestions.forEach((q, index) => {
+        const catName = questionCategories[q.category]?.name || q.category;
         const item = document.createElement('div');
         item.className = 'editor-item';
-        const catName = questionCategories[q.category]?.name || q.category;
         item.innerHTML = `
             <div class="editor-item-content">
                 <div class="editor-item-title">${q.sentence}</div>
@@ -292,7 +292,7 @@ function renderQuestionsList() {
                 </div>
             </div>
             <div class="editor-item-actions">
-                <button class="editor-item-btn edit" onclick="editQuestion(${index})">Edit</button>
+                <button class="editor-item-btn edit"   onclick="editQuestion(${index})">Edit</button>
                 <button class="editor-item-btn delete" onclick="deleteQuestion(${index})">Delete</button>
             </div>
         `;
@@ -313,7 +313,7 @@ function renderCategoriesList() {
                 <div class="editor-item-subtitle">${cat.description}</div>
             </div>
             <div class="editor-item-actions">
-                <button class="editor-item-btn edit" onclick="editCategory('${key}')">Edit</button>
+                <button class="editor-item-btn edit"   onclick="editCategory('${key}')">Edit</button>
                 <button class="editor-item-btn delete" onclick="deleteCategory('${key}')">Delete</button>
             </div>
         `;
@@ -322,52 +322,45 @@ function renderCategoriesList() {
 }
 
 function saveQuestion() {
-    const sentence = document.getElementById('question-sentence').value.trim();
-    const category = document.getElementById('question-category').value;
-    const option1 = document.getElementById('question-option1').value.trim();
-    const option2 = document.getElementById('question-option2').value.trim();
-    const correct = document.getElementById('question-correct').value;
+    const sentence  = document.getElementById('question-sentence').value.trim();
+    const category  = document.getElementById('question-category').value;
+    const option1   = document.getElementById('question-option1').value.trim();
+    const option2   = document.getElementById('question-option2').value.trim();
+    const correct   = document.getElementById('question-correct').value;
     const editIndex = parseInt(document.getElementById('edit-question-index').value);
 
-    if (!sentence || !option1 || !option2) {
-        alert('Please fill in all fields');
-        return;
-    }
+    if (!sentence || !option1 || !option2) { alert('Please fill in all fields'); return; }
 
-    const correctAnswer = correct === 'option1' ? option1 : option2;
     const newQuestion = {
-        category: category,
-        sentence: sentence,
+        category,
+        sentence,
         options: [option1, option2],
-        correct: correctAnswer
+        correct: correct === 'option1' ? option1 : option2,
     };
 
-    if (editIndex >= 0) {
-        allQuestions[editIndex] = newQuestion;
-    } else {
-        allQuestions.push(newQuestion);
-    }
+    if (editIndex >= 0) allQuestions[editIndex] = newQuestion;
+    else                allQuestions.push(newQuestion);
 
     clearQuestionForm();
     renderQuestionsList();
 }
 
 function clearQuestionForm() {
-    document.getElementById('question-sentence').value = '';
-    document.getElementById('question-option1').value = '';
-    document.getElementById('question-option2').value = '';
-    document.getElementById('question-correct').value = 'option1';
-    document.getElementById('edit-question-index').value = '-1';
+    document.getElementById('question-sentence').value    = '';
+    document.getElementById('question-option1').value     = '';
+    document.getElementById('question-option2').value     = '';
+    document.getElementById('question-correct').value     = 'option1';
+    document.getElementById('edit-question-index').value  = '-1';
     document.getElementById('question-form-title').textContent = 'Add New Question';
 }
 
 function editQuestion(index) {
     const q = allQuestions[index];
-    document.getElementById('question-sentence').value = q.sentence;
-    document.getElementById('question-category').value = q.category;
-    document.getElementById('question-option1').value = q.options[0];
-    document.getElementById('question-option2').value = q.options[1];
-    document.getElementById('question-correct').value = q.correct === q.options[0] ? 'option1' : 'option2';
+    document.getElementById('question-sentence').value   = q.sentence;
+    document.getElementById('question-category').value   = q.category;
+    document.getElementById('question-option1').value    = q.options[0];
+    document.getElementById('question-option2').value    = q.options[1];
+    document.getElementById('question-correct').value    = q.correct === q.options[0] ? 'option1' : 'option2';
     document.getElementById('edit-question-index').value = index;
     document.getElementById('question-form-title').textContent = 'Edit Question';
 }
@@ -380,24 +373,19 @@ function deleteQuestion(index) {
 }
 
 function saveCategory() {
-    const key = document.getElementById('category-key').value.trim().replace(/\s+/g, '_');
-    const name = document.getElementById('category-name').value.trim();
-    const desc = document.getElementById('category-desc').value.trim();
+    const key     = document.getElementById('category-key').value.trim().replace(/\s+/g, '_');
+    const name    = document.getElementById('category-name').value.trim();
+    const desc    = document.getElementById('category-desc').value.trim();
     const editKey = document.getElementById('edit-category-key').value;
 
-    if (!key || !name) {
-        alert('Please fill in category key and name');
-        return;
-    }
+    if (!key || !name) { alert('Please fill in category key and name'); return; }
 
     if (editKey && editKey !== key) {
         delete questionCategories[editKey];
-        allQuestions.forEach(q => {
-            if (q.category === editKey) q.category = key;
-        });
+        allQuestions.forEach(q => { if (q.category === editKey) q.category = key; });
     }
 
-    questionCategories[key] = { name: name, description: desc };
+    questionCategories[key] = { name, description: desc };
     clearCategoryForm();
     populateCategorySelect();
     renderCategoriesList();
@@ -405,26 +393,25 @@ function saveCategory() {
 }
 
 function clearCategoryForm() {
-    document.getElementById('category-key').value = '';
-    document.getElementById('category-name').value = '';
-    document.getElementById('category-desc').value = '';
+    document.getElementById('category-key').value      = '';
+    document.getElementById('category-name').value     = '';
+    document.getElementById('category-desc').value     = '';
     document.getElementById('edit-category-key').value = '';
 }
 
 function editCategory(key) {
     const cat = questionCategories[key];
-    document.getElementById('category-key').value = key;
-    document.getElementById('category-name').value = cat.name;
-    document.getElementById('category-desc').value = cat.description;
+    document.getElementById('category-key').value      = key;
+    document.getElementById('category-name').value     = cat.name;
+    document.getElementById('category-desc').value     = cat.description;
     document.getElementById('edit-category-key').value = key;
 }
 
 function deleteCategory(key) {
     if (Object.keys(questionCategories).length <= 1) {
-        alert('Cannot delete the last category');
-        return;
+        alert('Cannot delete the last category'); return;
     }
-    if (confirm('Are you sure you want to delete this category? Questions using this category will need to be reassigned.')) {
+    if (confirm('Are you sure? Questions using this category will also be removed.')) {
         delete questionCategories[key];
         allQuestions = allQuestions.filter(q => q.category !== key);
         populateCategorySelect();
@@ -434,45 +421,38 @@ function deleteCategory(key) {
 }
 
 function exportQuestions() {
-    const data = {
-        categories: questionCategories,
-        questions: allQuestions
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const blob = new Blob(
+        [JSON.stringify({ categories: questionCategories, questions: allQuestions }, null, 2)],
+        { type: 'application/json' }
+    );
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'questions.json';
-    a.click();
+    const a   = document.createElement('a');
+    a.href = url; a.download = 'questions.json'; a.click();
     URL.revokeObjectURL(url);
 }
 
 function importQuestions() {
-    const fileInput = document.getElementById('import-file');
-    const file = fileInput.files[0];
-    if (!file) {
-        alert('Please select a file to import');
-        return;
-    }
+    const file = document.getElementById('import-file').files[0];
+    if (!file) { alert('Please select a file to import'); return; }
     const reader = new FileReader();
-    reader.onload = function(e) {
+    reader.onload = e => {
         try {
             const data = JSON.parse(e.target.result);
             if (data.categories) questionCategories = data.categories;
-            if (data.questions) allQuestions = data.questions;
+            if (data.questions)  allQuestions = data.questions;
             populateCategorySelect();
             renderQuestionsList();
             renderCategoriesList();
             alert('Questions imported successfully!');
-        } catch (error) {
-            alert('Error importing file: ' + error.message);
+        } catch (err) {
+            alert('Error importing file: ' + err.message);
         }
     };
     reader.readAsText(file);
 }
 
 function resetToDefault() {
-    if (confirm('Are you sure you want to reset to default questions? All custom questions will be lost.')) {
+    if (confirm('Reset to default questions? All custom questions will be lost.')) {
         loadQuestionsFromJSON().then(() => {
             populateCategorySelect();
             renderQuestionsList();
@@ -505,37 +485,35 @@ function streakMultiplier(streak) {
     return 1.0;
 }
 
+// ── HUD & Score UI ────────────────────────────────────────────────────
 function updateHudScores() {
-    p1ScoreHud.textContent = player1Score;
-    p2ScoreHud.textContent = player2Score;
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        scoreHuds[i].textContent = playerScores[i];
+    }
 }
 
 function bumpScore(el) {
     el.classList.remove('bump');
-    void el.offsetWidth;  // reflow
+    void el.offsetWidth;  // force reflow to restart animation
     el.classList.add('bump');
     setTimeout(() => el.classList.remove('bump'), 200);
 }
 
-function updateStreakUI(playerNum) {
-    const streak = playerNum === 1 ? player1Streak : player2Streak;
-    const badge  = playerNum === 1 ? p1StreakBadge : p2StreakBadge;
-    if (streak >= 2) {
-        badge.textContent = `🔥${streak}`;
-        badge.classList.add('active');
-    } else {
-        badge.classList.remove('active');
-    }
+// i is 0-indexed
+function updateStreakUI(i) {
+    const streak = playerStreaks[i];
+    streakBadges[i].textContent = `🔥${streak}`;
+    streakBadges[i].classList.toggle('active', streak >= 2);
 }
 
-function spawnScorePopup(points, playerNum) {
+// i is 0-indexed
+function spawnScorePopup(points, i) {
     if (!points) return;
     const popup = document.createElement('div');
-    popup.className = `score-popup p${playerNum}`;
+    popup.className   = `score-popup p${i + 1}`;
     popup.textContent = `+${points}`;
-    const ind   = playerNum === 1 ? p1Indicator : p2Indicator;
     const crect = gameContainer.getBoundingClientRect();
-    const irect = ind.getBoundingClientRect();
+    const irect = indicators[i].getBoundingClientRect();
     popup.style.left = (irect.left - crect.left + irect.width / 2 - 24) + 'px';
     popup.style.top  = (irect.top  - crect.top  - 16) + 'px';
     gameContainer.appendChild(popup);
@@ -546,38 +524,25 @@ function spawnScorePopup(points, playerNum) {
 function selectOption(playerNum, side) {
     if (!gameActive || revealActive) return;
 
-    // Each player may answer only once
-    if (playerNum === 1 && player1Answered) return;
-    if (playerNum === 2 && player2Answered) return;
+    const i = playerNum - 1;
+    if (i >= NUM_PLAYERS || playerAnswered[i]) return;
 
     sfxClick();
 
     const btn    = side === 'left' ? leftBtn : rightBtn;
     const chosen = btn.dataset.option;
 
-    if (playerNum === 1) {
-        player1Answered = true;
-        player1Answer   = chosen;
-        player1Time     = TIMER_DURATION - timer;
+    playerAnswered[i] = true;
+    playerAnswers[i]  = chosen;
+    playerTimes[i]    = TIMER_DURATION - timer;
 
-        p1Indicator.classList.add('answered');
-        p1ChoiceEl.textContent = chosen;
-        btn.classList.add('chosen-p1');
-        (side === 'left' ? leftDotP1 : rightDotP1).classList.add('visible');
+    indicators[i].classList.add('answered');
+    choiceEls[i].textContent = chosen;
+    btn.classList.add(`chosen-p${playerNum}`);
+    (side === 'left' ? dotLeft[i] : dotRight[i]).classList.add('visible');
 
-    } else {
-        player2Answered = true;
-        player2Answer   = chosen;
-        player2Time     = TIMER_DURATION - timer;
-
-        p2Indicator.classList.add('answered');
-        p2ChoiceEl.textContent = chosen;
-        btn.classList.add('chosen-p2');
-        (side === 'left' ? leftDotP2 : rightDotP2).classList.add('visible');
-    }
-
-    // Both answered → stop timer, reveal immediately
-    if (player1Answered && player2Answered) {
+    // If every active player has answered, reveal immediately
+    if (playerAnswered.slice(0, NUM_PLAYERS).every(Boolean)) {
         clearInterval(timerInterval);
         revealAnswers();
     }
@@ -588,7 +553,6 @@ function startTimer() {
     clearInterval(timerInterval);
     timer = TIMER_DURATION;
     timerEl.textContent = timer;
-    timerEl.style.color = '#e74c3c';
 
     // Reset bar without transition, then animate
     timerBarEl.style.transition = 'none';
@@ -604,10 +568,7 @@ function startTimer() {
         timer--;
         timerEl.textContent = timer;
         if (timer <= 2) sfxTick();
-        if (timer <= 0) {
-            clearInterval(timerInterval);
-            revealAnswers();
-        }
+        if (timer <= 0) { clearInterval(timerInterval); revealAnswers(); }
     }, 1000);
 }
 
@@ -619,60 +580,52 @@ function revealAnswers() {
     const q       = currentQuestions[currentQuestion];
     const correct = q.correct;
 
-    // Highlight buttons green (correct) or red (wrong)
+    // Colour the option buttons
     [leftBtn, rightBtn].forEach(btn => {
-        if (btn.dataset.option === correct) btn.classList.add('reveal-correct');
-        else                                btn.classList.add('reveal-wrong');
+        btn.classList.add(btn.dataset.option === correct ? 'reveal-correct' : 'reveal-wrong');
     });
 
-    // Determine correctness
-    const p1ok = player1Answer === correct;
-    const p2ok = player2Answer === correct;
+    // Evaluate each player
+    const pts = [];
+    let anyCorrect = false;
+    let anyAnswered = false;
 
-    // Update streaks
-    if (p1ok) { player1Streak++; sfxCorrect(); }
-    else       { player1Streak = 0; if (player1Answer) sfxWrong(); }
-    if (p2ok) { player2Streak++; }
-    else       { player2Streak = 0; }
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        const ok = playerAnswers[i] === correct;
+        if (ok)              { playerStreaks[i]++; anyCorrect = true; }
+        else                   playerStreaks[i] = 0;
+        if (playerAnswers[i])  anyAnswered = true;
 
-    // Calculate points with streak multiplier
-    const p1mult   = streakMultiplier(player1Streak);
-    const p2mult   = streakMultiplier(player2Streak);
-    const p1Points = p1ok
-        ? Math.round((BASE_POINTS + Math.max(0, TIMER_DURATION - player1Time) * TIME_BONUS_MULTIPLIER) * p1mult)
-        : 0;
-    const p2Points = p2ok
-        ? Math.round((BASE_POINTS + Math.max(0, TIMER_DURATION - player2Time) * TIME_BONUS_MULTIPLIER) * p2mult)
-        : 0;
+        const mult = streakMultiplier(playerStreaks[i]);
+        const p = ok
+            ? Math.round((BASE_POINTS + Math.max(0, TIMER_DURATION - playerTimes[i]) * TIME_BONUS_MULTIPLIER) * mult)
+            : 0;
+        pts.push(p);
+        playerScores[i] += p;
 
-    player1Score += p1Points;
-    player2Score += p2Points;
+        if (playerAnswers[i]) {
+            choiceEls[i].textContent = `${ok ? '✓' : '✗'} ${playerAnswers[i]}`;
+        }
+    }
 
-    // Store result
-    gameResults.push({
-        question: currentQuestion + 1,
-        sentence: q.sentence,
-        correct,
-        p1Answer: player1Answer || '—',
-        p1Points,
-        p2Answer: player2Answer || '—',
-        p2Points
-    });
+    if (anyCorrect)       sfxCorrect();
+    else if (anyAnswered) sfxWrong();
+
+    // Record result for the end-screen table
+    const result = { question: currentQuestion + 1, sentence: q.sentence, correct };
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        result[`p${i + 1}Answer`] = playerAnswers[i] || '—';
+        result[`p${i + 1}Points`] = pts[i];
+    }
+    gameResults.push(result);
 
     // Update HUD
     updateHudScores();
-    if (p1Points) bumpScore(p1ScoreHud);
-    if (p2Points) bumpScore(p2ScoreHud);
-    updateStreakUI(1);
-    updateStreakUI(2);
-
-    // Floating +points popups
-    spawnScorePopup(p1Points, 1);
-    setTimeout(() => spawnScorePopup(p2Points, 2), 180);
-
-    // Show ✓ or ✗ in player indicator
-    if (player1Answer) p1ChoiceEl.textContent = `${p1ok ? '✓' : '✗'} ${player1Answer}`;
-    if (player2Answer) p2ChoiceEl.textContent = `${p2ok ? '✓' : '✗'} ${player2Answer}`;
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        if (pts[i]) bumpScore(scoreHuds[i]);
+        updateStreakUI(i);
+        setTimeout(() => spawnScorePopup(pts[i], i), i * 180);
+    }
 
     // Advance after reveal delay
     setTimeout(() => {
@@ -686,33 +639,35 @@ function revealAnswers() {
 function loadQuestion() {
     if (currentQuestion >= TOTAL_QUESTIONS) { endGame(); return; }
 
-    player1Answered = player2Answered = false;
-    player1Answer   = player2Answer   = null;
-    player1Time     = player2Time     = 0;
+    // Reset per-player state for this question
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        playerAnswered[i] = false;
+        playerAnswers[i]  = null;
+        playerTimes[i]    = 0;
+        indicators[i].classList.remove('answered');
+        choiceEls[i].textContent = '—';
+    }
 
     const q = currentQuestions[currentQuestion];
-    sentenceEl.innerHTML = q.sentence.replace('___', '<span class="blank">___</span>');
+    sentenceEl.innerHTML   = q.sentence.replace('___', '<span class="blank">___</span>');
     qCounterEl.textContent = `Question ${currentQuestion + 1} of ${TOTAL_QUESTIONS}`;
 
-    // Shuffle which option appears left / right each question
+    // Randomise which option appears left vs right
     const opts = shuffle([...q.options]);
-    leftBtn.dataset.option  = opts[0];
-    rightBtn.dataset.option = opts[1];
+    leftBtn.dataset.option   = opts[0];
+    rightBtn.dataset.option  = opts[1];
     leftBtnText.textContent  = opts[0];
     rightBtnText.textContent = opts[1];
 
-    // Reset all button states
-    leftBtn.classList.remove('chosen-p1', 'chosen-p2', 'reveal-correct', 'reveal-wrong');
-    rightBtn.classList.remove('chosen-p1', 'chosen-p2', 'reveal-correct', 'reveal-wrong');
+    // Clear button visual state
+    leftBtn.className  = 'option-btn';
+    rightBtn.className = 'option-btn';
 
-    // Reset player-dots
-    [leftDotP1, leftDotP2, rightDotP1, rightDotP2].forEach(d => d.classList.remove('visible'));
-
-    // Reset player indicators
-    p1Indicator.classList.remove('answered');
-    p2Indicator.classList.remove('answered');
-    p1ChoiceEl.textContent = '—';
-    p2ChoiceEl.textContent = '—';
+    // Clear all player dots
+    for (let i = 0; i < 4; i++) {
+        dotLeft[i]?.classList.remove('visible');
+        dotRight[i]?.classList.remove('visible');
+    }
 
     startTimer();
 }
@@ -721,34 +676,36 @@ function loadQuestion() {
 function startGame() {
     try { getAudio().resume(); } catch(e) {}
 
-    // Get settings from UI
     TOTAL_QUESTIONS = parseInt(numQuestionsSelect.value);
     TIMER_DURATION  = parseInt(timeLimitSelect.value);
-    
-    // Get filtered questions based on selected categories
+    NUM_PLAYERS     = parseInt(numPlayersSelect.value);
+
     const filteredQuestions = getFilteredQuestions();
-    
     if (filteredQuestions.length === 0) {
-        alert('Please select at least one category!');
-        return;
+        alert('Please select at least one category!'); return;
     }
-    
-    // Limit to available questions if less than requested
-    const actualQuestions = Math.min(TOTAL_QUESTIONS, filteredQuestions.length);
-    currentQuestions = shuffle(filteredQuestions).slice(0, actualQuestions);
-    TOTAL_QUESTIONS = actualQuestions;
-    
-    currentQuestion  = 0;
-    player1Score  = player2Score  = 0;
-    player1Streak = player2Streak = 0;
-    gameResults   = [];
+
+    // Cap question count at what's available
+    const actualCount    = Math.min(TOTAL_QUESTIONS, filteredQuestions.length);
+    currentQuestions     = shuffle(filteredQuestions).slice(0, actualCount);
+    TOTAL_QUESTIONS      = actualCount;
+    currentQuestion      = 0;
+
+    // Reset all player state
+    for (let i = 0; i < 4; i++) {
+        playerScores[i]  = 0;
+        playerStreaks[i] = 0;
+    }
+    gameResults = [];
+
+    // Show/hide player elements based on player count
+    applyPlayerCount();
 
     startScreen.style.display = 'none';
     endScreen.classList.remove('show');
 
     updateHudScores();
-    updateStreakUI(1);
-    updateStreakUI(2);
+    for (let i = 0; i < NUM_PLAYERS; i++) updateStreakUI(i);
 
     gameActive   = true;
     revealActive = false;
@@ -760,32 +717,43 @@ function endGame() {
     clearInterval(timerInterval);
     sfxGameOver();
 
-    let winText = '', winClass = '';
-    if      (player1Score > player2Score) { winText = '🎉 Player 1 Wins!'; winClass = 'p1-win'; }
-    else if (player2Score > player1Score) { winText = '🎉 Player 2 Wins!'; winClass = 'p2-win'; }
-    else                                  { winText = "🤝 It's a Tie!";    winClass = 'tie';    }
+    // Determine winner(s)
+    const maxScore = Math.max(...playerScores.slice(0, NUM_PLAYERS));
+    const winners  = [];
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        if (playerScores[i] === maxScore) winners.push(i + 1);
+    }
 
+    let winText, winClass;
+    if (winners.length > 1) {
+        winText  = "🤝 It's a Tie!";
+        winClass = 'tie';
+    } else {
+        winText  = `🎉 Player ${winners[0]} Wins!`;
+        winClass = `p${winners[0]}-win`;
+    }
     winnerEl.textContent = winText;
     winnerEl.className   = winClass;
-    p1FinalEl.textContent = player1Score;
-    p2FinalEl.textContent = player2Score;
-    p1TotalEl.textContent = player1Score;
-    p2TotalEl.textContent = player2Score;
 
+    // Fill final score boxes and table totals
+    for (let i = 0; i < NUM_PLAYERS; i++) {
+        finalEls[i].textContent = playerScores[i];
+        totalEls[i].textContent = playerScores[i];
+    }
+
+    // Build results table rows
     resultsBody.innerHTML = '';
     gameResults.forEach(r => {
-        const p1cls = r.p1Answer !== '—' ? (r.p1Answer === r.correct ? 'cell-correct' : 'cell-wrong') : '';
-        const p2cls = r.p2Answer !== '—' ? (r.p2Answer === r.correct ? 'cell-correct' : 'cell-wrong') : '';
-        const row   = document.createElement('tr');
-        row.innerHTML = `
-            <td>${r.question}</td>
-            <td>${r.sentence}</td>
-            <td class="cell-correct">${r.correct}</td>
-            <td class="p1-col ${p1cls}">${r.p1Answer}</td>
-            <td class="p1-col">${r.p1Points}</td>
-            <td class="p2-col ${p2cls}">${r.p2Answer}</td>
-            <td class="p2-col">${r.p2Points}</td>
-        `;
+        const row = document.createElement('tr');
+        let html = `<td>${r.question}</td><td>${r.sentence}</td><td class="cell-correct">${r.correct}</td>`;
+        for (let i = 0; i < NUM_PLAYERS; i++) {
+            const n   = i + 1;
+            const ans = r[`p${n}Answer`];
+            const pts = r[`p${n}Points`];
+            const cls = ans !== '—' ? (ans === r.correct ? 'cell-correct' : 'cell-wrong') : '';
+            html += `<td class="p${n}-col ${cls}">${ans}</td><td class="p${n}-col">${pts}</td>`;
+        }
+        row.innerHTML = html;
         resultsBody.appendChild(row);
     });
 
@@ -801,16 +769,24 @@ function restartGame() {
 document.addEventListener('keydown', e => {
     if (e.repeat) return;
 
-    // Player 1: F21 = left answer,  F18 = right answer
-    if      (e.code === 'F21')        { e.preventDefault(); highlightButton(1, 'left'); selectOption(1, 'left');  }
-    else if (e.code === 'F18')        { e.preventDefault(); highlightButton(1, 'right'); selectOption(1, 'right'); }
+    PLAYER_KEYS.forEach((keys, i) => {
+        const playerNum   = i + 1;
+        const matchLeft  = keys.left.code  ? e.code === keys.left.code  : e.key === keys.left.key;
+        const matchRight = keys.right.code ? e.code === keys.right.code : e.key === keys.right.key;
 
-    // Player 2: ← = left answer,  → = right answer
-    else if (e.key === 'ArrowLeft')   { e.preventDefault(); highlightButton(2, 'left'); selectOption(2, 'left');  }
-    else if (e.key === 'ArrowRight')  { e.preventDefault(); highlightButton(2, 'right'); selectOption(2, 'right'); }
+        if (matchLeft) {
+            e.preventDefault();
+            highlightButton(playerNum, 'left');
+            selectOption(playerNum, 'left');
+        } else if (matchRight) {
+            e.preventDefault();
+            highlightButton(playerNum, 'right');
+            selectOption(playerNum, 'right');
+        }
+    });
 });
 
-// ── Initialize Game ───────────────────────────────────────────────────
+// ── Initialize ────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
     initDOM();
     loadQuestionsFromJSON();
