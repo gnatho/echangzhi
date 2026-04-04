@@ -24,62 +24,57 @@
         <p class="tester-subtitle">Test your controllers by pressing the keys</p>
 
         <div class="controllers-container">
-            <!-- Player 1 -->
-            <div class="controller p1">
-                <div class="controller-label">🔴 Player 1</div>
-                <div class="btn-grid">
-                    <div class="test-btn" id="p1-btn-up">UP</div>
-                    <div class="test-btn" id="p1-btn-left">LEFT</div>
-                    <div class="test-btn" id="p1-btn-right">RIGHT</div>
-                    <div class="test-btn" id="p1-btn-a">A</div>
-                    <div class="test-btn"></div>
-                    <div class="test-btn" id="p1-btn-b">B</div>
-                    <div class="test-btn" id="p1-btn-x">X</div>
-                    <div class="test-btn" id="p1-btn-y">Y</div>
-                    <div class="test-btn" id="p1-btn-down">DOWN</div>
-                </div>
-            </div>
-
-            <!-- Player 2 -->
-            <div class="controller p2">
-                <div class="controller-label">🔵 Player 2</div>
-                <div class="btn-grid">
-                    <div class="test-btn" id="p2-btn-up">UP</div>
-                    <div class="test-btn" id="p2-btn-left">LEFT</div>
-                    <div class="test-btn" id="p2-btn-right">RIGHT</div>
-                    <div class="test-btn" id="p2-btn-a">A</div>
-                    <div class="test-btn"></div>
-                    <div class="test-btn" id="p2-btn-b">B</div>
-                    <div class="test-btn" id="p2-btn-x">X</div>
-                    <div class="test-btn" id="p2-btn-y">Y</div>
-                    <div class="test-btn" id="p2-btn-down">DOWN</div>
-                </div>
-            </div>
-
-            <!-- Player 3 (left/right only) -->
-            <div class="controller p3">
-                <div class="controller-label">🟢 Player 3</div>
+            <!-- Controller 1: abcde -->
+            <div class="controller c1">
+                <div class="controller-label">🔴 Controller 1</div>
                 <div class="btn-row">
-                    <div class="test-btn" id="p3-btn-left">LEFT<br><small>F19</small></div>
-                    <div class="test-btn" id="p3-btn-right">RIGHT<br><small>F20</small></div>
+                    <div class="test-btn" id="c1-btn-a">A</div>
+                    <div class="test-btn" id="c1-btn-b">B</div>
+                    <div class="test-btn" id="c1-btn-c">C</div>
+                    <div class="test-btn" id="c1-btn-d">D</div>
+                    <div class="test-btn" id="c1-btn-e">E</div>
                 </div>
             </div>
 
-            <!-- Player 4 (left/right only) -->
-            <div class="controller p4">
-                <div class="controller-label">🟡 Player 4</div>
+            <!-- Controller 2: fghij -->
+            <div class="controller c2">
+                <div class="controller-label">🔵 Controller 2</div>
                 <div class="btn-row">
-                    <div class="test-btn" id="p4-btn-left">LEFT<br><small>F22</small></div>
-                    <div class="test-btn" id="p4-btn-right">RIGHT<br><small>F23</small></div>
+                    <div class="test-btn" id="c2-btn-f">F</div>
+                    <div class="test-btn" id="c2-btn-g">G</div>
+                    <div class="test-btn" id="c2-btn-h">H</div>
+                    <div class="test-btn" id="c2-btn-i">I</div>
+                    <div class="test-btn" id="c2-btn-j">J</div>
+                </div>
+            </div>
+
+            <!-- Controller 3: klmno -->
+            <div class="controller c3">
+                <div class="controller-label">🟢 Controller 3</div>
+                <div class="btn-row">
+                    <div class="test-btn" id="c3-btn-k">K</div>
+                    <div class="test-btn" id="c3-btn-l">L</div>
+                    <div class="test-btn" id="c3-btn-m">M</div>
+                    <div class="test-btn" id="c3-btn-n">N</div>
+                    <div class="test-btn" id="c3-btn-o">O</div>
+                </div>
+            </div>
+
+            <!-- Controller 4: pqrst -->
+            <div class="controller c4">
+                <div class="controller-label">🟡 Controller 4</div>
+                <div class="btn-row">
+                    <div class="test-btn" id="c4-btn-p">P</div>
+                    <div class="test-btn" id="c4-btn-q">Q</div>
+                    <div class="test-btn" id="c4-btn-r">R</div>
+                    <div class="test-btn" id="c4-btn-s">S</div>
+                    <div class="test-btn" id="c4-btn-t">T</div>
                 </div>
             </div>
         </div>
 
         <div class="tester-instructions">
-            <p><kbd>F21</kbd> = P1 Left &nbsp;·&nbsp; <kbd>F18</kbd> = P1 Right</p>
-            <p><kbd>←</kbd> = P2 Left &nbsp;·&nbsp; <kbd>→</kbd> = P2 Right</p>
-            <p><kbd>F19</kbd> = P3 Left &nbsp;·&nbsp; <kbd>F20</kbd> = P3 Right</p>
-            <p><kbd>F22</kbd> = P4 Left &nbsp;·&nbsp; <kbd>F23</kbd> = P4 Right</p>
+            <p>Press the keys on your keyboard or controller to test</p>
         </div>
 
         <button id="tester-back-btn" onclick="showStartScreen()">← Back to Menu</button>
@@ -189,60 +184,56 @@
         <h1>🎯 Chooser</h1>
         <p class="subtitle">Up to four players compete to fill in the blank with the correct word!</p>
 
-        <!-- Settings Panel -->
-        <div class="settings-panel">
-            <h3>⚙️ Game Settings</h3>
-            <div class="settings-row">
-                <div class="setting-group">
-                    <label for="num-players">Number of Players</label>
-                    <select id="num-players">
-                        <option value="2" selected>2 Players</option>
-                        <option value="3">3 Players</option>
-                        <option value="4">4 Players</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label for="num-questions">Number of Questions</label>
-                    <select id="num-questions">
-                        <option value="5">5 Questions</option>
-                        <option value="10" selected>10 Questions</option>
-                        <option value="15">15 Questions</option>
-                        <option value="20">20 Questions</option>
-                    </select>
-                </div>
-                <div class="setting-group">
-                    <label for="time-limit">Time per Question</label>
-                    <select id="time-limit">
-                        <option value="3">3 Seconds</option>
-                        <option value="5" selected>5 Seconds</option>
-                        <option value="7">7 Seconds</option>
-                        <option value="10">10 Seconds</option>
-                    </select>
+        <div class="main-columns">
+            <!-- Left Column: Game Settings -->
+            <div class="settings-column">
+                <div class="settings-panel">
+                    <h3>⚙️ Game Settings</h3>
+                    <div class="setting-group">
+                        <label for="num-players">Number of Players</label>
+                        <select id="num-players">
+                            <option value="2" selected>2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="num-questions">Number of Questions</label>
+                        <select id="num-questions">
+                            <option value="5">5 Questions</option>
+                            <option value="10" selected>10 Questions</option>
+                            <option value="15">15 Questions</option>
+                            <option value="20">20 Questions</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="time-limit">Time per Question</label>
+                        <select id="time-limit">
+                            <option value="3">3 Seconds</option>
+                            <option value="5" selected>5 Seconds</option>
+                            <option value="7">7 Seconds</option>
+                            <option value="10">10 Seconds</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 
-            <div class="setting-group">
-                <label>Select Categories to Study</label>
-                <div class="categories-grid" id="categories-container"></div>
+            <!-- Right Column: Categories -->
+            <div class="categories-column">
+                <div class="categories-panel">
+                    <h3>Select Categories to Study</h3>
+                    <div class="categories-grid" id="categories-container"></div>
+                </div>
             </div>
         </div>
 
-        <div class="controls-info">
-            <h3>Controls</h3>
-            <p class="p1">🔴 Player 1 — <strong>F21</strong> = Left &nbsp;·&nbsp; <strong>F18</strong> = Right</p>
-            <p class="p2">🔵 Player 2 — <strong>←</strong> = Left &nbsp;·&nbsp; <strong>→</strong> = Right</p>
-            <p class="p3" style="display:none">🟢 Player 3 — <strong>F19</strong> = Left &nbsp;·&nbsp; <strong>F20</strong> = Right</p>
-            <p class="p4" style="display:none">🟡 Player 4 — <strong>F22</strong> = Left &nbsp;·&nbsp; <strong>F23</strong> = Right</p>
-            <p class="note">
-                Each player may answer only <strong>once</strong> per question.<br>
-                Once all players answer, the next question loads automatically.<br>
-                Build a streak 🔥 for a score multiplier!
-            </p>
+        <div class="action-buttons">
+            <div class="secondary-buttons">
+                <button id="test-controller-btn" onclick="showTesterScreen()">🎮 Test Controllers</button>
+                <button id="edit-questions-btn" onclick="showEditorScreen()">📝 Edit Questions</button>
+            </div>
+            <button id="begin-btn" onclick="startGame()">▶ Begin Game</button>
         </div>
-
-        <button id="test-controller-btn" onclick="showTesterScreen()" style="margin-right:10px;padding:12px 25px;font-size:1rem;background:#3d3d5c;color:white;border:none;border-radius:10px;cursor:pointer;">🎮 Test Controllers</button>
-        <button id="edit-questions-btn" onclick="showEditorScreen()" style="margin-right:10px;padding:12px 25px;font-size:1rem;background:#3d3d5c;color:white;border:none;border-radius:10px;cursor:pointer;">📝 Edit Questions</button>
-        <button id="begin-btn" onclick="startGame()">▶ Begin Game</button>
     </div>
 </div>
 

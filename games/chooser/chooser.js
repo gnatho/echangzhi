@@ -91,14 +91,11 @@ function initDOM() {
         dotRight.push(document.getElementById(`right-dot-p${i}`));
     }
 
-    // Button tester elements (only collect elements that exist)
-    ['p1', 'p2', 'p3', 'p4'].forEach(p => {
-        const btns = {};
-        ['up', 'down', 'left', 'right', 'a', 'b', 'x', 'y'].forEach(name => {
-            const el = document.getElementById(`${p}-btn-${name}`);
-            if (el) btns[name] = el;
-        });
-        playerButtons.push(btns);
+    // Button tester elements (controllers 1-4, each with 5 buttons)
+    const controllerButtons = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't'];
+    controllerButtons.forEach(letter => {
+        const el = document.getElementById(`c-btn-${letter}`);
+        if (el) playerButtons.push({ id: `c-btn-${letter}`, element: el });
     });
 
     // Update controls info when player count changes
@@ -766,8 +763,28 @@ function restartGame() {
 }
 
 // ── Keyboard Controls ──────────────────────────────────────────────────
+const TESTER_KEY_MAP = {
+    'a': 'c1', 'b': 'c1', 'c': 'c1', 'd': 'c1', 'e': 'c1',
+    'f': 'c2', 'g': 'c2', 'h': 'c2', 'i': 'c2', 'j': 'c2',
+    'k': 'c3', 'l': 'c3', 'm': 'c3', 'n': 'c3', 'o': 'c3',
+    'p': 'c4', 'q': 'c4', 'r': 'c4', 's': 'c4', 't': 'c4'
+};
+
 document.addEventListener('keydown', e => {
     if (e.repeat) return;
+
+    // Button tester: highlight controller buttons when pressed
+    if (testerScreen.classList.contains('show')) {
+        const key = e.key.toLowerCase();
+        const controllerId = TESTER_KEY_MAP[key];
+        if (controllerId) {
+            const btn = document.getElementById(`${controllerId}-btn-${key}`);
+            if (btn) {
+                btn.classList.add(`${controllerId}-active`);
+                setTimeout(() => btn.classList.remove(`${controllerId}-active`), 150);
+            }
+        }
+    }
 
     PLAYER_KEYS.forEach((keys, i) => {
         const playerNum   = i + 1;

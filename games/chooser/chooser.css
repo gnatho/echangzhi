@@ -21,27 +21,87 @@ body {
     border-radius: 22px; text-align: center;
     box-shadow: 0 20px 60px rgba(0,0,0,0.35);
     max-width: 700px; width: 90%;
+    display: flex; flex-direction: column; gap: 20px;
 }
 #start-content h1 { color: #667eea; font-size: 3rem; margin-bottom: 8px; }
 #start-content .subtitle { color: #7f8c8d; font-size: 1.05rem; margin-bottom: 22px; line-height: 1.5; }
 
-.controls-info {
-    background: #f8f9fa; padding: 18px 20px;
-    border-radius: 12px; margin-bottom: 24px; text-align: left;
+/* Main Columns Layout */
+.main-columns {
+    display: flex; flex-direction: column; gap: 20px;
 }
-.controls-info h3 {
-    color: #667eea; margin-bottom: 12px;
-    font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1.5px;
+
+/* Settings Column */
+.settings-column .settings-panel {
+    background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: left;
 }
-.controls-info p { margin: 7px 0; font-size: 0.95rem; }
-.controls-info .p1 { color: #e74c3c; font-weight: 700; }
-.controls-info .p2 { color: #3498db; font-weight: 700; }
-.controls-info .p3 { color: #27ae60; font-weight: 700; }
-.controls-info .p4 { color: #f39c12; font-weight: 700; }
-.controls-info .note { color: #95a5a6; font-size: 0.82rem; margin-top: 10px; line-height: 1.5; }
+.settings-column .settings-panel h3 {
+    color: #667eea; margin-bottom: 15px; font-size: 0.9rem;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.settings-column .setting-group { margin-bottom: 15px; }
+.settings-column .setting-group:last-child { margin-bottom: 0; }
+.settings-column .setting-group label {
+    display: block; font-size: 0.85rem; color: #5a6a8a;
+    margin-bottom: 6px; font-weight: 600;
+}
+.settings-column .setting-group select {
+    width: 100%; padding: 10px 12px; font-size: 1rem;
+    border: 2px solid #dde1e7; border-radius: 8px;
+    background: white; color: #2c3e50;
+}
+.settings-column .setting-group select:focus {
+    outline: none; border-color: #667eea;
+}
+
+/* Categories Column */
+.categories-column .categories-panel {
+    background: #f8f9fa; padding: 20px; border-radius: 12px; text-align: left;
+}
+.categories-column .categories-panel h3 {
+    color: #667eea; margin-bottom: 15px; font-size: 0.9rem;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.categories-column .categories-grid {
+    display: grid; grid-template-columns: 1fr; gap: 12px;
+}
+.categories-column .category-checkbox {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 14px; background: white; border-radius: 8px;
+    border: 2px solid #e8ecf1; cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+}
+.categories-column .category-checkbox:hover { border-color: #667eea; }
+.categories-column .category-checkbox.checked { background: rgba(102,126,234,0.08); border-color: #667eea; }
+.categories-column .category-checkbox input { display: none; }
+.categories-column .category-checkbox .checkmark {
+    width: 22px; height: 22px; border: 2px solid #cbd5e0;
+    border-radius: 5px; display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+}
+.categories-column .category-checkbox.checked .checkmark { background: #667eea; border-color: #667eea; }
+.categories-column .category-checkbox.checked .checkmark::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
+.categories-column .category-checkbox .cat-name { font-size: 0.95rem; font-weight: 600; color: #2c3e50; }
+.categories-column .category-checkbox .cat-desc { font-size: 0.75rem; color: #8892b0; margin-left: auto; }
+
+/* Action Buttons Container */
+.action-buttons {
+    display: flex; gap: 12px; justify-content: space-between; align-items: center;
+}
+.secondary-buttons {
+    display: flex; gap: 10px;
+}
+#test-controller-btn, #edit-questions-btn {
+    padding: 12px 20px; font-size: 0.95rem;
+    background: #3d3d5c; color: white; border: none; border-radius: 10px;
+    cursor: pointer; transition: background 0.2s, transform 0.2s;
+}
+#test-controller-btn:hover, #edit-questions-btn:hover {
+    background: #4d4d6c; transform: scale(1.03);
+}
 
 #begin-btn {
-    padding: 18px 60px; font-size: 1.4rem;
+    padding: 14px 40px; font-size: 1.2rem;
     background: linear-gradient(135deg, #667eea, #764ba2);
     color: white; border: none; border-radius: 14px;
     cursor: pointer; font-weight: bold;
@@ -275,28 +335,23 @@ body {
     box-shadow: 0 10px 30px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.1);
     position: relative;
 }
-.controller.p1 { border: 3px solid #e74c3c; }
-.controller.p2 { border: 3px solid #3498db; }
-.controller.p3 { border: 3px solid #27ae60; }
-.controller.p4 { border: 3px solid #f39c12; }
+.controller.c1 { border: 3px solid #e74c3c; }
+.controller.c2 { border: 3px solid #3498db; }
+.controller.c3 { border: 3px solid #27ae60; }
+.controller.c4 { border: 3px solid #f39c12; }
 
 .controller-label { font-size: 1.1rem; font-weight: bold; margin-bottom: 20px; }
-.controller.p1 .controller-label { color: #e74c3c; }
-.controller.p2 .controller-label { color: #3498db; }
-.controller.p3 .controller-label { color: #27ae60; }
-.controller.p4 .controller-label { color: #f39c12; }
+.controller.c1 .controller-label { color: #e74c3c; }
+.controller.c2 .controller-label { color: #3498db; }
+.controller.c3 .controller-label { color: #27ae60; }
+.controller.c4 .controller-label { color: #f39c12; }
 
-/* 3×3 d-pad grid (P1, P2) */
-.btn-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 50px);
-    grid-template-rows: repeat(3, 50px);
-    gap: 8px; justify-content: center;
-}
-.btn-grid .test-btn:nth-child(5) { visibility: hidden; }
-
-/* Simple left/right row (P3, P4) */
+/* 5-button row layout */
 .btn-row { display: flex; gap: 12px; justify-content: center; padding: 16px 0; }
+.btn-row .test-btn {
+    width: 60px; height: 60px;
+    font-size: 1.4rem;
+}
 
 .test-btn {
     width: 50px; height: 50px; border-radius: 10px;
@@ -309,22 +364,22 @@ body {
 }
 .test-btn small { font-size: 0.6rem; opacity: 0.7; }
 
-.test-btn.p1-active {
+.test-btn.c1-active {
     background: linear-gradient(145deg, #e74c3c, #c0392b);
     border-color: #e74c3c; color: white;
     box-shadow: 0 0 25px rgba(231,76,60,0.7);
 }
-.test-btn.p2-active {
+.test-btn.c2-active {
     background: linear-gradient(145deg, #3498db, #2980b9);
     border-color: #3498db; color: white;
     box-shadow: 0 0 25px rgba(52,152,219,0.7);
 }
-.test-btn.p3-active {
+.test-btn.c3-active {
     background: linear-gradient(145deg, #27ae60, #219a52);
     border-color: #27ae60; color: white;
     box-shadow: 0 0 25px rgba(39,174,96,0.7);
 }
-.test-btn.p4-active {
+.test-btn.c4-active {
     background: linear-gradient(145deg, #f39c12, #d68910);
     border-color: #f39c12; color: white;
     box-shadow: 0 0 25px rgba(243,156,18,0.7);
@@ -340,55 +395,104 @@ body {
 }
 #tester-back-btn:hover { background: #4d4d6c; }
 
-/* ── Settings Panel ───────────────────────────────────────────────────── */
-.settings-panel {
-    background: #f8f9fa; padding: 20px; border-radius: 12px;
-    margin: 20px 0; text-align: left; width: 100%;
-}
-.settings-panel h3 {
-    color: #667eea; margin-bottom: 15px; font-size: 0.9rem;
-    text-transform: uppercase; letter-spacing: 1px;
-}
-.settings-row {
-    display: flex; flex-direction: row; flex-wrap: nowrap; gap: 20px; margin-bottom: 15px;
-}
-.setting-group { flex: 1; min-width: 0; }
-.setting-group label {
-    display: block; font-size: 0.85rem; color: #5a6a8a;
-    margin-bottom: 6px; font-weight: 600;
-}
-.setting-group select, .setting-group input[type="number"] {
-    width: 100%; padding: 10px 12px; font-size: 1rem;
-    border: 2px solid #dde1e7; border-radius: 8px;
-    background: white; color: #2c3e50;
-}
-.setting-group select:focus, .setting-group input:focus {
-    outline: none; border-color: #667eea;
+/* ── Tablet Landscape (≥1024px) ─────────────────────────────────────────── */
+@media screen and (min-width: 1024px) and (orientation: landscape) {
+    #start-content {
+        max-width: 90%;
+        padding: 35px 45px;
+    }
+    .main-columns {
+        display: grid;
+        grid-template-columns: 40% 60%;
+        gap: 24px;
+    }
+    .settings-column .settings-panel {
+        padding: 25px;
+    }
+    .categories-column .categories-panel {
+        padding: 25px;
+    }
+    .categories-column .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .action-buttons {
+        margin-top: 10px;
+    }
+    #test-controller-btn, #edit-questions-btn {
+        padding: 14px 24px;
+    }
+    #begin-btn {
+        padding: 16px 45px;
+    }
 }
 
-/* Category checkboxes */
-.categories-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-    gap: 12px; margin-top: 10px; width: 100%;
+/* ── Large Tablet Landscape (≥1200px) ───────────────────────────────────── */
+@media screen and (min-width: 1200px) and (orientation: landscape) {
+    #start-content {
+        max-width: 85%;
+        padding: 40px 50px;
+    }
+    .main-columns {
+        gap: 28px;
+    }
+    .settings-column .settings-panel {
+        padding: 28px;
+    }
+    .categories-column .categories-panel {
+        padding: 28px;
+    }
+    .action-buttons {
+        margin-top: 15px;
+    }
+    #test-controller-btn, #edit-questions-btn {
+        padding: 16px 28px; font-size: 1rem;
+    }
+    #begin-btn {
+        padding: 18px 50px; font-size: 1.3rem;
+    }
 }
-.category-checkbox {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 14px; background: white; border-radius: 8px;
-    border: 2px solid #e8ecf1; cursor: pointer;
-    transition: border-color 0.2s, background 0.2s;
+
+/* ── Extra Large (≥1800px) Landscape ───────────────────────────────────── */
+@media screen and (min-width: 1800px) and (orientation: landscape) {
+    #start-content {
+        max-width: 80%;
+        padding: 50px 60px;
+    }
+    .main-columns {
+        gap: 32px;
+    }
+    .settings-column .settings-panel {
+        padding: 32px;
+    }
+    .settings-column .setting-group label {
+        font-size: 0.95rem;
+    }
+    .settings-column .setting-group select {
+        padding: 12px 14px; font-size: 1.1rem;
+    }
+    .categories-column .categories-panel {
+        padding: 32px;
+    }
+    .categories-column .categories-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+    .categories-column .category-checkbox {
+        padding: 12px 16px;
+    }
+    .categories-column .category-checkbox .cat-name {
+        font-size: 1.05rem;
+    }
+    .action-buttons {
+        margin-top: 20px;
+    }
+    #test-controller-btn, #edit-questions-btn {
+        padding: 18px 32px; font-size: 1.1rem;
+    }
+    #begin-btn {
+        padding: 20px 55px; font-size: 1.4rem;
+    }
 }
-.category-checkbox:hover { border-color: #667eea; }
-.category-checkbox.checked { background: rgba(102,126,234,0.08); border-color: #667eea; }
-.category-checkbox input { display: none; }
-.category-checkbox .checkmark {
-    width: 22px; height: 22px; border: 2px solid #cbd5e0;
-    border-radius: 5px; display: flex; align-items: center; justify-content: center;
-    transition: all 0.2s;
-}
-.category-checkbox.checked .checkmark { background: #667eea; border-color: #667eea; }
-.category-checkbox.checked .checkmark::after { content: '✓'; color: white; font-size: 14px; font-weight: bold; }
-.category-checkbox .cat-name { font-size: 0.95rem; font-weight: 600; color: #2c3e50; }
-.category-checkbox .cat-desc { font-size: 0.75rem; color: #8892b0; margin-left: auto; }
 
 /* ── Questions Editor Screen ─────────────────────────────────────────── */
 #editor-screen {
@@ -501,10 +605,6 @@ body {
 
 /* ── Large Tablet (≥1800 px landscape) ───────────────────────────────── */
 @media screen and (min-width: 1800px) and (orientation: landscape) {
-    #start-content { padding: 50px; max-width: 800px; }
-    #start-content h1 { font-size: 3.5rem; }
-    #start-content .subtitle { font-size: 1.2rem; }
-    #begin-btn { padding: 20px 70px; font-size: 1.6rem; }
     #hud { max-width: 1800px; padding: 12px 30px; }
     .score-val { font-size: 2.2rem; }
     #timer { font-size: 2.8rem; }
@@ -528,14 +628,10 @@ body {
     .fscore-val { font-size: 3rem; }
     #results-table { font-size: 1rem; }
     #play-again-btn { padding: 18px 60px; font-size: 1.4rem; }
-    .settings-panel { padding: 25px; }
-    .categories-grid { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 }
 
 /* ── Medium Tablet (1024–1799 px landscape) ──────────────────────────── */
 @media screen and (min-width: 1024px) and (max-width: 1799px) and (orientation: landscape) {
-    #start-content { padding: 40px; max-width: 650px; }
-    #start-content h1 { font-size: 3rem; }
     #sentence { font-size: 2.4rem; margin-bottom: 32px; }
     .option-btn { padding: 22px 45px; font-size: 1.8rem; min-width: 190px; }
     #shared-options { gap: 28px; margin-bottom: 34px; }
