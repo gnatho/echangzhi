@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Snakes & Ladders – Grammar Game</title>
+    <link rel="stylesheet" href="snakes.css">
+</head>
+<body>
+
+    <div id="orientation-warning">
+        <div class="rotate-icon">📱</div>
+        <p>Please rotate your device to landscape mode</p>
+    </div>
+
+    <!-- ═══ START SCREEN ═══ -->
+    <div id="start-screen">
+        <div id="start-content">
+            <h1>🐍🪜 Snakes &amp; Ladders</h1>
+            <p class="subtitle">Roll the dice · Answer questions · Race to the finish!</p>
+
+            <div class="settings-container">
+
+                <!-- Settings -->
+                <div class="settings-panel">
+                    <h3>⚙️ Game Settings</h3>
+
+                    <div class="setting-group">
+                        <label for="num-players">Number of Players</label>
+                        <select id="num-players">
+                            <option value="2" selected>2 Players</option>
+                            <option value="3">3 Players</option>
+                            <option value="4">4 Players</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="grid-size">Board Size</label>
+                        <select id="grid-size">
+                            <option value="6">6×6 – Small</option>
+                            <option value="8">8×8 – Medium</option>
+                            <option value="10" selected>10×10 – Large</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label for="difficulty">Difficulty Level</label>
+                        <select id="difficulty">
+                            <option value="1">Level 1 – Basics</option>
+                            <option value="2">Level 2 – Words</option>
+                            <option value="3">Level 3 – Simple Sentences</option>
+                            <option value="4">Level 4 – Intermediate</option>
+                            <option value="5">Level 5 – Advanced</option>
+                            <option value="6">Level 6 – Expert</option>
+                            <option value="7" selected>Level 7 – Discussion</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="skip-turn" checked>
+                            <span>Miss turn if answer is wrong</span>
+                        </label>
+                    </div>
+
+                    <div class="setting-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="sound-enabled" checked>
+                            <span>Sound Effects</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Token Selection -->
+                <div class="token-panel">
+                    <h3>🎯 Select Your Token</h3>
+                    <div class="token-selection" id="token-selection-area">
+                        <div class="player-token-select" id="player1-token">
+                            <div class="token-label">🔴 Player 1</div>
+                            <div class="token-options"></div>
+                        </div>
+                        <div class="player-token-select" id="player2-token" style="display:none">
+                            <div class="token-label">🔵 Player 2</div>
+                            <div class="token-options"></div>
+                        </div>
+                        <div class="player-token-select" id="player3-token" style="display:none">
+                            <div class="token-label">🟢 Player 3</div>
+                            <div class="token-options"></div>
+                        </div>
+                        <div class="player-token-select" id="player4-token" style="display:none">
+                            <div class="token-label">🟡 Player 4</div>
+                            <div class="token-options"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="begin-btn" onclick="startGame()">▶ Start Game</button>
+                <button id="back-btn" onclick="goBack()">← Back</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ GAME SCREEN ═══ -->
+    <div id="game-screen">
+        <div id="game-header">
+            <div id="turn-indicator">Player 1's Turn</div>
+            <div id="dice-area">
+                <div id="dice" onclick="rollDice()" title="Click to roll">🎲</div>
+                <div id="dice-value">Click!</div>
+            </div>
+        </div>
+
+        <div id="board-container">
+            <div id="board-wrapper">
+                <div id="board"></div>
+                <!-- SVG drawn over board for snakes & ladders visuals -->
+                <svg id="snake-ladder-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+            </div>
+        </div>
+
+        <div id="game-footer">
+            <div id="player-cards"></div>
+        </div>
+    </div>
+
+    <!-- ═══ QUESTION MODAL ═══ -->
+    <div id="question-modal" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="question-title">Question</h2>
+                <span id="question-level" class="level-badge"></span>
+            </div>
+            <div class="modal-body">
+                <div id="question-text"></div>
+                <div id="question-type"></div>
+
+                <!-- Teacher clicks Correct or Wrong — no typing needed -->
+                <div id="judge-buttons">
+                    <button id="correct-btn" class="judge-btn correct-btn" onclick="submitCorrect()">
+                        <span class="judge-icon">✓</span>
+                        <span class="judge-label">Correct</span>
+                    </button>
+                    <button id="wrong-btn" class="judge-btn wrong-btn" onclick="submitWrong()">
+                        <span class="judge-icon">✗</span>
+                        <span class="judge-label">Wrong</span>
+                    </button>
+                </div>
+            </div>
+            <div id="question-result"></div>
+        </div>
+    </div>
+
+    <!-- ═══ WIN SCREEN ═══ -->
+    <div id="win-screen" class="modal" role="dialog" aria-modal="true">
+        <div class="modal-content win-content">
+            <div class="win-header">
+                <div id="winner-emoji">🏆</div>
+                <h2 id="winner-text">Player 1 Wins!</h2>
+            </div>
+            <div class="win-stats">
+                <div id="final-positions"></div>
+            </div>
+            <div class="win-actions">
+                <button onclick="playAgain()">🔄 Play Again</button>
+                <button onclick="goToMenu()">🏠 Main Menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="questions.js"></script>
+    <script src="snakes.js"></script>
+</body>
+</html>

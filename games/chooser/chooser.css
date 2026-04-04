@@ -326,8 +326,13 @@ body {
 #tester-content .tester-subtitle { color: #8892b0; font-size: 1rem; margin-bottom: 30px; }
 
 .controllers-container {
-    display: flex; justify-content: center;
-    gap: 40px; flex-wrap: wrap; margin: 30px 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 30px;
+    margin: 30px 0;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 .controller {
     background: linear-gradient(145deg, #2d2d44, #1e1e32);
@@ -388,12 +393,29 @@ body {
 .tester-instructions { color: #5a6a8a; font-size: 0.9rem; margin-top: 25px; line-height: 1.6; }
 .tester-instructions kbd { background: #2d2d44; padding: 3px 8px; border-radius: 4px; color: #00d9ff; font-family: monospace; }
 
-#tester-back-btn {
+#tester-back-btn, #game-back-btn {
     margin-top: 25px; padding: 12px 35px; font-size: 1rem;
     background: #3d3d5c; color: white; border: none; border-radius: 10px;
     cursor: pointer; transition: background 0.2s;
 }
-#tester-back-btn:hover { background: #4d4d6c; }
+#tester-back-btn:hover, #game-back-btn:hover { background: #4d4d6c; }
+
+#reveal-btn {
+    margin-top: 20px; padding: 14px 40px; font-size: 1.1rem;
+    background: #27ae60; color: white; border: none; border-radius: 12px;
+    cursor: pointer; font-weight: bold;
+    box-shadow: 0 4px 15px rgba(39,174,96,0.4);
+    transition: transform 0.2s;
+}
+#reveal-btn:hover { transform: scale(1.05); }
+
+#game-back-btn {
+    position: absolute; top: 15px; right: 15px;
+    padding: 10px 20px; font-size: 0.95rem;
+    background: #3d3d5c; color: white; border: none; border-radius: 8px;
+    cursor: pointer; transition: background 0.2s;
+}
+#game-back-btn:hover { background: #4d4d6c; }
 
 /* ── Tablet Landscape (≥1024px) ─────────────────────────────────────────── */
 @media screen and (min-width: 1024px) and (orientation: landscape) {

@@ -209,10 +209,11 @@
                     <div class="setting-group">
                         <label for="time-limit">Time per Question</label>
                         <select id="time-limit">
+                            <option value="0">Unlimited</option>
                             <option value="3">3 Seconds</option>
-                            <option value="5" selected>5 Seconds</option>
+                            <option value="5">5 Seconds</option>
                             <option value="7">7 Seconds</option>
-                            <option value="10">10 Seconds</option>
+                            <option value="10" selected>10 Seconds</option>
                         </select>
                     </div>
                 </div>
@@ -312,25 +313,28 @@
         <div id="player-indicators">
             <div class="player-indicator player1" id="p1-indicator">
                 <div class="player-label">🔴 Player 1</div>
-                <div class="controls-hint">F21 / F18</div>
+                <div class="controls-hint">E / B</div>
                 <div class="chosen-display" id="p1-choice">—</div>
             </div>
             <div class="player-indicator player2" id="p2-indicator" style="display:none">
                 <div class="player-label">🔵 Player 2</div>
-                <div class="controls-hint">← / →</div>
+                <div class="controls-hint">J / G</div>
                 <div class="chosen-display" id="p2-choice">—</div>
             </div>
             <div class="player-indicator player3" id="p3-indicator" style="display:none">
                 <div class="player-label">🟢 Player 3</div>
-                <div class="controls-hint">F19 / F20</div>
+                <div class="controls-hint">O / L</div>
                 <div class="chosen-display" id="p3-choice">—</div>
             </div>
             <div class="player-indicator player4" id="p4-indicator" style="display:none">
                 <div class="player-label">🟡 Player 4</div>
-                <div class="controls-hint">F22 / F23</div>
+                <div class="controls-hint">T / Q</div>
                 <div class="chosen-display" id="p4-choice">—</div>
             </div>
         </div>
+
+        <button id="reveal-btn" style="display:none" onclick="revealAnswers()">Reveal Answer</button>
+        <button id="game-back-btn" style="display:none" onclick="showStartScreen()">← Back to Menu</button>
     </div>
 </div>
 

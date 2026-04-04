@@ -6,10 +6,10 @@ const REVEAL_DELAY          = 1500;  // ms to show answer before advancing
 // Key mappings per player [0]=P1, [1]=P2, [2]=P3, [3]=P4
 // "code" is checked via e.code; "key" via e.key
 const PLAYER_KEYS = [
-    { left: { code: 'F21' },        right: { code: 'F18' } },
-    { left: { key:  'ArrowLeft' },  right: { key:  'ArrowRight' } },
-    { left: { code: 'F19' },        right: { code: 'F20' } },
-    { left: { code: 'F22' },        right: { code: 'F23' } },
+    { left: { key: 'e' }, right: { key: 'b' } },
+    { left: { key: 'j' }, right: { key: 'g' } },
+    { left: { key: 'o' }, right: { key: 'l' } },
+    { left: { key: 't' }, right: { key: 'q' } },
 ];
 
 // ── Configurable Settings ─────────────────────────────────────────────
@@ -42,7 +42,7 @@ let startScreen, testerScreen, endScreen, editorScreen;
 let sentenceEl, qCounterEl, timerEl, timerBarEl;
 let leftBtn, rightBtn, leftBtnText, rightBtnText;
 let gameContainer, categoriesContainer, numQuestionsSelect, numPlayersSelect, timeLimitSelect;
-let winnerEl, resultsBody;
+let winnerEl, resultsBody, revealBtn, gameBackBtn;
 
 // Per-player DOM arrays (index 0 = Player 1)
 let indicators   = [];  // #p{n}-indicator
@@ -78,6 +78,8 @@ function initDOM() {
     timeLimitSelect     = document.getElementById('time-limit');
     winnerEl            = document.getElementById('winner-announcement');
     resultsBody         = document.getElementById('results-body');
+    revealBtn           = document.getElementById('reveal-btn');
+    gameBackBtn         = document.getElementById('game-back-btn');
 
     // Build per-player DOM arrays
     for (let i = 1; i <= 4; i++) {
@@ -195,9 +197,9 @@ function initializeCategoryCheckboxes() {
     Object.keys(questionCategories).forEach(catKey => {
         const cat = questionCategories[catKey];
         const label = document.createElement('label');
-        label.className = 'category-checkbox checked';
+        label.className = 'category-checkbox';
         label.innerHTML = `
-            <input type="checkbox" value="${catKey}" checked>
+            <input type="checkbox" value="${catKey}">
             <span class="checkmark"></span>
             <span class="cat-name">${cat.name}</span>
             <span class="cat-desc">${cat.description}</span>
@@ -207,7 +209,6 @@ function initializeCategoryCheckboxes() {
             updateSelectedCategories();
         });
         categoriesContainer.appendChild(label);
-        selectedCategories.push(catKey);
     });
 }
 
@@ -231,6 +232,11 @@ function showTesterScreen() {
 }
 
 function showStartScreen() {
+    clearInterval(timerInterval);
+    gameActive = false;
+    revealActive = false;
+    gameContainer.style.display = 'none';
+    gameBackBtn.style.display = 'none';
     testerScreen.classList.remove('show');
     editorScreen.classList.remove('show');
     startScreen.style.display = 'flex';
@@ -531,10 +537,10 @@ function selectOption(playerNum, side) {
 
     playerAnswered[i] = true;
     playerAnswers[i]  = chosen;
-    playerTimes[i]    = TIMER_DURATION - timer;
+    playerTimes[i]    = TIMER_DURATION === 0 ? 0 : TIMER_DURATION - timer;
 
     indicators[i].classList.add('answered');
-    choiceEls[i].textContent = chosen;
+    choiceEls[i].textContent = '✓';
     btn.classList.add(`chosen-p${playerNum}`);
     (side === 'left' ? dotLeft[i] : dotRight[i]).classList.add('visible');
 
@@ -548,6 +554,18 @@ function selectOption(playerNum, side) {
 // ── Timer ──────────────────────────────────────────────────────────────
 function startTimer() {
     clearInterval(timerInterval);
+    
+    if (TIMER_DURATION === 0) {
+        timerEl.textContent = '∞';
+        timerEl.style.display = 'none';
+        timerBarEl.style.display = 'none';
+        revealBtn.style.display = 'block';
+        return;
+    }
+
+    timerEl.style.display = '';
+    timerBarEl.style.display = '';
+    revealBtn.style.display = 'none';
     timer = TIMER_DURATION;
     timerEl.textContent = timer;
 
@@ -666,6 +684,7 @@ function loadQuestion() {
         dotRight[i]?.classList.remove('visible');
     }
 
+    revealBtn.style.display = 'none';
     startTimer();
 }
 
@@ -700,6 +719,8 @@ function startGame() {
 
     startScreen.style.display = 'none';
     endScreen.classList.remove('show');
+    gameContainer.style.display = 'flex';
+    gameBackBtn.style.display = 'block';
 
     updateHudScores();
     for (let i = 0; i < NUM_PLAYERS; i++) updateStreakUI(i);
