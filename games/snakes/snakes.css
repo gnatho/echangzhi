@@ -162,15 +162,16 @@ body {
 .token-selection {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
 }
 
 .player-token-select {
     background: white;
     border-radius: 12px;
-    padding: 12px 14px;
+    padding: 10px 12px;
     border: 2px solid #cdd8cd;
     transition: border-color 0.2s;
+    position: relative;
 }
 
 .token-label {
@@ -180,15 +181,71 @@ body {
     font-size: 0.9rem;
 }
 
-.token-options {
+/* Trigger button that shows current token */
+.token-trigger {
     display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 8px 12px;
+    background: #f4f7f4;
+    border: 2px solid #cdd8cd;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-family: inherit;
+}
+
+.token-trigger:hover {
+    border-color: #2d8a2d;
+    background: #edf6ed;
+}
+
+.trigger-emoji {
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.trigger-name {
+    flex: 1;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #333;
+    text-align: left;
+}
+
+.trigger-arrow {
+    color: #888;
+    font-size: 0.8rem;
+    transition: transform 0.2s;
+}
+
+.token-trigger.open .trigger-arrow { transform: rotate(180deg); }
+
+/* Dropdown grid */
+.token-dropdown {
+    display: none;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 5px;
+    padding: 10px;
+    background: white;
+    border: 2px solid #cdd8cd;
+    border-radius: 10px;
+    margin-top: 6px;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.16);
+    position: relative;
+    z-index: 200;
+}
+
+.token-dropdown.open { display: grid; }
+
+.token-options {
+    /* wrapper for trigger + dropdown */
 }
 
 .token-option {
-    width: 38px;
-    height: 38px;
+    width: 42px;
+    height: 42px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -196,19 +253,43 @@ body {
     border: 2px solid #ddd;
     border-radius: 8px;
     cursor: pointer;
-    transition: all 0.18s;
+    transition: all 0.15s;
     background: white;
+    position: relative;
 }
 
-.token-option:hover {
+.token-option:hover:not(.taken) {
     border-color: #2d8a2d;
-    transform: scale(1.12);
+    transform: scale(1.14);
 }
 
 .token-option.selected {
     background: linear-gradient(135deg, #1a6b1a, #2d8a2d);
     border-color: #155a15;
     box-shadow: 0 2px 8px rgba(45, 138, 45, 0.4);
+}
+
+.token-option.taken {
+    opacity: 0.28;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.token-option.taken::after {
+    content: '✕';
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    font-size: 0.55rem;
+    background: #e74c3c;
+    color: white;
+    border-radius: 50%;
+    width: 12px;
+    height: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
 }
 
 /* Action Buttons */
@@ -303,6 +384,16 @@ body {
     transform: scale(1.15) rotate(-5deg);
 }
 
+#dice.result-shown {
+    animation: dice-result-pop 0.35s ease-out;
+}
+
+@keyframes dice-result-pop {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(1.35); }
+    100% { transform: scale(1); }
+}
+
 #dice.rolling {
     animation: dice-roll 0.5s ease-out;
 }
@@ -325,6 +416,133 @@ body {
     border-radius: 8px;
     padding: 4px 10px;
 }
+
+/* ══════════════════════════════════════
+    DICE 3D ANIMATION
+══════════════════════════════════════ */
+#dice-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+}
+
+#dice-overlay.active {
+    display: flex;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    animation: overlay-in 0.2s ease-out;
+}
+
+@keyframes overlay-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+/* Perspective lives here so the cube gets proper depth */
+#dice-container {
+    width: 200px;
+    height: 200px;
+    position: relative;
+    perspective: 900px;
+    perspective-origin: 50% 40%;
+}
+
+#dice-cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+    transform: rotateX(-25deg) rotateY(-35deg);
+    animation: dice-enter 0.22s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+@keyframes dice-enter {
+    from { transform: rotateX(-25deg) rotateY(-35deg) scale(0.3); opacity: 0; }
+    to   { transform: rotateX(-25deg) rotateY(-35deg) scale(1);   opacity: 1; }
+}
+
+/* ─── Continuous roll ─── */
+#dice-cube.rolling {
+    animation: cube-tumble 0.32s linear infinite;
+}
+
+@keyframes cube-tumble {
+    0%   { transform: rotateX(0deg)   rotateY(0deg)   rotateZ(0deg); }
+    20%  { transform: rotateX(72deg)  rotateY(144deg)  rotateZ(36deg); }
+    40%  { transform: rotateX(144deg) rotateY(72deg)   rotateZ(-72deg); }
+    60%  { transform: rotateX(216deg) rotateY(252deg)  rotateZ(108deg); }
+    80%  { transform: rotateX(288deg) rotateY(324deg)  rotateZ(-36deg); }
+    100% { transform: rotateX(360deg) rotateY(360deg)  rotateZ(0deg); }
+}
+
+/* ─── Settle into resting pose ─── */
+#dice-cube.settling {
+    animation: cube-settle 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+@keyframes cube-settle {
+    0%   { transform: rotateX(-10deg) rotateY(-20deg) scale(1.12); }
+    55%  { transform: rotateX(-28deg) rotateY(-40deg) scale(0.97); }
+    80%  { transform: rotateX(-23deg) rotateY(-32deg) scale(1.02); }
+    100% { transform: rotateX(-25deg) rotateY(-35deg) scale(1); }
+}
+
+/* ─── Exit shrink ─── */
+#dice-cube.shrinking {
+    animation: cube-exit 0.45s cubic-bezier(0.4, 0, 0.8, 0.8) forwards;
+}
+
+@keyframes cube-exit {
+    0%   { transform: rotateX(-25deg) rotateY(-35deg) scale(1);    opacity: 1; }
+    25%  { transform: rotateX(-25deg) rotateY(-35deg) scale(1.06); opacity: 1; }
+    100% { transform: rotateX(-25deg) rotateY(-35deg) scale(0);    opacity: 0; }
+}
+
+.dice-face {
+    position: absolute;
+    width: 200px;
+    height: 200px;
+    background: linear-gradient(145deg, #fafafa, #ddd);
+    border: 3px solid #1a1a1a;
+    border-radius: 24px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+    padding: 22px;
+    box-shadow: inset 0 0 30px rgba(0,0,0,0.06), 0 0 20px rgba(0,0,0,0.3);
+    transform-style: preserve-3d;
+    align-items: center;
+    justify-items: center;
+}
+
+.dice-face::before {
+    content: '';
+    position: absolute;
+    inset: 10px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0));
+    pointer-events: none;
+}
+
+.dice-face .dot {
+    width: 32px;
+    height: 32px;
+    background: radial-gradient(circle at 30% 30%, #555, #111);
+    border-radius: 50%;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.7), 0 1px 2px rgba(255,255,255,0.35);
+}
+
+/* Half the face size = 100px */
+.front  { transform: translateZ(100px); }
+.back   { transform: rotateY(180deg)  translateZ(100px); }
+.right  { transform: rotateY(90deg)   translateZ(100px); }
+.left   { transform: rotateY(-90deg)  translateZ(100px); }
+.top    { transform: rotateX(90deg)   translateZ(100px); }
+.bottom { transform: rotateX(-90deg)  translateZ(100px); }
 
 /* ── Board Container ── */
 #board-container {

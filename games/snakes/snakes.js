@@ -13,14 +13,30 @@
 if (typeof SNAKES_LADDERS_CONFIG === 'undefined') {
     window.SNAKES_LADDERS_CONFIG = {
         playerTokens: [
-            { id: 'rocket',   emoji: '🚀' },
-            { id: 'star',     emoji: '⭐' },
-            { id: 'gem',      emoji: '💎' },
-            { id: 'crown',    emoji: '👑' },
-            { id: 'fire',     emoji: '🔥' },
-            { id: 'lightning',emoji: '⚡' },
-            { id: 'dragon',   emoji: '🐉' },
-            { id: 'unicorn',  emoji: '🦄' },
+            { id: 'rocket',   emoji: '🚀', name: 'Rocket'    },
+            { id: 'star',     emoji: '⭐', name: 'Star'      },
+            { id: 'gem',      emoji: '💎', name: 'Diamond'   },
+            { id: 'crown',    emoji: '👑', name: 'Crown'     },
+            { id: 'fire',     emoji: '🔥', name: 'Fire'      },
+            { id: 'lightning',emoji: '⚡', name: 'Lightning' },
+            { id: 'dragon',   emoji: '🐉', name: 'Dragon'    },
+            { id: 'unicorn',  emoji: '🦄', name: 'Unicorn'   },
+            { id: 'robot',    emoji: '🤖', name: 'Robot'     },
+            { id: 'alien',    emoji: '👾', name: 'Alien'     },
+            { id: 'ghost',    emoji: '👻', name: 'Ghost'     },
+            { id: 'ninja',    emoji: '🥷', name: 'Ninja'     },
+            { id: 'wizard',   emoji: '🧙', name: 'Wizard'    },
+            { id: 'cat',      emoji: '🐱', name: 'Cat'       },
+            { id: 'fox',      emoji: '🦊', name: 'Fox'       },
+            { id: 'panda',    emoji: '🐼', name: 'Panda'     },
+            { id: 'lion',     emoji: '🦁', name: 'Lion'      },
+            { id: 'penguin',  emoji: '🐧', name: 'Penguin'   },
+            { id: 'shark',    emoji: '🦈', name: 'Shark'     },
+            { id: 'butterfly',emoji: '🦋', name: 'Butterfly' },
+            { id: 'trophy',   emoji: '🏆', name: 'Trophy'    },
+            { id: 'rainbow',  emoji: '🌈', name: 'Rainbow'   },
+            { id: 'comet',    emoji: '☄️', name: 'Comet'    },
+            { id: 'mushroom', emoji: '🍄', name: 'Mushroom'  },
         ]
     };
 }
@@ -49,7 +65,7 @@ const LADDER_COLORS = [
 let CONFIG = {
     numPlayers: 2,
     gridSize: 10,
-    difficulty: 7,
+    difficulty: 6,
     skipWrongAnswer: true,
     soundEnabled: true,
     tokens: []
@@ -113,12 +129,24 @@ function playSound(type) {
     } catch (e) { /* audio not supported */ }
 }
 
+// ── Token Selection State ─────────────────────────────────────────────────────
+// Maps playerIndex (1-4) → token index in SNAKES_LADDERS_CONFIG.playerTokens
+const tokenSelections = { 1: 0, 2: 1, 3: 2, 4: 3 };
+
 // ── DOM Init ─────────────────────────────────────────────────────────────────
 function initDOM() {
     document.getElementById('num-players').addEventListener('change', updatePlayerCount);
     document.getElementById('grid-size').addEventListener('change', updateGridSize);
     updatePlayerCount();
     initializeTokenSelection();
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.token-dropdown.open').forEach(d => {
+            d.classList.remove('open');
+            d.previousElementSibling?.classList.remove('open');
+        });
+    });
 }
 
 function updatePlayerCount() {
@@ -127,32 +155,117 @@ function updatePlayerCount() {
         const el = document.getElementById(`player${i}-token`);
         if (el) el.style.display = i <= count ? 'block' : 'none';
     }
+    // Refresh dropdowns so "taken" state reflects active players
+    for (let i = 1; i <= 4; i++) refreshDropdown(i);
 }
 
 function updateGridSize() {
     CONFIG.gridSize = parseInt(document.getElementById('grid-size').value);
 }
 
+// ── Token Picker ──────────────────────────────────────────────────────────────
 function initializeTokenSelection() {
     const tokens = SNAKES_LADDERS_CONFIG.playerTokens;
     for (let p = 1; p <= 4; p++) {
-        const container = document.querySelector(`#player${p}-token .token-options`);
-        if (!container) continue;
-        container.innerHTML = '';
-        tokens.forEach((token, idx) => {
-            const div = document.createElement('div');
-            div.className = 'token-option';
-            div.textContent = token.emoji;
-            div.dataset.tokenId = token.id;
-            if (idx === p - 1) div.classList.add('selected');
-            div.addEventListener('click', function () {
-                this.closest('.token-options').querySelectorAll('.token-option')
-                    .forEach(t => t.classList.remove('selected'));
-                this.classList.add('selected');
-            });
-            container.appendChild(div);
-        });
+        buildTokenWidget(p, tokens);
     }
+}
+
+function buildTokenWidget(p, tokens) {
+    const container = document.querySelector(`#player${p}-token .token-options`);
+    if (!container) return;
+
+    const t = tokens[tokenSelections[p]];
+
+    // Trigger button
+    const trigger = document.createElement('button');
+    trigger.className = 'token-trigger';
+    trigger.id = `token-trigger-p${p}`;
+    trigger.type = 'button';
+    trigger.innerHTML = `
+        <span class="trigger-emoji">${t.emoji}</span>
+        <span class="trigger-name">${t.name}</span>
+        <span class="trigger-arrow">▾</span>`;
+
+    trigger.addEventListener('click', e => {
+        e.stopPropagation();
+        const dropdown = document.getElementById(`token-dropdown-p${p}`);
+        const isOpen   = dropdown.classList.contains('open');
+
+        // Close all
+        document.querySelectorAll('.token-dropdown.open').forEach(d => {
+            d.classList.remove('open');
+            d.previousElementSibling?.classList.remove('open');
+        });
+
+        if (!isOpen) {
+            dropdown.classList.add('open');
+            trigger.classList.add('open');
+            refreshDropdown(p);
+        }
+    });
+
+    // Dropdown grid
+    const dropdown = document.createElement('div');
+    dropdown.className = 'token-dropdown';
+    dropdown.id = `token-dropdown-p${p}`;
+
+    tokens.forEach((token, idx) => {
+        const opt = document.createElement('div');
+        opt.className = 'token-option';
+        opt.textContent = token.emoji;
+        opt.title = token.name;
+        opt.dataset.idx = idx;
+        opt.addEventListener('click', e => {
+            e.stopPropagation();
+            selectToken(p, idx);
+        });
+        dropdown.appendChild(opt);
+    });
+
+    container.innerHTML = '';
+    container.appendChild(trigger);
+    container.appendChild(dropdown);
+    refreshDropdown(p);
+}
+
+function selectToken(playerNum, tokenIdx) {
+    tokenSelections[playerNum] = tokenIdx;
+    const tokens  = SNAKES_LADDERS_CONFIG.playerTokens;
+    const t       = tokens[tokenIdx];
+    const trigger = document.getElementById(`token-trigger-p${playerNum}`);
+
+    if (trigger) {
+        trigger.querySelector('.trigger-emoji').textContent = t.emoji;
+        trigger.querySelector('.trigger-name').textContent  = t.name;
+    }
+
+    // Close this dropdown
+    const dropdown = document.getElementById(`token-dropdown-p${playerNum}`);
+    dropdown?.classList.remove('open');
+    trigger?.classList.remove('open');
+
+    // Refresh all dropdowns so "taken" badges update everywhere
+    for (let i = 1; i <= 4; i++) refreshDropdown(i);
+}
+
+function refreshDropdown(playerNum) {
+    const dropdown = document.getElementById(`token-dropdown-p${playerNum}`);
+    if (!dropdown) return;
+
+    // Collect tokens taken by OTHER active players
+    const takenIdx = new Set();
+    for (let op = 1; op <= 4; op++) {
+        if (op === playerNum) continue;
+        const el = document.getElementById(`player${op}-token`);
+        if (el && el.style.display !== 'none') takenIdx.add(tokenSelections[op]);
+    }
+
+    dropdown.querySelectorAll('.token-option').forEach(opt => {
+        const idx = parseInt(opt.dataset.idx);
+        opt.classList.toggle('selected', idx === tokenSelections[playerNum]);
+        opt.classList.toggle('taken',    takenIdx.has(idx) && idx !== tokenSelections[playerNum]);
+    });
 }
 
 // ── Game Flow ─────────────────────────────────────────────────────────────────
@@ -166,14 +279,10 @@ function startGame() {
     CONFIG.soundEnabled     = document.getElementById('sound-enabled').checked;
 
     CONFIG.tokens = [];
+    const allTokens = SNAKES_LADDERS_CONFIG.playerTokens;
     for (let p = 1; p <= CONFIG.numPlayers; p++) {
-        const container = document.querySelector(`#player${p}-token .token-options`);
-        const selected  = container ? container.querySelector('.token-option.selected') : null;
-        CONFIG.tokens.push({
-            player: p,
-            emoji:  selected ? selected.textContent : ['🚀', '⭐', '💎', '👑'][p - 1],
-            id:     selected ? selected.dataset.tokenId : `p${p}`
-        });
+        const t = allTokens[tokenSelections[p]] || allTokens[p - 1];
+        CONFIG.tokens.push({ player: p, emoji: t.emoji, id: t.id });
     }
 
     gameState.boardSize = CONFIG.gridSize * CONFIG.gridSize;
@@ -649,11 +758,13 @@ const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
 function rollDice() {
     if (!gameState.waitingForRoll || gameState.gameOver) return;
 
-    const player    = gameState.players[gameState.currentPlayer];
-    const dice      = document.getElementById('dice');
-    const diceValue = document.getElementById('dice-value');
+    const player      = gameState.players[gameState.currentPlayer];
+    const dice        = document.getElementById('dice');
+    const diceValue   = document.getElementById('dice-value');
+    const diceOverlay = document.getElementById('dice-overlay');
+    const diceCube    = document.getElementById('dice-cube');
+    const faces       = diceCube.querySelectorAll('.dice-face');
 
-    // Skipping turn
     if (player.skipNext) {
         player.skipNext = false;
         renderPlayerCards();
@@ -663,23 +774,68 @@ function rollDice() {
 
     gameState.waitingForRoll = false;
     playSound('roll');
-    dice.classList.add('rolling');
 
+    diceOverlay.classList.add('active');
+    diceCube.classList.add('rolling');
+
+    const setFaceDots = (faceIndex, num) => {
+        const face = faces[faceIndex];
+        face.innerHTML = '';
+        const positions = {
+            1: [4],
+            2: [0, 8],
+            3: [0, 4, 8],
+            4: [0, 2, 6, 8],
+            5: [0, 2, 4, 6, 8],
+            6: [0, 2, 3, 5, 6, 8]
+        };
+        (positions[num] || [4]).forEach(pos => {
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            // Place dot in the right grid cell (empty others act as spacers)
+            dot.style.gridColumn = (pos % 3) + 1;
+            dot.style.gridRow    = Math.floor(pos / 3) + 1;
+            face.appendChild(dot);
+        });
+    };
+
+    setFaceDots(0, 1);
+    setFaceDots(1, 6);
+    setFaceDots(2, 3);
+    setFaceDots(3, 4);
+    setFaceDots(4, 2);
+    setFaceDots(5, 5);
+
+    const rollResult = Math.floor(Math.random() * 6) + 1;
     let ticks = 0;
+
     const interval = setInterval(() => {
-        const fake = Math.floor(Math.random() * 6);
-        dice.textContent  = DICE_FACES[fake];
-        diceValue.textContent = fake + 1;
         ticks++;
-        if (ticks >= 12) {
+        [0, 1, 2, 3, 4, 5].forEach(i => {
+            const fake = Math.floor(Math.random() * 6) + 1;
+            setFaceDots(i, fake);
+        });
+        if (ticks >= 16) {
             clearInterval(interval);
-            const roll = Math.floor(Math.random() * 6);
-            dice.textContent  = DICE_FACES[roll];
-            diceValue.textContent = roll + 1;
-            dice.classList.remove('rolling');
-            setTimeout(() => movePlayer(roll + 1), 350);
+            setFaceDots(0, rollResult);
+            setFaceDots(1, 7 - rollResult);
+            diceCube.classList.remove('rolling');
+            diceCube.classList.add('settling');
+
+            setTimeout(() => {
+                diceCube.classList.remove('settling');
+                diceCube.classList.add('shrinking');
+                setTimeout(() => {
+                    diceCube.classList.remove('shrinking');
+                    diceOverlay.classList.remove('active');
+                    dice.textContent = DICE_FACES[rollResult - 1];
+                    diceValue.textContent = rollResult;
+                    dice.classList.add('result-shown');
+                    setTimeout(() => movePlayer(rollResult), 450);
+                }, 500);
+            }, 350);
         }
-    }, 55);
+    }, 70);
 }
 
 // ── Movement ──────────────────────────────────────────────────────────────────
@@ -783,7 +939,6 @@ function showQuestion() {
     let questionText  = '(Ask the student your question)';
     let levelName     = `Level ${CONFIG.difficulty}`;
     let levelDesc     = '';
-    let questionType  = '';
 
     if (typeof snakesQuestions !== 'undefined') {
         const lq = snakesQuestions[level];
@@ -793,15 +948,13 @@ function showQuestion() {
             questionText = q.question;
             levelName    = lq.name        || levelName;
             levelDesc    = lq.description || '';
-            questionType = q.type         || '';
         }
     }
 
     document.getElementById('question-title').textContent = levelName;
     document.getElementById('question-level').textContent = levelDesc;
     document.getElementById('question-text').textContent  = questionText;
-    document.getElementById('question-type').textContent  =
-        questionType ? `Type: ${questionType}` : '';
+    document.getElementById('question-type').textContent  = '';
 
     const resultEl = document.getElementById('question-result');
     resultEl.style.display = 'none';

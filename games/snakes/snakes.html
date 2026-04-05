@@ -47,13 +47,13 @@
                     <div class="setting-group">
                         <label for="difficulty">Difficulty Level</label>
                         <select id="difficulty">
-                            <option value="1">Level 1 – Basics</option>
-                            <option value="2">Level 2 – Words</option>
-                            <option value="3">Level 3 – Simple Sentences</option>
-                            <option value="4">Level 4 – Intermediate</option>
-                            <option value="5">Level 5 – Advanced</option>
-                            <option value="6">Level 6 – Expert</option>
-                            <option value="7" selected>Level 7 – Discussion</option>
+                            <option value="0">Level 0 – Basics</option>
+                            <option value="1">Level 1 – Words</option>
+                            <option value="2">Level 2 – Simple Sentences</option>
+                            <option value="3">Level 3 – Intermediate</option>
+                            <option value="4">Level 4 – Advanced</option>
+                            <option value="5">Level 5 – Expert</option>
+                            <option value="6" selected>Level 6 – Discussion</option>
                         </select>
                     </div>
 
@@ -105,6 +105,18 @@
 
     <!-- ═══ GAME SCREEN ═══ -->
     <div id="game-screen">
+        <div id="dice-overlay">
+            <div id="dice-container">
+                <div id="dice-cube">
+                    <div class="dice-face front"></div>
+                    <div class="dice-face back"></div>
+                    <div class="dice-face right"></div>
+                    <div class="dice-face left"></div>
+                    <div class="dice-face top"></div>
+                    <div class="dice-face bottom"></div>
+                </div>
+            </div>
+        </div>
         <div id="game-header">
             <div id="turn-indicator">Player 1's Turn</div>
             <div id="dice-area">
