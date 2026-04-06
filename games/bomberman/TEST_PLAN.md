@@ -14,7 +14,6 @@ The game is organized into the following modules:
 | Input | `input.js` | Keyboard and gamepad polling with drift-free deadzone |
 | Renderer | `renderer.js` | Layered canvas rendering: grid, powerups, bombs, explosions, players, particles |
 | Particles | `particles.js` | Particle emission, physics (gravity), lifecycle management |
-| On-Screen Controls | `onscreen-controls.js` | Touch-friendly D-pad and bomb button |
 | Main | `bomberman.js` | Game orchestration, fixed-timestep loop, UI integration |
 
 ## Configuration Object
@@ -86,7 +85,6 @@ CONFIG = {
 ### AC-7: Input Support
 - Keyboard: 4 players with distinct key bindings
 - Gamepad: Standard gamepad API with 0.5 deadzone on analog sticks
-- On-screen D-pad and bomb button for touch devices (auto-shown on touch devices)
 - All input sources are normalized into a single direction string
 
 ## Test Plan
@@ -159,15 +157,6 @@ CONFIG = {
 
 **Expected:** Gamepad input works identically to keyboard input. Deadzone prevents drift.
 
-### Test 8: On-Screen Controls (Touch Devices)
-**Steps:**
-1. Open game on a touch device or use Chrome DevTools device emulation
-2. Verify D-pad and bomb button are visible
-3. Tap D-pad directions and verify movement
-4. Tap bomb button and verify bomb placement
-
-**Expected:** On-screen controls appear on touch devices. Tapping D-pad moves player. Tapping bomb button drops a bomb.
-
 ## How to Run
 
 1. Open `games/bomberman/bomberman.html` in a modern browser (Chrome, Firefox, Edge)
@@ -178,4 +167,4 @@ CONFIG = {
    Then navigate to `http://localhost:8000/games/bomberman/bomberman.html`
 3. Select number of players and character tokens
 4. Click "Start Game"
-5. Use keyboard controls as shown in the controls bar at the bottom
+5. Use keyboard controls or gamepad for input

@@ -243,6 +243,22 @@ body {
     border-radius: 20px;
 }
 
+.fullscreen-btn {
+    padding: 8px 16px;
+    font-size: 1.2rem;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 8px;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(255,255,255,0.2);
+    border-color: rgba(255,255,255,0.4);
+}
+
 .game-container {
     flex: 1;
     display: flex;
@@ -328,45 +344,6 @@ body {
     font-size: 0.8rem;
 }
 
-.controls-info {
-    display: flex;
-    justify-content: center;
-    gap: 30px;
-    padding: 15px;
-    background: rgba(0,0,0,0.3);
-    width: 100%;
-    flex-wrap: wrap;
-}
-
-.control-group {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.85rem;
-    color: rgba(255,255,255,0.7);
-}
-
-.control-key {
-    background: rgba(255,255,255,0.15);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-weight: bold;
-    font-family: monospace;
-    font-size: 0.8rem;
-}
-
-.control-group.p3 .control-key {
-    background: rgba(155,89,182,0.3);
-}
-
-.control-group.p4 .control-key {
-    background: rgba(46,204,113,0.3);
-}
-
-.control-group.bomb-key .control-key {
-    background: rgba(231,76,60,0.3);
-}
-
 /* Game Over Screen */
 #game-over-screen {
     flex-direction: column;
@@ -438,52 +415,6 @@ body {
     color: #fff;
 }
 
-.bomb-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    padding: 15px;
-    background: rgba(0,0,0,0.3);
-    width: 100%;
-    flex-wrap: wrap;
-}
-
-.bomb-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    font-size: 1rem;
-    font-weight: bold;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    color: white;
-}
-
-.bomb-btn:hover {
-    transform: scale(1.05);
-    filter: brightness(1.1);
-}
-
-.bomb-btn:active {
-    transform: scale(0.95);
-}
-
-.bomb-btn.player1 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
-.bomb-btn.player2 { background: linear-gradient(135deg, #3498db, #2980b9); }
-.bomb-btn.player3 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
-.bomb-btn.player4 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
-
-.bomb-btn .key-hint {
-    font-size: 0.75rem;
-    opacity: 0.8;
-    background: rgba(0,0,0,0.2);
-    padding: 2px 6px;
-    border-radius: 4px;
-}
-
 /* Responsive */
 @media (max-width: 800px) {
     .game-container {
@@ -499,14 +430,6 @@ body {
     .player-card {
         min-width: 150px;
     }
-    
-    .controls-info {
-        gap: 15px;
-    }
-    
-    .control-group {
-        font-size: 0.75rem;
-    }
 }
 
 @media (max-width: 500px) {
@@ -520,187 +443,5 @@ body {
     
     .start-container h1 {
         font-size: 1.8rem;
-    }
-    
-    .bomb-buttons {
-        gap: 10px;
-        padding: 10px;
-    }
-    
-    .bomb-btn {
-        padding: 10px 16px;
-        font-size: 0.85rem;
-    }
-}
-
-.onscreen-controls-container {
-    display: none;
-    justify-content: center;
-    gap: 40px;
-    padding: 10px;
-    flex-wrap: wrap;
-}
-
-.onscreen-controls-container.active {
-    display: flex;
-}
-
-.onscreen-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.dpad {
-    display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(3, 48px);
-    gap: 2px;
-}
-
-.dpad-btn {
-    width: 48px;
-    height: 48px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    transition: background 0.1s;
-}
-
-.dpad-btn:active, .dpad-btn.pressed {
-    background: rgba(255,255,255,0.3);
-}
-
-.dpad-btn.up { grid-column: 2; grid-row: 1; }
-.dpad-btn.left { grid-column: 1; grid-row: 2; }
-.dpad-btn.right { grid-column: 3; grid-row: 2; }
-.dpad-btn.down { grid-column: 2; grid-row: 3; }
-
-.bomb-btn-onscreen {
-    width: 64px;
-    height: 64px;
-    border: 2px solid rgba(255,107,107,0.5);
-    background: rgba(255,107,107,0.2);
-    color: #fff;
-    font-size: 1.8rem;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    transition: background 0.1s;
-}
-
-.bomb-btn-onscreen:active {
-    background: rgba(255,107,107,0.5);
-}
-
-@media (max-width: 800px) {
-    .onscreen-controls-container {
-        display: flex;
-    }
-}
-
-@media (hover: none) and (pointer: coarse) {
-    .onscreen-controls-container {
-        display: flex;
-    }
-}
-
-.onscreen-controls-container {
-    display: none;
-    justify-content: center;
-    gap: 40px;
-    padding: 10px;
-    flex-wrap: wrap;
-}
-
-.onscreen-controls-container.active {
-    display: flex;
-}
-
-.onscreen-controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.dpad {
-    display: grid;
-    grid-template-columns: repeat(3, 48px);
-    grid-template-rows: repeat(3, 48px);
-    gap: 2px;
-}
-
-.dpad-btn {
-    width: 48px;
-    height: 48px;
-    border: 2px solid rgba(255,255,255,0.3);
-    background: rgba(255,255,255,0.1);
-    color: #fff;
-    font-size: 1.2rem;
-    border-radius: 8px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    transition: background 0.1s;
-}
-
-.dpad-btn:active, .dpad-btn.pressed {
-    background: rgba(255,255,255,0.3);
-}
-
-.dpad-btn.up { grid-column: 2; grid-row: 1; }
-.dpad-btn.left { grid-column: 1; grid-row: 2; }
-.dpad-btn.right { grid-column: 3; grid-row: 2; }
-.dpad-btn.down { grid-column: 2; grid-row: 3; }
-
-.bomb-btn-onscreen {
-    width: 64px;
-    height: 64px;
-    border: 2px solid rgba(255,107,107,0.5);
-    background: rgba(255,107,107,0.2);
-    color: #fff;
-    font-size: 1.8rem;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    user-select: none;
-    -webkit-user-select: none;
-    touch-action: manipulation;
-    transition: background 0.1s;
-}
-
-.bomb-btn-onscreen:active {
-    background: rgba(255,107,107,0.5);
-}
-
-@media (max-width: 800px) {
-    .onscreen-controls-container {
-        display: flex;
-    }
-}
-
-@media (hover: none) and (pointer: coarse) {
-    .onscreen-controls-container {
-        display: flex;
     }
 }

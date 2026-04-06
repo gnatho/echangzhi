@@ -6,7 +6,6 @@ import { CollisionSystem } from './collision.js';
 import { InputHandler } from './input.js';
 import { Renderer } from './renderer.js';
 import { ParticleSystem } from './particles.js';
-import { OnScreenControls } from './onscreen-controls.js';
 
 class BombermanGame {
   constructor() {
@@ -28,7 +27,6 @@ class BombermanGame {
     this.maxFrameTime = CONFIG.MAX_FRAME_TIME;
 
     this.gamepadMap = new Map();
-    this.onscreenControls = [];
 
     this._boundLoop = this._gameLoop.bind(this);
   }
@@ -47,6 +45,7 @@ class BombermanGame {
     document.getElementById('num-players').addEventListener('change', () => this._updatePlayerSelectors());
     document.getElementById('start-btn').addEventListener('click', () => this._startGame());
     document.getElementById('play-again-btn').addEventListener('click', () => this._resetGame());
+    document.getElementById('fullscreen-btn').addEventListener('click', () => this._toggleFullscreen());
 
     this._updatePlayerSelectors();
   }
@@ -119,8 +118,6 @@ class BombermanGame {
     this.collision = new CollisionSystem(this.map, this.bombSystem);
 
     this._spawnPowerups();
-    this._createBombButtons();
-    this._createOnScreenControls();
     this._renderPlayersHUD();
 
     document.getElementById('start-screen').classList.remove('active');
@@ -166,49 +163,6 @@ class BombermanGame {
         ...CONFIG.POWERUPS[type]
       });
     }
-  }
-
-  _createBombButtons() {
-    const container = document.getElementById('bomb-buttons');
-    container.innerHTML = '';
-
-    this.players.forEach((player, idx) => {
-      const btn = document.createElement('button');
-      btn.className = `bomb-btn player${idx + 1}`;
-      btn.innerHTML = `
-        <span>${player.token.emoji} Drop Bomb</span>
-        <span class="key-hint">${this._getKeyLabel(player.controls.bomb)}</span>
-      `;
-      btn.addEventListener('click', () => this._handleBombInput(player));
-      container.appendChild(btn);
-    });
-  }
-
-  _createOnScreenControls() {
-    const container = document.getElementById('onscreen-controls');
-    container.innerHTML = '';
-    this.onscreenControls = [];
-
-    for (const player of this.players) {
-      const osc = new OnScreenControls(container, player.id, player.controls);
-      osc.onBomb(() => this._handleBombInput(player));
-      this.onscreenControls.push(osc);
-    }
-
-    container.classList.add('active');
-  }
-
-  _getKeyLabel(code) {
-    const labels = {
-      'KeyA': 'A', 'KeyB': 'B', 'KeyC': 'C', 'KeyD': 'D', 'KeyE': 'E',
-      'KeyF': 'F', 'KeyG': 'G', 'KeyH': 'H', 'KeyI': 'I', 'KeyJ': 'J',
-      'KeyK': 'K', 'KeyL': 'L', 'KeyM': 'M', 'KeyN': 'N', 'KeyO': 'O',
-      'KeyP': 'P', 'KeyQ': 'Q', 'KeyR': 'R', 'KeyS': 'S', 'KeyT': 'T',
-      'KeyU': 'U', 'KeyV': 'V', 'KeyW': 'W', 'KeyX': 'X', 'KeyY': 'Y', 'KeyZ': 'Z',
-      'Space': 'Space', 'Numpad0': 'Num0', 'Numpad4': 'Num4',
-      'Numpad5': 'Num5', 'Numpad6': 'Num6', 'Numpad8': 'Num8'
-    };
-    return labels[code] || code;
   }
 
   _gameLoop(timestamp) {
@@ -273,13 +227,6 @@ class BombermanGame {
       const gpIndex = this.gamepadMap.get(player.id);
       if (gpIndex !== undefined) {
         dir = this.input.getGamepadDirection(gpIndex);
-      }
-    }
-
-    if (!dir) {
-      const osc = this.onscreenControls.find(c => c.playerId === player.id);
-      if (osc) {
-        dir = osc.getDirection();
       }
     }
 
@@ -352,150 +299,29 @@ class BombermanGame {
     this._renderPlayersHUD();
   }
 
-  _onExplosion(cells) {
-    for (const cell of cells) {
-      const center = this.map.gridToPixelCenter(cell.x, cell.y);
-      this.particles.emit(center.x, center.y, 15, {
-        speed: 8,
-        colors: ['#ff6b6b', '#f39c12'],
-        maxSize: 6,
-        minSize: 3,
-        life: 30
+  _toggleFullscreen() {
+    const btn = document.getElementById('fullscreen-btn');
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch(err => {
+        console.warn('Fullscreen request failed:', err);
       });
+      btn.textContent = '⛶';
+      btn.title = 'Exit Fullscreen';
+    } else {
+      document.exitFullscreen();
+      btn.textContent = '⛶';
+      btn.title = 'Toggle Fullscreen';
     }
-  }
-
-  _onBlockDestroyed(gx, gy) {
-    const center = this.map.gridToPixelCenter(gx, gy);
-    this.particles.emit(center.x, center.y, 15, {
-      speed: 8,
-      colors: ['#ff6b6b', '#f39c12'],
-      maxSize: 6,
-      minSize: 3,
-      life: 30
-    });
-
-    if (Math.random() < CONFIG.POWERUP_DROP_CHANCE) {
-      const types = Object.keys(CONFIG.POWERUPS);
-      const type = types[Math.floor(Math.random() * types.length)];
-      this.powerups.push({
-        x: gx,
-        y: gy,
-        type: type,
-        ...CONFIG.POWERUPS[type]
-      });
-    }
-  }
-
-  _checkExplosionDamage() {
-    for (const player of this.players) {
-      if (!player.alive) continue;
-      if (this.bombSystem.isPlayerInExplosion(player)) {
-        this._killPlayer(player);
-      }
-    }
-  }
-
-  _killPlayer(player) {
-    player.alive = false;
-    this.particles.emit(player.x, player.y, 20, {
-      speed: 6,
-      color: player.token.color,
-      maxSize: 8,
-      minSize: 4,
-      life: 40
-    });
-    this._renderPlayersHUD();
-  }
-
-  _checkWinCondition() {
-    const alivePlayers = this.players.filter(p => p.alive);
-
-    if (alivePlayers.length <= 1 && this.players.length > 1) {
-      this.running = false;
-
-      let winner;
-      if (alivePlayers.length === 1) {
-        winner = alivePlayers[0];
-      } else {
-        winner = this.players[0];
-      }
-
-      setTimeout(() => this._showGameOver(winner), 500);
-    }
-  }
-
-  _showGameOver(winner) {
-    document.getElementById('game-screen').classList.remove('active');
-    document.getElementById('game-over-screen').classList.add('active');
-
-    document.getElementById('winner-text').textContent =
-      `${winner.token.emoji} ${winner.token.name} Wins!`;
-
-    document.getElementById('winner-details').innerHTML = `
-      <p>Player ${winner.id + 1} dominated the arena!</p>
-    `;
-  }
-
-  _resetGame() {
-    document.getElementById('game-over-screen').classList.remove('active');
-    document.getElementById('start-screen').classList.add('active');
-
-    this.running = false;
-    this.players = [];
-    this.powerups = [];
-    this.particles.clear();
-    for (const osc of this.onscreenControls) {
-      osc.destroy();
-    }
-    this.onscreenControls = [];
-    document.getElementById('onscreen-controls').classList.remove('active');
-  }
-
-  _render() {
-    this.renderer.clear();
-    this.renderer.renderGrid(this.map);
-    this.renderer.renderPowerups(this.powerups);
-    this.renderer.renderBombs(this.bombSystem.bombs);
-    this.renderer.renderExplosions(this.bombSystem.explosions);
-    this.renderer.renderPlayers(this.players);
-    this.renderer.renderParticles(this.particles);
-  }
-
-  _renderPlayersHUD() {
-    const container = document.getElementById('players-hud');
-    container.innerHTML = '';
-
-    this.players.forEach((player) => {
-      const card = document.createElement('div');
-      card.className = 'player-card' +
-        (!player.alive ? ' eliminated' : '');
-
-      card.innerHTML = `
-        <div class="player-icon">${player.token.emoji}</div>
-        <div class="player-info">
-          <div class="player-name" style="color: ${player.token.color}">${player.token.name}</div>
-          <div class="player-stats">
-            <div class="stat-item">
-              <span class="stat-icon">\uD83D\uDCA3</span>
-              <span>${player.maxBombs}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-icon">\uD83D\uDD25</span>
-              <span>${player.bombRange}</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-icon">\u26A1</span>
-              <span>${(player.speed / CONFIG.BASE_SPEED).toFixed(1)}x</span>
-            </div>
-          </div>
-        </div>
-      `;
-
-      container.appendChild(card);
-    });
   }
 }
+
+document.addEventListener('fullscreenchange', () => {
+  const btn = document.getElementById('fullscreen-btn');
+  if (btn) {
+    btn.textContent = document.fullscreenElement ? '⛶' : '⛶';
+    btn.title = document.fullscreenElement ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+  }
+});
 
 const game = new BombermanGame();
 document.addEventListener('DOMContentLoaded', () => game.init());

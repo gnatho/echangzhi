@@ -1,0 +1,493 @@
+diff --git a/games/bomberman/TEST_PLAN.md b/games/bomberman/TEST_PLAN.md
+index d87ad23..4ba5d13 100644
+--- a/games/bomberman/TEST_PLAN.md
++++ b/games/bomberman/TEST_PLAN.md
+@@ -14,7 +14,6 @@ The game is organized into the following modules:
+ | Input | `input.js` | Keyboard and gamepad polling with drift-free deadzone |
+ | Renderer | `renderer.js` | Layered canvas rendering: grid, powerups, bombs, explosions, players, particles |
+ | Particles | `particles.js` | Particle emission, physics (gravity), lifecycle management |
+-| On-Screen Controls | `onscreen-controls.js` | Touch-friendly D-pad and bomb button |
+ | Main | `bomberman.js` | Game orchestration, fixed-timestep loop, UI integration |
+ 
+ ## Configuration Object
+@@ -86,7 +85,6 @@ CONFIG = {
+ ### AC-7: Input Support
+ - Keyboard: 4 players with distinct key bindings
+ - Gamepad: Standard gamepad API with 0.5 deadzone on analog sticks
+-- On-screen D-pad and bomb button for touch devices (auto-shown on touch devices)
+ - All input sources are normalized into a single direction string
+ 
+ ## Test Plan
+@@ -159,15 +157,6 @@ CONFIG = {
+ 
+ **Expected:** Gamepad input works identically to keyboard input. Deadzone prevents drift.
+ 
+-### Test 8: On-Screen Controls (Touch Devices)
+-**Steps:**
+-1. Open game on a touch device or use Chrome DevTools device emulation
+-2. Verify D-pad and bomb button are visible
+-3. Tap D-pad directions and verify movement
+-4. Tap bomb button and verify bomb placement
+-
+-**Expected:** On-screen controls appear on touch devices. Tapping D-pad moves player. Tapping bomb button drops a bomb.
+-
+ ## How to Run
+ 
+ 1. Open `games/bomberman/bomberman.html` in a modern browser (Chrome, Firefox, Edge)
+@@ -178,4 +167,4 @@ CONFIG = {
+    Then navigate to `http://localhost:8000/games/bomberman/bomberman.html`
+ 3. Select number of players and character tokens
+ 4. Click "Start Game"
+-5. Use keyboard controls as shown in the controls bar at the bottom
++5. Use keyboard controls or gamepad for input
+diff --git a/games/bomberman/bomberman.css b/games/bomberman/bomberman.css
+index 3b1c22d..7c124de 100644
+--- a/games/bomberman/bomberman.css
++++ b/games/bomberman/bomberman.css
+@@ -328,45 +328,6 @@ body {
+     font-size: 0.8rem;
+ }
+ 
+-.controls-info {
+-    display: flex;
+-    justify-content: center;
+-    gap: 30px;
+-    padding: 15px;
+-    background: rgba(0,0,0,0.3);
+-    width: 100%;
+-    flex-wrap: wrap;
+-}
+-
+-.control-group {
+-    display: flex;
+-    align-items: center;
+-    gap: 8px;
+-    font-size: 0.85rem;
+-    color: rgba(255,255,255,0.7);
+-}
+-
+-.control-key {
+-    background: rgba(255,255,255,0.15);
+-    padding: 4px 10px;
+-    border-radius: 6px;
+-    font-weight: bold;
+-    font-family: monospace;
+-    font-size: 0.8rem;
+-}
+-
+-.control-group.p3 .control-key {
+-    background: rgba(155,89,182,0.3);
+-}
+-
+-.control-group.p4 .control-key {
+-    background: rgba(46,204,113,0.3);
+-}
+-
+-.control-group.bomb-key .control-key {
+-    background: rgba(231,76,60,0.3);
+-}
+-
+ /* Game Over Screen */
+ #game-over-screen {
+     flex-direction: column;
+@@ -438,52 +399,6 @@ body {
+     color: #fff;
+ }
+ 
+-.bomb-buttons {
+-    display: flex;
+-    justify-content: center;
+-    gap: 15px;
+-    padding: 15px;
+-    background: rgba(0,0,0,0.3);
+-    width: 100%;
+-    flex-wrap: wrap;
+-}
+-
+-.bomb-btn {
+-    display: flex;
+-    align-items: center;
+-    gap: 8px;
+-    padding: 12px 24px;
+-    font-size: 1rem;
+-    font-weight: bold;
+-    border: none;
+-    border-radius: 12px;
+-    cursor: pointer;
+-    transition: all 0.2s;
+-    color: white;
+-}
+-
+-.bomb-btn:hover {
+-    transform: scale(1.05);
+-    filter: brightness(1.1);
+-}
+-
+-.bomb-btn:active {
+-    transform: scale(0.95);
+-}
+-
+-.bomb-btn.player1 { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+-.bomb-btn.player2 { background: linear-gradient(135deg, #3498db, #2980b9); }
+-.bomb-btn.player3 { background: linear-gradient(135deg, #9b59b6, #8e44ad); }
+-.bomb-btn.player4 { background: linear-gradient(135deg, #2ecc71, #27ae60); }
+-
+-.bomb-btn .key-hint {
+-    font-size: 0.75rem;
+-    opacity: 0.8;
+-    background: rgba(0,0,0,0.2);
+-    padding: 2px 6px;
+-    border-radius: 4px;
+-}
+-
+ /* Responsive */
+ @media (max-width: 800px) {
+     .game-container {
+@@ -499,14 +414,6 @@ body {
+     .player-card {
+         min-width: 150px;
+     }
+-    
+-    .controls-info {
+-        gap: 15px;
+-    }
+-    
+-    .control-group {
+-        font-size: 0.75rem;
+-    }
+ }
+ 
+ @media (max-width: 500px) {
+@@ -521,186 +428,4 @@ body {
+     .start-container h1 {
+         font-size: 1.8rem;
+     }
+-    
+-    .bomb-buttons {
+-        gap: 10px;
+-        padding: 10px;
+-    }
+-    
+-    .bomb-btn {
+-        padding: 10px 16px;
+-        font-size: 0.85rem;
+-    }
+-}
+-
+-.onscreen-controls-container {
+-    display: none;
+-    justify-content: center;
+-    gap: 40px;
+-    padding: 10px;
+-    flex-wrap: wrap;
+-}
+-
+-.onscreen-controls-container.active {
+-    display: flex;
+-}
+-
+-.onscreen-controls {
+-    display: flex;
+-    align-items: center;
+-    gap: 12px;
+-}
+-
+-.dpad {
+-    display: grid;
+-    grid-template-columns: repeat(3, 48px);
+-    grid-template-rows: repeat(3, 48px);
+-    gap: 2px;
+-}
+-
+-.dpad-btn {
+-    width: 48px;
+-    height: 48px;
+-    border: 2px solid rgba(255,255,255,0.3);
+-    background: rgba(255,255,255,0.1);
+-    color: #fff;
+-    font-size: 1.2rem;
+-    border-radius: 8px;
+-    cursor: pointer;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    user-select: none;
+-    -webkit-user-select: none;
+-    touch-action: manipulation;
+-    transition: background 0.1s;
+-}
+-
+-.dpad-btn:active, .dpad-btn.pressed {
+-    background: rgba(255,255,255,0.3);
+-}
+-
+-.dpad-btn.up { grid-column: 2; grid-row: 1; }
+-.dpad-btn.left { grid-column: 1; grid-row: 2; }
+-.dpad-btn.right { grid-column: 3; grid-row: 2; }
+-.dpad-btn.down { grid-column: 2; grid-row: 3; }
+-
+-.bomb-btn-onscreen {
+-    width: 64px;
+-    height: 64px;
+-    border: 2px solid rgba(255,107,107,0.5);
+-    background: rgba(255,107,107,0.2);
+-    color: #fff;
+-    font-size: 1.8rem;
+-    border-radius: 50%;
+-    cursor: pointer;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    user-select: none;
+-    -webkit-user-select: none;
+-    touch-action: manipulation;
+-    transition: background 0.1s;
+-}
+-
+-.bomb-btn-onscreen:active {
+-    background: rgba(255,107,107,0.5);
+-}
+-
+-@media (max-width: 800px) {
+-    .onscreen-controls-container {
+-        display: flex;
+-    }
+-}
+-
+-@media (hover: none) and (pointer: coarse) {
+-    .onscreen-controls-container {
+-        display: flex;
+-    }
+-}
+-
+-.onscreen-controls-container {
+-    display: none;
+-    justify-content: center;
+-    gap: 40px;
+-    padding: 10px;
+-    flex-wrap: wrap;
+-}
+-
+-.onscreen-controls-container.active {
+-    display: flex;
+-}
+-
+-.onscreen-controls {
+-    display: flex;
+-    align-items: center;
+-    gap: 12px;
+-}
+-
+-.dpad {
+-    display: grid;
+-    grid-template-columns: repeat(3, 48px);
+-    grid-template-rows: repeat(3, 48px);
+-    gap: 2px;
+-}
+-
+-.dpad-btn {
+-    width: 48px;
+-    height: 48px;
+-    border: 2px solid rgba(255,255,255,0.3);
+-    background: rgba(255,255,255,0.1);
+-    color: #fff;
+-    font-size: 1.2rem;
+-    border-radius: 8px;
+-    cursor: pointer;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    user-select: none;
+-    -webkit-user-select: none;
+-    touch-action: manipulation;
+-    transition: background 0.1s;
+-}
+-
+-.dpad-btn:active, .dpad-btn.pressed {
+-    background: rgba(255,255,255,0.3);
+-}
+-
+-.dpad-btn.up { grid-column: 2; grid-row: 1; }
+-.dpad-btn.left { grid-column: 1; grid-row: 2; }
+-.dpad-btn.right { grid-column: 3; grid-row: 2; }
+-.dpad-btn.down { grid-column: 2; grid-row: 3; }
+-
+-.bomb-btn-onscreen {
+-    width: 64px;
+-    height: 64px;
+-    border: 2px solid rgba(255,107,107,0.5);
+-    background: rgba(255,107,107,0.2);
+-    color: #fff;
+-    font-size: 1.8rem;
+-    border-radius: 50%;
+-    cursor: pointer;
+-    display: flex;
+-    align-items: center;
+-    justify-content: center;
+-    user-select: none;
+-    -webkit-user-select: none;
+-    touch-action: manipulation;
+-    transition: background 0.1s;
+-}
+-
+-.bomb-btn-onscreen:active {
+-    background: rgba(255,107,107,0.5);
+-}
+-
+-@media (max-width: 800px) {
+-    .onscreen-controls-container {
+-        display: flex;
+-    }
+-}
+-
+-@media (hover: none) and (pointer: coarse) {
+-    .onscreen-controls-container {
+-        display: flex;
+-    }
+ }
+\ No newline at end of file
+diff --git a/games/bomberman/bomberman.html b/games/bomberman/bomberman.html
+index fd1a39b..9be1773 100644
+--- a/games/bomberman/bomberman.html
++++ b/games/bomberman/bomberman.html
+@@ -49,27 +49,6 @@
+             <div class="players-hud" id="players-hud"></div>
+         </div>
+         
+-        <div class="controls-info">
+-            <div class="control-group">
+-                <span class="control-key">Arrow Keys + Space</span>
+-                <span>Player 1 Move + Bomb</span>
+-            </div>
+-            <div class="control-group">
+-                <span class="control-key">W/A/S/D + E</span>
+-                <span>Player 2 Move + Bomb</span>
+-            </div>
+-            <div class="control-group p3">
+-                <span class="control-key">I/J/K/L + O</span>
+-                <span>Player 3 Move + Bomb</span>
+-            </div>
+-            <div class="control-group p4">
+-                <span class="control-key">Numpad 8456 + 0</span>
+-                <span>Player 4 Move + Bomb</span>
+-            </div>
+-        </div>
+-        
+-        <div class="bomb-buttons" id="bomb-buttons"></div>
+-        <div class="onscreen-controls-container" id="onscreen-controls"></div>
+     </div>
+     
+     <div id="game-over-screen" class="screen">
+diff --git a/games/bomberman/bomberman.js b/games/bomberman/bomberman.js
+index a67cc97..151ae0a 100644
+--- a/games/bomberman/bomberman.js
++++ b/games/bomberman/bomberman.js
+@@ -6,7 +6,6 @@ import { CollisionSystem } from './collision.js';
+ import { InputHandler } from './input.js';
+ import { Renderer } from './renderer.js';
+ import { ParticleSystem } from './particles.js';
+-import { OnScreenControls } from './onscreen-controls.js';
+ 
+ class BombermanGame {
+   constructor() {
+@@ -28,7 +27,6 @@ class BombermanGame {
+     this.maxFrameTime = CONFIG.MAX_FRAME_TIME;
+ 
+     this.gamepadMap = new Map();
+-    this.onscreenControls = [];
+ 
+     this._boundLoop = this._gameLoop.bind(this);
+   }
+@@ -119,8 +117,6 @@ class BombermanGame {
+     this.collision = new CollisionSystem(this.map, this.bombSystem);
+ 
+     this._spawnPowerups();
+-    this._createBombButtons();
+-    this._createOnScreenControls();
+     this._renderPlayersHUD();
+ 
+     document.getElementById('start-screen').classList.remove('active');
+@@ -168,49 +164,6 @@ class BombermanGame {
+     }
+   }
+ 
+-  _createBombButtons() {
+-    const container = document.getElementById('bomb-buttons');
+-    container.innerHTML = '';
+-
+-    this.players.forEach((player, idx) => {
+-      const btn = document.createElement('button');
+-      btn.className = `bomb-btn player${idx + 1}`;
+-      btn.innerHTML = `
+-        <span>${player.token.emoji} Drop Bomb</span>
+-        <span class="key-hint">${this._getKeyLabel(player.controls.bomb)}</span>
+-      `;
+-      btn.addEventListener('click', () => this._handleBombInput(player));
+-      container.appendChild(btn);
+-    });
+-  }
+-
+-  _createOnScreenControls() {
+-    const container = document.getElementById('onscreen-controls');
+-    container.innerHTML = '';
+-    this.onscreenControls = [];
+-
+-    for (const player of this.players) {
+-      const osc = new OnScreenControls(container, player.id, player.controls);
+-      osc.onBomb(() => this._handleBombInput(player));
+-      this.onscreenControls.push(osc);
+-    }
+-
+-    container.classList.add('active');
+-  }
+-
+-  _getKeyLabel(code) {
+-    const labels = {
+-      'KeyA': 'A', 'KeyB': 'B', 'KeyC': 'C', 'KeyD': 'D', 'KeyE': 'E',
+-      'KeyF': 'F', 'KeyG': 'G', 'KeyH': 'H', 'KeyI': 'I', 'KeyJ': 'J',
+-      'KeyK': 'K', 'KeyL': 'L', 'KeyM': 'M', 'KeyN': 'N', 'KeyO': 'O',
+-      'KeyP': 'P', 'KeyQ': 'Q', 'KeyR': 'R', 'KeyS': 'S', 'KeyT': 'T',
+-      'KeyU': 'U', 'KeyV': 'V', 'KeyW': 'W', 'KeyX': 'X', 'KeyY': 'Y', 'KeyZ': 'Z',
+-      'Space': 'Space', 'Numpad0': 'Num0', 'Numpad4': 'Num4',
+-      'Numpad5': 'Num5', 'Numpad6': 'Num6', 'Numpad8': 'Num8'
+-    };
+-    return labels[code] || code;
+-  }
+-
+   _gameLoop(timestamp) {
+     if (!this.running) return;
+ 
+@@ -276,13 +229,6 @@ class BombermanGame {
+       }
+     }
+ 
+-    if (!dir) {
+-      const osc = this.onscreenControls.find(c => c.playerId === player.id);
+-      if (osc) {
+-        dir = osc.getDirection();
+-      }
+-    }
+-
+     if (!dir) {
+       player.clearQueue();
+       return;
+@@ -351,6 +297,7 @@ class BombermanGame {
+     }
+     this._renderPlayersHUD();
+   }
++}
+ 
+   _onExplosion(cells) {
+     for (const cell of cells) {
+@@ -445,11 +392,6 @@ class BombermanGame {
+     this.players = [];
+     this.powerups = [];
+     this.particles.clear();
+-    for (const osc of this.onscreenControls) {
+-      osc.destroy();
+-    }
+-    this.onscreenControls = [];
+-    document.getElementById('onscreen-controls').classList.remove('active');
+   }
+ 
+   _render() {
