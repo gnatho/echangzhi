@@ -31,23 +31,41 @@
             </div>
             
             <button id="start-btn" class="start-btn">Start Game</button>
+            <button id="controls-btn" class="controls-btn">Configure Controls</button>
             <a href="../../game.html" class="back-btn">← Back to Games</a>
+        </div>
+    </div>
+    
+    <div id="controls-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Configure Controls</h2>
+                <button id="close-controls" class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="controls-config"></div>
+            <div class="modal-footer">
+                <button id="reset-controls" class="reset-btn">Reset to Defaults</button>
+                <button id="save-controls" class="save-btn">Save</button>
+            </div>
+        </div>
+    </div>
         </div>
     </div>
     
     <div id="game-screen" class="screen">
         <div class="game-header">
             <div class="game-title">💣 Bomber Battle</div>
-            <div class="game-status" id="game-status">Player 1's Turn</div>
-            <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+            <div class="game-hud" id="players-hud"></div>
+            <div class="header-right">
+                <div class="game-status" id="game-status">Player 1's Turn</div>
+                <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
+            </div>
         </div>
         
         <div class="game-container">
             <div id="game-canvas-container">
                 <canvas id="game-canvas"></canvas>
             </div>
-            
-            <div class="players-hud" id="players-hud"></div>
         </div>
         
     </div>

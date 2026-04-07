@@ -1,3 +1,5 @@
+import { CONTROLLER_CONFIG } from './controllers.js';
+
 export const CONFIG = {
   TILE_SIZE: 48,
   GRID_WIDTH: 15,
@@ -26,12 +28,9 @@ export const CONFIG = {
     BOMB:  { emoji: '\uD83D\uDCA3', color: '#3498db' },
     SPEED: { emoji: '\u26A1', color: '#f1c40f' }
   },
-  CONTROLS: [
-    { up: 'ArrowUp',    down: 'ArrowDown',  left: 'ArrowLeft',  right: 'ArrowRight', bomb: 'Space' },
-    { up: 'KeyW',       down: 'KeyS',       left: 'KeyA',       right: 'KeyD',       bomb: 'KeyE' },
-    { up: 'KeyI',       down: 'KeyK',       left: 'KeyJ',       right: 'KeyL',       bomb: 'KeyO' },
-    { up: 'Numpad8',    down: 'Numpad5',    left: 'Numpad4',    right: 'Numpad6',    bomb: 'Numpad0' }
-  ],
+  get CONTROLS() {
+    return CONTROLLER_CONFIG.controllers;
+  },
   START_POSITIONS: [
     { x: 1, y: 1 },
     { x: 12, y: 11 },
