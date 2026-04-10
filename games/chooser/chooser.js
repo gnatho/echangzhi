@@ -828,4 +828,27 @@ document.addEventListener('keydown', e => {
 document.addEventListener('DOMContentLoaded', () => {
     initDOM();
     loadQuestionsFromJSON();
+
+    // Fullscreen button
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', function() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.warn('Fullscreen request failed:', err);
+                });
+                fullscreenBtn.title = 'Exit Fullscreen';
+            } else {
+                document.exitFullscreen();
+                fullscreenBtn.title = 'Toggle Fullscreen';
+            }
+        });
+    }
+
+    document.addEventListener('fullscreenchange', function() {
+        const btn = document.getElementById('fullscreen-btn');
+        if (btn) {
+            btn.title = document.fullscreenElement ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+        }
+    });
 });

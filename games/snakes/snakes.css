@@ -1049,3 +1049,20 @@ body {
     .player-name { font-size: 0.78rem; }
     .player-position { font-size: 0.7rem; }
 }
+
+/* Fullscreen Button */
+.fullscreen-btn {
+    background: none;
+    border: 2px solid #155a15;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: #155a15;
+    transition: all 0.2s;
+}
+
+.fullscreen-btn:hover {
+    background: #155a15;
+    color: white;
+}

@@ -683,3 +683,19 @@ body {
     #timer { font-size: 2rem; }
     .score-val { font-size: 1.4rem; }
 }
+
+/* Fullscreen Button */
+.fullscreen-btn {
+    background: #3498db;
+    border: 2px solid #2980b9;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s;
+}
+
+.fullscreen-btn:hover {
+    background: #2980b9;
+}

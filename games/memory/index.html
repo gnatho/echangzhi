@@ -63,6 +63,22 @@
         .stat { font-size: 1.2rem; font-weight: bold; color: #2c3e50; }
         .stat span { color: #9b59b6; }
 
+        /* Fullscreen Button */
+        .fullscreen-btn {
+            background: #9b59b6;
+            border: 2px solid #8e44ad;
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+        }
+        
+        .fullscreen-btn:hover {
+            background: #8e44ad;
+        }
+
         /* Game Area */
         #game-container {
             position: relative;
@@ -271,6 +287,7 @@
         <div id="game-title">🧩 Memory</div>
         <div class="stat">Score: <span id="score">0</span></div>
         <div class="stat">Pairs: <span id="pairs">0</span>/15</div>
+        <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
     </div>
 
     <div id="game-container">
@@ -584,6 +601,29 @@
         
         // Initialize game on load
         initGame();
+
+        // Fullscreen button
+        const fullscreenBtn = document.getElementById('fullscreen-btn');
+        if (fullscreenBtn) {
+            fullscreenBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => {
+                        console.warn('Fullscreen request failed:', err);
+                    });
+                    fullscreenBtn.title = 'Exit Fullscreen';
+                } else {
+                    document.exitFullscreen();
+                    fullscreenBtn.title = 'Toggle Fullscreen';
+                }
+            });
+        }
+
+        document.addEventListener('fullscreenchange', function() {
+            const btn = document.getElementById('fullscreen-btn');
+            if (btn) {
+                btn.title = document.fullscreenElement ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+            }
+        });
     </script>
 </body>
 </html>

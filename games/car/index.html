@@ -35,6 +35,24 @@
                 overflow: hidden;
             }
         }
+
+        /* Fullscreen Button */
+        .fullscreen-btn {
+            background: rgba(20, 20, 20, 0.85);
+            border: 2px solid #888;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #fff;
+            transition: all 0.2s;
+            pointer-events: auto;
+        }
+
+        .fullscreen-btn:hover {
+            background: #fff;
+            color: #000;
+        }
     </style>
 </head>
 <body>
@@ -45,6 +63,7 @@
             <div class="score" id="p1-score">0</div>
             <div class="controls-hint">A:GAS | B:LEFT | C:RIGHT | D:REV</div>
         </div>
+        <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
         <div class="player-card" id="p2-card">
             <div>PLAYER 2</div>
             <div class="score" id="p2-score">0</div>
@@ -259,6 +278,32 @@
     }
 
     loop();
+
+    // Fullscreen button
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
+
+    function toggleFullscreen() {
+        const btn = document.getElementById('fullscreen-btn');
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch(err => {
+                console.warn('Fullscreen request failed:', err);
+            });
+            btn.title = 'Exit Fullscreen';
+        } else {
+            document.exitFullscreen();
+            btn.title = 'Toggle Fullscreen';
+        }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+        const btn = document.getElementById('fullscreen-btn');
+        if (btn) {
+            btn.title = document.fullscreenElement ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+        }
+    });
 </script>
 </body>
 </html>

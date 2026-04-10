@@ -147,7 +147,33 @@ function initDOM() {
             d.previousElementSibling?.classList.remove('open');
         });
     });
+
+    // Fullscreen button
+    const fullscreenBtn = document.getElementById('fullscreen-btn');
+    if (fullscreenBtn) {
+        fullscreenBtn.addEventListener('click', toggleFullscreen);
+    }
 }
+
+function toggleFullscreen() {
+    const btn = document.getElementById('fullscreen-btn');
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(err => {
+            console.warn('Fullscreen request failed:', err);
+        });
+        btn.title = 'Exit Fullscreen';
+    } else {
+        document.exitFullscreen();
+        btn.title = 'Toggle Fullscreen';
+    }
+}
+
+document.addEventListener('fullscreenchange', () => {
+    const btn = document.getElementById('fullscreen-btn');
+    if (btn) {
+        btn.title = document.fullscreenElement ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+    }
+});
 
 function updatePlayerCount() {
     const count = parseInt(document.getElementById('num-players').value);
