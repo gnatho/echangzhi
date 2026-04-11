@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Funny Sounds</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        h1 {
+            font-size: 3rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .keys-container {
+            display: flex;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .key {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(145deg, #e94560, #c73e54);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: bold;
+            box-shadow: 0 6px 0 #9e2a3d, 0 10px 20px rgba(0,0,0,0.3);
+            cursor: pointer;
+            transition: all 0.1s;
+            user-select: none;
+        }
+        .key:active, .key.pressed {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #9e2a3d, 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .key:nth-child(2) { background: linear-gradient(145deg, #f39c12, #d68910); box-shadow: 0 6px 0 #b8780c, 0 10px 20px rgba(0,0,0,0.3); }
+        .key:nth-child(2):active, .key:nth-child(2).pressed { box-shadow: 0 2px 0 #b8780c, 0 4px 10px rgba(0,0,0,0.3); }
+        .key:nth-child(3) { background: linear-gradient(145deg, #2ecc71, #27ae60); box-shadow: 0 6px 0 #1e8449, 0 10px 20px rgba(0,0,0,0.3); }
+        .key:nth-child(3):active, .key:nth-child(3).pressed { box-shadow: 0 2px 0 #1e8449, 0 4px 10px rgba(0,0,0,0.3); }
+        .key:nth-child(4) { background: linear-gradient(145deg, #3498db, #2980b9); box-shadow: 0 6px 0 #1f618d, 0 10px 20px rgba(0,0,0,0.3); }
+        .key:nth-child(4):active, .key:nth-child(4).pressed { box-shadow: 0 2px 0 #1f618d, 0 4px 10px rgba(0,0,0,0.3); }
+        .key:nth-child(5) { background: linear-gradient(145deg, #9b59b6, #8e44ad); box-shadow: 0 6px 0 #6c3483, 0 10px 20px rgba(0,0,0,0.3); }
+        .key:nth-child(5):active, .key:nth-child(5).pressed { box-shadow: 0 2px 0 #6c3483, 0 4px 10px rgba(0,0,0,0.3); }
+        .instructions {
+            margin-top: 40px;
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Funny Sounds 🎵</h1>
+    <div class="keys-container">
+        <div class="key" data-key="a">A</div>
+        <div class="key" data-key="b">B</div>
+        <div class="key" data-key="c">C</div>
+        <div class="key" data-key="d">D</div>
+        <div class="key" data-key="e">E</div>
+    </div>
+    <p class="instructions">Press keys A, B, C, D, or E for funny sounds!</p>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const sounds = {
+            a: () => playBoing(),
+            b: () => playBurp(),
+            c: () => playPop(),
+            d: () => playSlide(),
+            e: () => playBoop()
+        };
+
+        function playBoing() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(600, audioCtx.currentTime + 0.1);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.3);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        }
+
+        function playBurp() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(100, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playPop() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.6, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playSlide() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(900, audioCtx.currentTime + 0.2);
+            osc.frequency.linearRampToValueAtTime(300, audioCtx.currentTime + 0.4);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.4);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.4);
+        }
+
+        function playBoop() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime + 0.05);
+            osc.frequency.setValueAtTime(400, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.15);
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            if (sounds[key]) {
+                sounds[key]();
+                const keyEl = document.querySelector(`.key[data-key="${key}"]`);
+                if (keyEl) keyEl.classList.add('pressed');
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            const key = e.key.toLowerCase();
+            const keyEl = document.querySelector(`.key[data-key="${key}"]`);
+            if (keyEl) keyEl.classList.remove('pressed');
+        });
+
+        document.querySelectorAll('.key').forEach(keyEl => {
+            keyEl.addEventListener('mousedown', () => {
+                const key = keyEl.dataset.key;
+                sounds[key]();
+                keyEl.classList.add('pressed');
+            });
+            keyEl.addEventListener('mouseup', () => keyEl.classList.remove('pressed'));
+            keyEl.addEventListener('mouseleave', () => keyEl.classList.remove('pressed'));
+        });
+    </script>
+</body>
+</html>

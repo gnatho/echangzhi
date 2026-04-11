@@ -139,6 +139,15 @@ function initDOM() {
     document.getElementById('grid-size').addEventListener('change', updateGridSize);
     updatePlayerCount();
     initializeTokenSelection();
+    initDiceController();
+    setupDiceKeyboardSupport();
+    
+    const rollBtn = document.getElementById('roll-dice-btn');
+    if (rollBtn) {
+        rollBtn.addEventListener('click', () => {
+            rollDice();
+        });
+    }
 
     // Close dropdowns when clicking outside
     document.addEventListener('click', () => {
@@ -778,92 +787,6 @@ function updateTurnIndicator() {
     }
 }
 
-// ── Dice ──────────────────────────────────────────────────────────────────────
-const DICE_FACES = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-
-function rollDice() {
-    if (!gameState.waitingForRoll || gameState.gameOver) return;
-
-    const player      = gameState.players[gameState.currentPlayer];
-    const dice        = document.getElementById('dice');
-    const diceValue   = document.getElementById('dice-value');
-    const diceOverlay = document.getElementById('dice-overlay');
-    const diceCube    = document.getElementById('dice-cube');
-    const faces       = diceCube.querySelectorAll('.dice-face');
-
-    if (player.skipNext) {
-        player.skipNext = false;
-        renderPlayerCards();
-        nextTurn();
-        return;
-    }
-
-    gameState.waitingForRoll = false;
-    playSound('roll');
-
-    diceOverlay.classList.add('active');
-    diceCube.classList.add('rolling');
-
-    const setFaceDots = (faceIndex, num) => {
-        const face = faces[faceIndex];
-        face.innerHTML = '';
-        const positions = {
-            1: [4],
-            2: [0, 8],
-            3: [0, 4, 8],
-            4: [0, 2, 6, 8],
-            5: [0, 2, 4, 6, 8],
-            6: [0, 2, 3, 5, 6, 8]
-        };
-        (positions[num] || [4]).forEach(pos => {
-            const dot = document.createElement('div');
-            dot.className = 'dot';
-            // Place dot in the right grid cell (empty others act as spacers)
-            dot.style.gridColumn = (pos % 3) + 1;
-            dot.style.gridRow    = Math.floor(pos / 3) + 1;
-            face.appendChild(dot);
-        });
-    };
-
-    setFaceDots(0, 1);
-    setFaceDots(1, 6);
-    setFaceDots(2, 3);
-    setFaceDots(3, 4);
-    setFaceDots(4, 2);
-    setFaceDots(5, 5);
-
-    const rollResult = Math.floor(Math.random() * 6) + 1;
-    let ticks = 0;
-
-    const interval = setInterval(() => {
-        ticks++;
-        [0, 1, 2, 3, 4, 5].forEach(i => {
-            const fake = Math.floor(Math.random() * 6) + 1;
-            setFaceDots(i, fake);
-        });
-        if (ticks >= 16) {
-            clearInterval(interval);
-            setFaceDots(0, rollResult);
-            setFaceDots(1, 7 - rollResult);
-            diceCube.classList.remove('rolling');
-            diceCube.classList.add('settling');
-
-            setTimeout(() => {
-                diceCube.classList.remove('settling');
-                diceCube.classList.add('shrinking');
-                setTimeout(() => {
-                    diceCube.classList.remove('shrinking');
-                    diceOverlay.classList.remove('active');
-                    dice.textContent = DICE_FACES[rollResult - 1];
-                    diceValue.textContent = rollResult;
-                    dice.classList.add('result-shown');
-                    setTimeout(() => movePlayer(rollResult), 450);
-                }, 500);
-            }, 350);
-        }
-    }, 70);
-}
-
 // ── Movement ──────────────────────────────────────────────────────────────────
 function movePlayer(steps) {
     const player      = gameState.players[gameState.currentPlayer];
@@ -1116,6 +1039,18 @@ document.addEventListener('keydown', e => {
     if (e.code === 'Space' && gameState.waitingForRoll && !gameState.gameOver) {
         e.preventDefault();
         rollDice();
+    }
+});
+
+// ── Dice Click Handler ────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    const diceElement = document.getElementById('dice');
+    if (diceElement) {
+        diceElement.addEventListener('click', () => {
+            if (gameState.waitingForRoll && !gameState.gameOver) {
+                rollDice();
+            }
+        });
     }
 });
 

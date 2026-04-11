@@ -23,10 +23,10 @@ const PLAYER_CONTROLS = {
     3: {
         name: "PLAYER 3",
         color: "#00ccff",
-        gas:   "7",
-        rev:   "6",
-        left:  "8",
-        right: "5"
+        gas:   "n",
+        rev:   "m",
+        left:  "o",
+        right: "l"
     },
     4: {
         name: "PLAYER 4",

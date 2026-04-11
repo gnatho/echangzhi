@@ -1,7 +1,7 @@
 const DEFAULT_CONTROLS = [
   { up: 'KeyD',       down: 'KeyC',       left: 'KeyE',       right: 'KeyB',       bomb: 'KeyA' },
   { up: 'KeyI',       down: 'KeyH',       left: 'KeyJ',       right: 'KeyG',       bomb: 'KeyF' },
-  { up: 'KeyI',       down: 'KeyK',       left: 'KeyJ',       right: 'KeyL',       bomb: 'KeyO' },
+  { up: 'KeyN',       down: 'KeyM',       left: 'KeyO',       right: 'KeyL',       bomb: 'KeyK' },
   { up: 'Numpad8',    down: 'Numpad5',    left: 'Numpad4',    right: 'Numpad6',    bomb: 'Numpad0' }
 ];
 
