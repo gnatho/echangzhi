@@ -9,6 +9,8 @@
 </head>
 <body>
 
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
     <div id="orientation-warning">
         <div class="rotate-icon">📱</div>
         <p>Please rotate your device to landscape mode</p>
@@ -191,5 +193,14 @@
     <script type="module" src="dice-controller.js"></script>
     <script src="questions.js"></script>
     <script src="snakes.js"></script>
+    <script>
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen();
+    }
+}
+</script>
 </body>
 </html>

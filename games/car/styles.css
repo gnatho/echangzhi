@@ -12,6 +12,24 @@ body {
     font-family: 'Share Tech Mono', monospace;
 }
 
+.fullscreen-btn {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    z-index: 1000;
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-size: 1rem;
+    color: white;
+    cursor: pointer;
+}
+
+.fullscreen-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
 canvas { display: block; }
 
 /* ===========================

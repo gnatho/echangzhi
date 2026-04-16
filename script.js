@@ -132,10 +132,21 @@ let starCellIndex = -1;
 
 // ==================== INITIALIZATION ====================
 function init() {
+    populateWordSetSelector('wordSetSelector');
+    populateLevelSelector('levelSelector');
+    populateUnitSelector('unitSelector', levelSelector.value);
     generateGrid();
     modeSelector.addEventListener('change', handleModeChange);
     selectorElement.addEventListener('change', generateGrid);
-    levelSelector.addEventListener('change', handleModeChange);
+    levelSelector.addEventListener('change', function() {
+        populateUnitSelector('unitSelector', this.value);
+        if (modeSelector.value === 'levels' || modeSelector.value === 'grammar') {
+            generateGrid();
+        }
+        if (modeSelector.value === 'grammar') {
+            generateGrammarActivity();
+        }
+    });
     unitSelector.addEventListener('change', handleModeChange);
     grammarActivitySelector.addEventListener('change', generateGrammarActivity);
     keyboardModeSelector.addEventListener('change', handleKeyboardModeChange);
@@ -166,11 +177,13 @@ function handleModeChange() {
         gridElement.style.display = 'grid';
         generateGrid();
     } else if (mode === 'levels') {
+        populateUnitSelector('unitSelector', levelSelector.value);
         levelSelector.style.display = 'block';
         unitSelector.style.display = 'block';
         gridElement.style.display = 'grid';
         generateGrid();
     } else if (mode === 'grammar') {
+        populateUnitSelector('unitSelector', levelSelector.value);
         levelSelector.style.display = 'block';
         unitSelector.style.display = 'block';
         grammarActivitySelector.style.display = 'block';
@@ -1417,4 +1430,12 @@ function showSpellingComplete() {
         </button>
     `;
     soundWin();
+}
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+    } else {
+        document.exitFullscreen();
+    }
 }

@@ -129,19 +129,33 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 30px;
-    margin-top: 10px;
-    border-radius: 12px;
+    padding: 8px 15px;
+    margin-top: 50px;
+    border-radius: 10px;
     z-index: 10;
+}
+
+.back-btn {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    z-index: 100;
+    background: rgba(255,255,255,0.7);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
 .stats-container {
     display: flex;
-    gap: 30px;
+    gap: 20px;
 }
 
 .stat {
-    font-size: 1.3rem;
+    font-size: 1rem;
     font-weight: bold;
 }
 
@@ -153,10 +167,10 @@ body {
 #timer-container {
     width: 100%;
     max-width: 900px;
-    height: 10px;
+    height: 6px;
     background: rgba(255, 255, 255, 0.5);
-    border-radius: 5px;
-    margin: 15px 0;
+    border-radius: 3px;
+    margin: 8px 0;
     overflow: hidden;
 }
 
@@ -184,11 +198,10 @@ body {
 /* Update the grid to remove height restrictions */
 #memory-grid {
     display: grid;
-    gap: 12px;
+    gap: 8px;
     width: 100%;
-    max-width: 800px;
-    /* Removed max-height to prevent cutting off rows */
-    margin-bottom: 20px; /* Add some breathing room at the bottom */
+    max-width: 600px;
+    margin-bottom: 10px;
 }
 /* Force tiles to be perfectly square */
 .tile {
@@ -220,8 +233,7 @@ body {
     justify-content: center;
     align-items: center;
     border-radius: 12px;
-    /* font-size will be calculated relative to tile width */
-    font-size: min(10vw, 4.5rem); 
+    font-size: min(8vw, 2.5rem); 
     user-select: none;
 }
 
@@ -229,7 +241,7 @@ body {
 .tile-back {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 2.5rem; 
+    font-size: 1.5rem; 
     border: 2px solid rgba(255,255,255,0.2);
 }
 
@@ -289,10 +301,12 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-    .tile-face { font-size: 2rem; }
-    .stats-container { gap: 15px; }
-    .stat { font-size: 1rem; }
-    #hud { padding: 10px 15px; }
+    .tile-face { font-size: 1.8rem; }
+    .stats-container { gap: 10px; }
+    .stat { font-size: 0.9rem; }
+    #hud { padding: 6px 10px; margin-top: 45px; }
+    #memory-grid { gap: 5px; max-width: 95vw; }
+    .back-btn { top: 8px; left: 8px; padding: 5px 10px; font-size: 0.9rem; }
 }
 
 #game-container {
@@ -300,8 +314,8 @@ body {
     width: 100%;
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Changed from center to start */
-    padding: 20px;
+    align-items: flex-start;
+    padding: 10px;
     perspective: 1000px;
-    overflow-y: auto; /* Allows scrolling if the grid is taller than the screen */
+    overflow: hidden;
 }

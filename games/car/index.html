@@ -8,6 +8,8 @@
 </head>
 <body>
 
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
     <!-- ===== MENU OVERLAY ===== -->
     <div id="menu-overlay">
         <div class="menu-bg"></div>
@@ -97,6 +99,15 @@
 
     <script src="controls.js"></script>
     <script src="game.js"></script>
+    <script>
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
 
 </body>
 </html>

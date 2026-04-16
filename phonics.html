@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Word Grid Game - Upgraded</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <div class="version">v1.1 (Upgraded)</div>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+
+    <div class="wheel-modal" id="wheelModal">
+        <button class="wheel-close-btn" onclick="closeWheelModal()">×</button>
+        <div class="wheel-container">
+            <div class="wheel-pointer"></div>
+            <div class="wheel" id="wheel"></div>
+            <button class="wheel-spin-btn" id="spinBtn" onclick="spinWheel()">SPIN</button>
+        </div>
+    </div>
+
+    <div id="fullscreenResult" class="fullscreen-result" onclick="handleOverlayClick(event)">
+        <div id="fsResultText" class="result-text">+3</div>
+        <button id="spinAgainBtn" class="spin-again-btn" onclick="spinWheelAgain(event)">Spin again</button>
+        <div class="tap-continue">Tap outside to close</div>
+    </div>
+
+    <div class="controls">
+        <select id="modeSelector">
+            <option value="phonemes">Phonics</option>
+            <option value="levels">Levels</option>
+            <option value="grammar">Grammar</option>
+        </select>
+        <select id="wordSetSelector"></select>
+        <select id="levelSelector" style="display: none;"></select>
+        <select id="unitSelector" style="display: none;"></select>
+        <select id="grammarActivitySelector" style="display: none;">
+            <option value="reorder">Sentence Reorder</option>
+            <option value="fill">Fill in Blank</option>
+            <option value="spelling">Spelling</option>
+        </select>
+        <select id="keyboardModeSelector" style="display: none;">
+            <option value="full">Full Keyboard</option>
+            <option value="limited">Only Given Letters</option>
+        </select>
+        <button id="pictureToggleBtn" class="control-btn" style="display: none; padding: 6px 12px; font-size: 14px;" onclick="togglePicture()">📷 Picture</button>
+        <button id="audioToggleBtn" class="control-btn" style="display: none; padding: 6px 12px; font-size: 14px;" onclick="toggleAudio()">🔊 Audio</button>
+        <button class="control-btn" onclick="resetGrid()">Reset Grid</button>
+    </div>
+
+    <div class="grid-container" id="grid"></div>
+    
+    <div class="grammar-container" id="grammarContainer" style="display: none;"></div>
+
+    <script src="data/phonems.js"></script>
+    <script src="data/level_words.js"></script>
+    <script src="data/grammar_ex.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

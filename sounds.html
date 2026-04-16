@@ -15,6 +15,21 @@
             justify-content: center;
             color: white;
         }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            z-index: 1000;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            padding: 10px 15px;
+            font-size: 1.2rem;
+            color: white;
+            cursor: pointer;
+        }
+
         h1 {
             font-size: 3rem;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
@@ -59,6 +74,9 @@
     </style>
 </head>
 <body>
+
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+
     <h1>🎵 Funny Sounds 🎵</h1>
     <div class="keys-container">
         <div class="key" data-key="a">A</div>
@@ -176,6 +194,14 @@
             keyEl.addEventListener('mouseup', () => keyEl.classList.remove('pressed'));
             keyEl.addEventListener('mouseleave', () => keyEl.classList.remove('pressed'));
         });
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
     </script>
 </body>
 </html>
