@@ -50,6 +50,9 @@ let selectedTiles = [];
 let matchedPairs = 0;
 let score = 0;
 let isProcessing = false;
+let timeRemaining = 0;
+let timerInterval = null;
+let totalTime = 0;
 
 // DOM Elements
 const screens = {
@@ -60,6 +63,7 @@ const gridEl = document.getElementById('memory-grid');
 const scoreEl = document.getElementById('score');
 const pairsEl = document.getElementById('pairs');
 const totalPairsEl = document.getElementById('total-pairs');
+const timerBar = document.getElementById('timer-bar');
 const overlay = document.getElementById('result-overlay');
 
 // --- GAME LOGIC ---
@@ -76,9 +80,11 @@ function startGame(difficulty) {
     screens.game.style.display = 'flex';
     
     setupBoard(config);
+    startTimer(config.time);
 }
 
 function returnToMenu() {
+    clearInterval(timerInterval);
     overlay.classList.remove('show');
     screens.game.style.display = 'none';
     screens.menu.classList.add('active');
@@ -106,6 +112,12 @@ function setupBoard(config) {
     // Configure Grid Layout dynamically
     gridEl.style.gridTemplateColumns = `repeat(${config.cols}, 1fr)`;
     gridEl.style.gridTemplateRows = `repeat(${config.rows}, 1fr)`;
+
+    // Set tile aspect ratio to fit the grid without overflow
+    const availableHeight = window.innerHeight - 45; // account for top bar
+    const availableWidth = window.innerWidth;
+    const aspect = (availableWidth * config.rows) / (availableHeight * config.cols);
+    document.documentElement.style.setProperty('--tile-aspect', aspect);
     
     // Generate Pairs
     let pairPool = [];
@@ -200,10 +212,29 @@ function checkMatch() {
 // --- TIMER & ENDGAME ---
 
 function startTimer(seconds) {
-    // Timer optional - not shown in optimized layout
+    clearInterval(timerInterval);
+    totalTime = seconds;
+    timeRemaining = seconds;
+    
+    timerBar.className = '';
+    timerBar.style.width = '100%';
+    
+    timerInterval = setInterval(() => {
+        timeRemaining--;
+        const percentage = (timeRemaining / totalTime) * 100;
+        timerBar.style.width = `${percentage}%`;
+        
+        if(percentage <= 30 && percentage > 10) timerBar.className = 'warning';
+        if(percentage <= 10) timerBar.className = 'danger';
+        
+        if (timeRemaining <= 0) {
+            endGame(false);
+        }
+    }, 1000);
 }
 
 function endGame(win) {
+    clearInterval(timerInterval);
     isProcessing = true;
     
     const title = document.getElementById('result-title');
@@ -214,7 +245,7 @@ function endGame(win) {
         SoundFX.win();
         title.textContent = "🎉 You Win!";
         title.style.color = "#2ecc71";
-        msg.textContent = `You found all ${matchedPairs} pairs!`;
+        msg.textContent = `You finished with ${timeRemaining} seconds to spare!`;
     } else {
         SoundFX.lose();
         title.textContent = "⏳ Time's Up!";
@@ -224,3 +255,9 @@ function endGame(win) {
     
     setTimeout(() => overlay.classList.add('show'), 500);
 }
+
+// Fullscreen
+document.getElementById('fullscreen-btn').addEventListener('click', () => {
+    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
+    else document.exitFullscreen();
+});

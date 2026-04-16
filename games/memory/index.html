@@ -11,22 +11,35 @@
     <button class="back-btn" onclick="window.location.href='../index.html'">← Back</button>
 
     <div id="menu-screen" class="screen active">
-        <div class="menu-card">
-            <h1>🧩 Memory</h1>
-            <p>Match all pairs!</p>
+        <div class="menu-card glass-panel">
+            <h1>🧩 Memory Deluxe</h1>
+            <p>Test your brain. Beat the clock.</p>
             
             <div class="difficulty-selector">
-                <button class="btn primary" onclick="startGame('easy')">Easy</button>
-                <button class="btn primary" onclick="startGame('medium')">Medium</button>
-                <button class="btn primary" onclick="startGame('hard')">Hard (30)</button>
+                <h2>Select Difficulty</h2>
+                <button class="btn primary" onclick="startGame('easy')">Easy (4x3)</button>
+                <button class="btn primary" onclick="startGame('medium')">Medium (4x4)</button>
+                <button class="btn primary" onclick="startGame('hard')">Hard (6x5)</button>
+            </div>
+            
+            <div class="controls-info">
+                <p>🎵 Sound effects are generated in real-time!</p>
             </div>
         </div>
     </div>
 
     <div id="game-screen" class="screen">
-        <div id="hud">
-            <span class="stat">Score: <span id="score">0</span></span>
-            <span class="stat">Pairs: <span id="pairs">0</span>/<span id="total-pairs">15</span></span>
+        <div id="hud" class="glass-panel">
+            <button class="btn icon-btn" onclick="returnToMenu()" title="Back to Menu">🔙</button>
+            <div class="stats-container">
+                <div class="stat">Score: <span id="score">0</span></div>
+                <div class="stat">Pairs: <span id="pairs">0</span>/<span id="total-pairs">15</span></div>
+            </div>
+            <button id="fullscreen-btn" class="btn icon-btn" title="Toggle Fullscreen">⛶</button>
+        </div>
+
+        <div id="timer-container">
+            <div id="timer-bar"></div>
         </div>
 
         <div id="game-container">
