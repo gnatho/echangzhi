@@ -83,6 +83,27 @@ body {
     margin-bottom: 30px;
 }
 
+.timer-setting {
+    margin-bottom: 25px;
+}
+
+.timer-setting label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 1.1rem;
+    color: #555;
+    cursor: pointer;
+}
+
+.timer-setting input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #8e44ad;
+    cursor: pointer;
+}
+
 /* Buttons */
 .btn {
     padding: 12px 24px;
@@ -124,6 +145,15 @@ body {
 .btn.icon-btn:hover {
     background: #8e44ad;
     color: white;
+}
+
+.btn.icon-btn.active {
+    background: #8e44ad;
+    color: white;
+}
+
+.btn.icon-btn:not(.active) {
+    opacity: 0.5;
 }
 
 /* HUD */
@@ -180,6 +210,8 @@ body {
     border-radius: 3px;
     margin: 4px 0;
     overflow: hidden;
+    position: relative;
+    display: block;
 }
 
 #timer-bar {
@@ -187,6 +219,32 @@ body {
     width: 100%;
     background: #2ecc71;
     transition: width 1s linear, background-color 0.3s;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#timer-bar {
+    height: 100%;
+    width: 100%;
+    background: #2ecc71;
+    transition: width 1s linear, background-color 0.3s;
+}
+
+#timer-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 0.7rem;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 0 0 2px white;
+    display: none;
+}
+
+#timer-container.show-text #timer-text {
+    display: block;
 }
 
 #timer-bar.warning { background: #f39c12; }
@@ -240,7 +298,7 @@ body {
     justify-content: center;
     align-items: center;
     border-radius: 12px;
-    font-size: min(8vw, 2.5rem); 
+    font-size: min(24vw, 7.5rem); 
     user-select: none;
 }
 
@@ -248,7 +306,7 @@ body {
 .tile-back {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    font-size: 1.5rem; 
+    font-size: 4.5rem; 
     border: 2px solid rgba(255,255,255,0.2);
 }
 
@@ -308,7 +366,7 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 600px) {
-    .tile-face { font-size: 1.8rem; }
+    .tile-face { font-size: 5.4rem; }
     .stats-container { gap: 10px; }
     .stat { font-size: 0.9rem; }
     #hud { padding: 6px 10px; }
