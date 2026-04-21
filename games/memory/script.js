@@ -50,6 +50,7 @@ let selectedTiles = [];
 let matchedPairs = 0;
 let score = 0;
 let isProcessing = false;
+let timerEnabled = true;
 let timeRemaining = 0;
 let timerInterval = null;
 let totalTime = 0;
@@ -64,6 +65,8 @@ const scoreEl = document.getElementById('score');
 const pairsEl = document.getElementById('pairs');
 const totalPairsEl = document.getElementById('total-pairs');
 const timerBar = document.getElementById('timer-bar');
+const timerContainer = document.getElementById('timer-container');
+const timerText = document.getElementById('timer-text');
 const overlay = document.getElementById('result-overlay');
 
 // --- GAME LOGIC ---
@@ -73,6 +76,7 @@ function startGame(difficulty) {
     
     currentDifficulty = difficulty;
     const config = DIFFICULTIES[difficulty];
+    timerEnabled = document.getElementById('timer-enabled').checked;
     
     // Switch screens
     screens.menu.classList.remove('active');
@@ -175,7 +179,7 @@ function checkMatch() {
         card2.element.classList.add('matched');
         
         matchedPairs++;
-        score += Math.max(10, Math.floor(timeRemaining * 1.5)); // Time bonus
+        score += timerEnabled ? Math.max(10, Math.floor(timeRemaining * 1.5)) : 10;
         
         scoreEl.textContent = score;
         pairsEl.textContent = matchedPairs;
@@ -211,16 +215,21 @@ function checkMatch() {
 
 // --- TIMER & ENDGAME ---
 
-function startTimer(seconds) {
+function startTimer(seconds, overrideTotalTime = null) {
+    if (!timerEnabled) return;
+    
     clearInterval(timerInterval);
-    totalTime = seconds;
+    totalTime = overrideTotalTime || seconds;
     timeRemaining = seconds;
     
+    timerContainer.classList.add('show-text');
     timerBar.className = '';
     timerBar.style.width = '100%';
+    timerText.textContent = seconds;
     
     timerInterval = setInterval(() => {
         timeRemaining--;
+        timerText.textContent = timeRemaining;
         const percentage = (timeRemaining / totalTime) * 100;
         timerBar.style.width = `${percentage}%`;
         
@@ -245,7 +254,7 @@ function endGame(win) {
         SoundFX.win();
         title.textContent = "🎉 You Win!";
         title.style.color = "#2ecc71";
-        msg.textContent = `You finished with ${timeRemaining} seconds to spare!`;
+        msg.textContent = timerEnabled ? `You finished with ${timeRemaining} seconds to spare!` : "You found all the pairs!";
     } else {
         SoundFX.lose();
         title.textContent = "⏳ Time's Up!";

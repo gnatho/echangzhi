@@ -15,6 +15,13 @@
             <h1>🧩 Memory Deluxe</h1>
             <p>Test your brain. Beat the clock.</p>
             
+            <div class="timer-setting">
+                <label>
+                    <input type="checkbox" id="timer-enabled" checked>
+                    <span>Enable Timer</span>
+                </label>
+            </div>
+            
             <div class="difficulty-selector">
                 <h2>Select Difficulty</h2>
                 <button class="btn primary" onclick="startGame('easy')">Easy (4x3)</button>
@@ -40,6 +47,7 @@
 
         <div id="timer-container">
             <div id="timer-bar"></div>
+            <div id="timer-text">45</div>
         </div>
 
         <div id="game-container">
