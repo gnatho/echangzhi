@@ -45,6 +45,8 @@ const DIFFICULTIES = {
 };
 
 let currentDifficulty = 'medium';
+let currentLevel = 0;
+let currentUnit = 0;
 let tiles = [];
 let selectedTiles = [];
 let matchedPairs = 0;
@@ -54,6 +56,67 @@ let timerEnabled = true;
 let timeRemaining = 0;
 let timerInterval = null;
 let totalTime = 0;
+
+// --- LEVEL & UNIT SELECTOR ---
+function initLevelUnitSelectors() {
+    const levelSelect = document.getElementById('level-select');
+    const unitSelect = document.getElementById('unit-select');
+    
+    if (!levelSelect || !unitSelect) return;
+    
+    // Populate levels
+    const levels = Object.keys(levelUnits).sort((a, b) => Number(a) - Number(b));
+    levels.forEach(level => {
+        const option = document.createElement('option');
+        option.value = level;
+        option.textContent = "Level " + level;
+        levelSelect.appendChild(option);
+    });
+    
+    // Set default values
+    currentLevel = levels.length > 0 ? Number(levels[0]) : 0;
+    levelSelect.value = currentLevel;
+    populateUnits(currentLevel);
+}
+
+function populateUnits(level) {
+    const unitSelect = document.getElementById('unit-select');
+    if (!unitSelect) return;
+    
+    unitSelect.innerHTML = '';
+    const units = Object.keys(levelUnits[level] || {}).sort((a, b) => Number(a) - Number(b));
+    
+    units.forEach(unit => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = "Unit " + unit;
+        unitSelect.appendChild(option);
+    });
+    
+    // Set default unit
+    if (units.length > 0) {
+        currentUnit = Number(units[0]);
+        unitSelect.value = currentUnit;
+    }
+}
+
+function onLevelChange() {
+    const levelSelect = document.getElementById('level-select');
+    if (levelSelect) {
+        currentLevel = Number(levelSelect.value);
+        populateUnits(currentLevel);
+    }
+}
+
+function onUnitChange() {
+    const unitSelect = document.getElementById('unit-select');
+    if (unitSelect) {
+        currentUnit = Number(unitSelect.value);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', initLevelUnitSelectors);
 
 // DOM Elements
 const screens = {
@@ -123,10 +186,33 @@ function setupBoard(config) {
     const aspect = (availableWidth * config.rows) / (availableHeight * config.cols);
     document.documentElement.style.setProperty('--tile-aspect', aspect);
     
-    // Generate Pairs
+    // Get words from selected level and unit
+    let words = [];
+    if (levelUnits[currentLevel] && levelUnits[currentLevel][currentUnit]) {
+        words = levelUnits[currentLevel][currentUnit].slice();
+    }
+    
+    // If not enough words, fill with icons from EMOJIS
     let pairPool = [];
-    for(let i = 0; i < numPairs; i++) {
-        pairPool.push(EMOJIS[i], EMOJIS[i]);
+    if (words.length >= numPairs) {
+        // Use only needed words
+        const selectedWords = words.slice(0, numPairs);
+        for(let i = 0; i < numPairs; i++) {
+            pairPool.push(selectedWords[i], selectedWords[i]);
+        }
+    } else {
+        // Use all available words, fill rest with icons
+        const wordsCount = words.length;
+        for(let i = 0; i < wordsCount; i++) {
+            pairPool.push(words[i], words[i]);
+        }
+        
+        // Fill remaining pairs with icons
+        const iconsNeeded = numPairs - wordsCount;
+        for(let i = 0; i < iconsNeeded; i++) {
+            const icon = EMOJIS[i % EMOJIS.length];
+            pairPool.push(icon, icon);
+        }
     }
     
     // Shuffle
@@ -134,20 +220,20 @@ function setupBoard(config) {
     
     // Render Tiles
     gridEl.innerHTML = '';
-    pairPool.forEach((emoji, index) => {
+    pairPool.forEach((content, index) => {
         const tile = document.createElement('div');
         tile.className = 'tile';
         tile.dataset.index = index;
         
         tile.innerHTML = `
             <div class="tile-face tile-back">?</div>
-            <div class="tile-face tile-front">${emoji}</div>
+            <div class="tile-face tile-front">${content}</div>
         `;
         
-        tile.addEventListener('click', () => handleTileClick(index, tile, emoji));
+        tile.addEventListener('click', () => handleTileClick(index, tile, content));
         gridEl.appendChild(tile);
         
-        tiles.push({ element: tile, symbol: emoji, matched: false, flipped: false });
+        tiles.push({ element: tile, symbol: content, matched: false, flipped: false });
     });
 }
 

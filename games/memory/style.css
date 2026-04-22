@@ -5,9 +5,17 @@
     padding: 0;
 }
 
+@font-face {
+    font-family: 'CastleDown';
+    src: url('../../static/fonts/castledown.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
     overflow: hidden;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: #2c3e50;
     height: 100vh;
     background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
@@ -81,6 +89,52 @@ body {
     flex-direction: column;
     gap: 15px;
     margin-bottom: 30px;
+}
+
+.level-unit-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 12px;
+}
+
+.selector-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+}
+
+.selector-row label {
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #555;
+    min-width: 50px;
+}
+
+.selector-row select {
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 2px solid #8e44ad;
+    border-radius: 8px;
+    background: white;
+    color: #333;
+    cursor: pointer;
+    min-width: 180px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.selector-row select:hover {
+    border-color: #9b59b6;
+}
+
+.selector-row select:focus {
+    outline: none;
+    border-color: #9b59b6;
+    box-shadow: 0 0 0 3px rgba(142, 68, 173, 0.2);
 }
 
 .timer-setting {
@@ -300,6 +354,10 @@ body {
     border-radius: 12px;
     font-size: min(24vw, 7.5rem); 
     user-select: none;
+    overflow: hidden;
+    word-wrap: break-word;
+    text-align: center;
+    padding: 4px;
 }
 
 /* Adjust the '?' size specifically if needed */
@@ -310,12 +368,13 @@ body {
     border: 2px solid rgba(255,255,255,0.2);
 }
 
-/* Ensure emojis fill the space */
+/* Ensure text/emoji fills the space */
 .tile-front {
     background: white;
     transform: rotateY(180deg);
     border: 3px solid #9b59b6;
-    line-height: 1; /* Helps centering larger emojis */
+    line-height: 1.1;
+    font-size: clamp(0.5rem, 4vw, 2.5rem);
 }
 
 .tile.matched .tile-front {
