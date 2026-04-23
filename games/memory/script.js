@@ -1,6 +1,60 @@
 // --- SYNTHESIZED AUDIO ENGINE ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 
+let audioEnabled = false;
+let invisibleMode = false;
+const audioCache = {};
+
+function normalizeWord(word) {
+    return word.toLowerCase().replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+}
+
+async function playWordAudio(word) {
+    if (!audioEnabled) return;
+    
+    const normalized = normalizeWord(word);
+    const audioPath = `/static/audio/${normalized}.mp3`;
+    
+    if (audioCache[audioPath]) {
+        audioCache[audioPath].currentTime = 0;
+        audioCache[audioPath].play().catch(() => {});
+        return;
+    }
+    
+    try {
+        const audio = new Audio(audioPath);
+        audioCache[audioPath] = audio;
+        await audio.play();
+    } catch (e) {
+    }
+}
+
+function toggleAudio() {
+    audioEnabled = !audioEnabled;
+    const btn = document.getElementById('audio-toggle');
+    btn.textContent = audioEnabled ? '🔊' : '🔇';
+}
+
+function toggleInvisibleMode() {
+    invisibleMode = !invisibleMode;
+    const btn = document.getElementById('invisible-toggle');
+    btn.classList.toggle('active', invisibleMode);
+    
+    document.querySelectorAll('.tile').forEach(tile => {
+        const front = tile.querySelector('.tile-front');
+        if (front) {
+            if (invisibleMode && front.textContent && !EMOJIS.includes(front.textContent)) {
+                front.classList.add('invisible-text');
+            } else {
+                front.classList.remove('invisible-text');
+            }
+        }
+    });
+}
+
+document.getElementById('audio-toggle')?.addEventListener('click', toggleAudio);
+document.getElementById('invisible-toggle')?.addEventListener('click', toggleInvisibleMode);
+
 const SoundFX = {
     playTone: (freq, type, duration, vol=0.1) => {
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -242,6 +296,7 @@ function handleTileClick(index, element, symbol) {
     
     // Flip card
     SoundFX.flip();
+    playWordAudio(symbol);
     tiles[index].flipped = true;
     element.classList.add('flipped');
     selectedTiles.push({ index, element, symbol });

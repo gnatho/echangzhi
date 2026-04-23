@@ -383,6 +383,11 @@ body {
     animation: pulse 0.5s ease;
 }
 
+.tile-front.invisible-text {
+    color: transparent;
+    text-shadow: 0 0 0 transparent;
+}
+
 @keyframes pulse {
     0% { transform: rotateY(180deg) scale(1); }
     50% { transform: rotateY(180deg) scale(1.1); }
