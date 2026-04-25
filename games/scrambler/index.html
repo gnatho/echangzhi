@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>ESL Sentence Builder</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & Root ─────────────────────────────────── */
+*, *::before, *::after {
+  margin: 0; padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+:root {
+  --bg-top:    #0f1b4c;
+  --bg-bot:    #2d0a5e;
+  --wb-bg:     #fdfcf8;
+  --blue:      #2f7ef5;
+  --blue-dk:   #1a5cd1;
+  --blue-sh:   #1044a8;
+  --green:     #18c77a;
+  --green-dk:  #0d9f5e;
+  --green-sh:  #097a47;
+  --purple:    #9b5cf6;
+  --purple-dk: #7c3aed;
+  --purple-sh: #5b21b6;
+  --amber:     #f59e0b;
+  --amber-dk:  #d97706;
+  --amber-sh:  #b45309;
+  --red:       #ef4444;
+  --card-r:    13px;
+  --font-head: 'Fredoka One', cursive;
+  --font-body: 'Baloo 2', cursive;
+}
+
+body {
+  font-family: var(--font-body);
+  background: linear-gradient(145deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+  height: 100dvh;
+  width:  100vw;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Starfield dots */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70%  8%, rgba(255,255,255,.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,.30) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,.20) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,.28) 0%, transparent 100%),
+    radial-gradient(2px 2px at 28% 48%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 85%, rgba(255,255,255,.20) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── Layout ───────────────────────────────────────── */
+#app {
+  position: relative;
+  z-index: 1;
+  width:  min(98vw, 1160px);
+  height: min(97dvh, 760px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* ─── Header ───────────────────────────────────────── */
+#header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 6px;
+  flex-shrink: 0;
+  height: 48px;
+}
+
+#title {
+  font-family: var(--font-head);
+  font-size: clamp(18px, 3.8vw, 30px);
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,.45);
+  letter-spacing: .5px;
+}
+
+#title span { color: #FFD96A; }
+
+/* Mode toggle pill */
+#mode-wrap {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 7px 15px;
+  border-radius: 50px;
+  backdrop-filter: blur(12px);
+}
+
+#mode-wrap span {
+  font-size: clamp(12px, 1.9vw, 15px);
+  font-weight: 800;
+  color: rgba(255,255,255,.85);
+}
+
+.sw { position: relative; display: inline-block; width: 48px; height: 26px; }
+.sw input { display: none; }
+.sw-track {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.22);
+  border-radius: 26px;
+  transition: background .3s;
+  cursor: pointer;
+}
+.sw-track::before {
+  content: '';
+  position: absolute;
+  width: 20px; height: 20px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.sw input:checked ~ .sw-track { background: rgba(155, 92, 246, .65); }
+.sw input:checked ~ .sw-track::before { transform: translateX(22px); }
+
+/* ─── Whiteboard ───────────────────────────────────── */
+#wb {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--wb-bg);
+  box-shadow:
+    0 0 0 2px rgba(255,255,255,.22),
+    0 24px 70px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.9);
+  touch-action: none;
+}
+
+/* Ruled lines */
+#wb::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    transparent, transparent 55px,
+    rgba(100,116,255,.07) 55px,
+    rgba(100,116,255,.07) 56px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Margin line – left red line like a real notebook */
+#wb::after {
+  content: '';
+  position: absolute;
+  top: 0; bottom: 0;
+  left: 68px;
+  width: 2px;
+  background: rgba(255, 80, 80, .12);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Watermark prompt */
+#wb-hint {
+  position: absolute;
+  bottom: 12px; right: 16px;
+  font-size: 12px; font-weight: 700;
+  color: rgba(0,0,0,.14);
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Mode badge */
+#badge {
+  position: absolute;
+  top: 11px; left: 16px;
+  font-size: 12px; font-weight: 800;
+  padding: 3px 11px;
+  border-radius: 20px;
+  pointer-events: none;
+  z-index: 20;
+  transition: background .3s, color .3s;
+}
+.badge-easy { background: rgba(47,126,245,.12); color: #1a5cd1; }
+.badge-hard { background: rgba(155,92,246,.12); color: #7c3aed; }
+
+/* Legend */
+#legend {
+  position: absolute;
+  bottom: 12px; left: 16px;
+  display: flex;
+  gap: 14px;
+  pointer-events: none;
+  z-index: 20;
+  transition: opacity .3s;
+}
+.leg {
+  display: flex; align-items: center; gap: 5px;
+  font-size: 11px; font-weight: 800;
+  color: rgba(0,0,0,.32);
+}
+.leg-dot { width: 11px; height: 11px; border-radius: 3px; }
+
+/* Snap-zone highlight (shown briefly when cards are close) */
+.snap-glow {
+  outline: 3px solid rgba(255, 220, 60, .7);
+  outline-offset: 2px;
+}
+
+/* ─── Word Cards ───────────────────────────────────── */
+.card {
+  position: absolute;
+  padding: 11px 19px;
+  border-radius: var(--card-r);
+  font-family: var(--font-head);
+  font-size: clamp(17px, 2.7vw, 26px);
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+  white-space: nowrap;
+  z-index: 10;
+  /* 3-D bevel effect */
+  box-shadow:
+    0 5px 0 rgba(0,0,0,.24),
+    0 7px 22px rgba(0,0,0,.14);
+  transition: box-shadow .12s, transform .12s, filter .15s;
+}
+
+/* ── Color themes ── */
+.card.q-card {
+  background: linear-gradient(155deg, #5da3ff 0%, var(--blue) 100%);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,0,60,.28);
+}
+.card.a-card {
+  background: linear-gradient(155deg, #3de89a 0%, var(--green) 100%);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(0,60,20,.28);
+}
+.card.h-card {
+  background: linear-gradient(155deg, #c084fc 0%, var(--purple) 100%);
+  color: #fff;
+  text-shadow: 0 1px 4px rgba(40,0,80,.28);
+}
+
+/* ── Dragging state ── */
+.card.dragging {
+  cursor: grabbing;
+  box-shadow:
+    0 2px 0 rgba(0,0,0,.18),
+    0 18px 45px rgba(0,0,0,.32);
+  transform: scale(1.07) rotate(-1.8deg);
+  z-index: 900 !important;
+}
+
+/* ── Animations ── */
+@keyframes kf-shake {
+  0%,100% { transform: translateX(0) rotate(0); }
+  14%     { transform: translateX(-11px) rotate(-2.5deg); }
+  28%     { transform: translateX(11px)  rotate(2.5deg); }
+  42%     { transform: translateX(-9px)  rotate(-1.5deg); }
+  57%     { transform: translateX(9px)   rotate(1.5deg); }
+  71%     { transform: translateX(-6px); }
+  85%     { transform: translateX(5px); }
+}
+.card.do-shake { animation: kf-shake .58s ease; }
+
+@keyframes kf-snap {
+  0%   { transform: scale(1); }
+  35%  { transform: scale(1.11); }
+  65%  { transform: scale(0.96); }
+  100% { transform: scale(1); }
+}
+.card.do-snap { animation: kf-snap .28s cubic-bezier(.34,1.56,.64,1); }
+
+@keyframes kf-celebrate {
+  0%,100% { filter: brightness(1); }
+  40%     { filter: brightness(1.4); }
+}
+.card.do-celebrate { animation: kf-celebrate .55s ease 3; }
+
+/* ─── Bottom bar ───────────────────────────────────── */
+#bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
+  height: 58px;
+}
+
+#check-btn {
+  height: 52px;
+  padding: 0 54px;
+  font-family: var(--font-head);
+  font-size: clamp(16px, 2.6vw, 21px);
+  letter-spacing: .4px;
+  color: #fff;
+  background: linear-gradient(140deg, var(--amber), var(--red));
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--amber-sh), 0 10px 28px rgba(245,158,11,.42);
+  text-shadow: 0 1px 4px rgba(0,0,0,.25);
+  transition: transform .12s, box-shadow .12s;
+  touch-action: manipulation;
+}
+#check-btn:hover  { transform: translateY(-2px); box-shadow: 0 8px 0 var(--amber-sh), 0 14px 32px rgba(245,158,11,.5); }
+#check-btn:active { transform: translateY(4px);  box-shadow: 0 2px 0 var(--amber-sh), 0 4px 14px rgba(245,158,11,.35); }
+
+#reset-btn {
+  height: 52px;
+  padding: 0 26px;
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.9vw, 17px);
+  font-weight: 800;
+  color: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.1);
+  border: 2px solid rgba(255,255,255,.28);
+  border-radius: 50px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background .2s, transform .1s;
+  touch-action: manipulation;
+}
+#reset-btn:hover  { background: rgba(255,255,255,.2); transform: translateY(-1px); }
+#reset-btn:active { transform: translateY(2px); }
+
+/* ─── Feedback Overlay ─────────────────────────────── */
+#fb-overlay {
+  position: fixed; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none;
+  z-index: 9999;
+}
+#fb-msg {
+  font-family: var(--font-head);
+  font-size: clamp(38px, 9vw, 78px);
+  color: #fff;
+  text-shadow: 0 4px 30px rgba(0,0,0,.38), 0 0 60px rgba(255,255,255,.4);
+  text-align: center;
+  opacity: 0;
+  transform: scale(.18) rotate(-12deg);
+  transition:
+    opacity .48s cubic-bezier(.34,1.56,.64,1),
+    transform .48s cubic-bezier(.34,1.56,.64,1);
+}
+#fb-msg.show { opacity: 1; transform: scale(1) rotate(0deg); }
+
+/* ─── Confetti ─────────────────────────────────────── */
+.cbit {
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  border-radius: 3px;
+}
+@keyframes kf-fall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(105vh) rotate(820deg) scale(.35); }
+}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <!-- Header -->
+  <div id="header">
+    <div id="title">✏️ <span>Sentence</span> Builder</div>
+    <div id="mode-wrap">
+      <span>Easy</span>
+      <label class="sw">
+        <input type="checkbox" id="mode-cb">
+        <span class="sw-track"></span>
+      </label>
+      <span>Hard</span>
+    </div>
+  </div>
+
+  <!-- Whiteboard -->
+  <div id="wb">
+    <div id="wb-hint">📖 Drag the cards to build the sentences!</div>
+    <div id="badge" class="badge-easy">⭐ Easy Mode</div>
+    <div id="legend">
+      <div class="leg"><div class="leg-dot" style="background:var(--blue)"></div>Question</div>
+      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Answer</div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div id="bar">
+    <button id="reset-btn">🔄 Reset</button>
+    <button id="check-btn">✅ Check Sentences!</button>
+  </div>
+</div>
+
+<!-- Feedback overlay -->
+<div id="fb-overlay"><div id="fb-msg"></div></div>
+
+<!-- Interact.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/interact.js/1.10.27/interact.min.js"></script>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════
+   CONSTANTS
+═══════════════════════════════════════════════════════ */
+const WORD_DATA = [
+  { text: 'Do',      grp: 0 },
+  { text: 'you',     grp: 0 },
+  { text: 'like',    grp: 0 },
+  { text: 'apples?', grp: 0 },
+  { text: 'Yes,',    grp: 1 },
+  { text: 'I',       grp: 1 },
+  { text: 'do.',     grp: 1 },
+];
+
+const CORRECT_Q  = 'Do you like apples?';
+const CORRECT_A  = 'Yes, I do.';
+const SNAP_DIST  = 70;    // px – edge distance to trigger snap
+const CARD_GAP   = 8;     // px – gap between snapped cards
+const V_TOLERANCE = 1.5;  // multiplier of card height for vertical snap tolerance
+
+/* ═══════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════ */
+let cards       = [];
+let nextGid     = 0;
+let hardMode    = false;
+let activeGid   = null;   // groupId currently being dragged
+let audioCtx    = null;
+
+/* ═══════════════════════════════════════════════════════
+   DOM REFS
+═══════════════════════════════════════════════════════ */
+const wbEl     = document.getElementById('wb');
+const badge    = document.getElementById('badge');
+const legend   = document.getElementById('legend');
+const fbMsg    = document.getElementById('fb-msg');
+const modeCb   = document.getElementById('mode-cb');
+const checkBtn = document.getElementById('check-btn');
+const resetBtn = document.getElementById('reset-btn');
+
+/* ═══════════════════════════════════════════════════════
+   AUDIO  (Web Audio API – no external files needed)
+═══════════════════════════════════════════════════════ */
+function ensureAudio() {
+  if (audioCtx) return;
+  try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+  catch (e) { console.warn('Audio unavailable', e); }
+}
+
+function tone(freq, type, vol, dur, delay = 0) {
+  if (!audioCtx) return;
+  const osc  = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.type = type;
+  osc.frequency.value = freq;
+  const t = audioCtx.currentTime + delay;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(vol, t + 0.018);
+  gain.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  osc.start(t);
+  osc.stop(t + dur + 0.05);
+}
+
+function playSuccess() {
+  // Bright C-major arpeggio + sustain chord
+  [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) =>
+    tone(f, 'sine', 0.22, 0.5, i * 0.12)
+  );
+}
+
+function playError() {
+  tone(260, 'sawtooth', 0.18, 0.38);
+  tone(210, 'sawtooth', 0.15, 0.32, 0.22);
+}
+
+function playSnap() {
+  tone(920, 'sine', 0.07, 0.14);
+}
+
+/* ═══════════════════════════════════════════════════════
+   CARD HELPERS
+═══════════════════════════════════════════════════════ */
+function cardClass(grp) {
+  if (hardMode) return 'card h-card';
+  return 'card ' + (grp === 0 ? 'q-card' : 'a-card');
+}
+
+function setPos(card) {
+  card.el.style.left = Math.round(card.x) + 'px';
+  card.el.style.top  = Math.round(card.y) + 'px';
+}
+
+function groupOf(gid) {
+  return cards.filter(c => c.groupId === gid);
+}
+
+function allGroups() {
+  const m = {};
+  cards.forEach(c => { (m[c.groupId] ??= []).push(c); });
+  return m;
+}
+
+function sortX(arr) {
+  return [...arr].sort((a, b) => (a.x + a.width * .5) - (b.x + b.width * .5));
+}
+
+function anim(el, cls) {
+  el.classList.remove(cls);
+  void el.offsetWidth;          // force reflow to restart
+  el.classList.add(cls);
+  el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
+}
+
+/* ═══════════════════════════════════════════════════════
+   INIT & SCATTER
+═══════════════════════════════════════════════════════ */
+function initCards() {
+  wbEl.querySelectorAll('.card').forEach(e => e.remove());
+  cards   = [];
+  nextGid = 0;
+  activeGid = null;
+
+  // Create elements off-screen so we can measure them
+  WORD_DATA.forEach((wd, i) => {
+    const el = document.createElement('div');
+    el.className = cardClass(wd.grp);
+    el.dataset.id = i;
+    el.textContent = wd.text;
+    el.style.left = '-9999px';
+    el.style.top  = '0px';
+    wbEl.appendChild(el);
+
+    const r = el.getBoundingClientRect();
+    cards.push({
+      id:      i,
+      text:    wd.text,
+      grp:     wd.grp,
+      el,
+      x: 0,   y: 0,
+      width:  r.width  || 90,
+      height: r.height || 52,
+      groupId: nextGid++,
+    });
+  });
+
+  scatterCards();
+}
+
+function scatterCards() {
+  const { width: W, height: H } = wbEl.getBoundingClientRect();
+  const pad = 20;
+
+  // Three loose horizontal zones
+  const zones = [
+    { y0: pad,           y1: H * .30 },
+    { y0: H * .34,       y1: H * .64 },
+    { y0: H * .68,       y1: H - pad },
+  ];
+
+  // Shuffle
+  const shuffled = [...cards].sort(() => Math.random() - .5);
+  const placed   = [];
+
+  shuffled.forEach((card, idx) => {
+    const z = zones[idx % zones.length];
+    let x, y, tries = 0;
+    do {
+      x = pad + Math.random() * (W - card.width  - pad * 2);
+      y = z.y0 + Math.random() * Math.max(2, z.y1 - z.y0 - card.height);
+      tries++;
+    } while (tries < 32 && placed.some(p =>
+      x < p.x + p.w + 18 && x + card.width  > p.x - 18 &&
+      y < p.y + p.h + 14 && y + card.height > p.y - 14
+    ));
+
+    card.x = x;
+    card.y = y;
+    card.el.style.zIndex = 10;
+    placed.push({ x, y, w: card.width, h: card.height });
+    setPos(card);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   SNAPPING
+═══════════════════════════════════════════════════════ */
+function trySnap(movedGid) {
+  const groups    = allGroups();
+  const movedGrp  = groups[movedGid];
+  if (!movedGrp) return;
+
+  let bestDist = SNAP_DIST;
+  let bestGid  = null;
+
+  for (const mc of movedGrp) {
+    const mcL  = mc.x;
+    const mcR  = mc.x + mc.width;
+    const mcCY = mc.y + mc.height * .5;
+
+    for (const [gidStr, gCards] of Object.entries(groups)) {
+      const gid = +gidStr;
+      if (gid === movedGid) continue;
+
+      for (const tc of gCards) {
+        const tcL  = tc.x;
+        const tcR  = tc.x + tc.width;
+        const tcCY = tc.y + tc.height * .5;
+
+        // Must be on roughly the same horizontal band
+        if (Math.abs(mcCY - tcCY) > mc.height * V_TOLERANCE) continue;
+
+        // Nearest-edge distance (right-of-mc to left-of-tc, or vice versa)
+        const d = Math.min(
+          Math.abs(mcR - tcL),
+          Math.abs(mcL - tcR)
+        );
+        if (d < bestDist) { bestDist = d; bestGid = gid; }
+      }
+    }
+  }
+
+  if (bestGid !== null) {
+    mergeGroups(movedGid, bestGid);
+    playSnap();
+  }
+}
+
+function mergeGroups(gid1, gid2) {
+  const groups = allGroups();
+  const all    = sortX([...(groups[gid1] ?? []), ...(groups[gid2] ?? [])]);
+
+  const { width: W, height: H } = wbEl.getBoundingClientRect();
+  const totalW = all.reduce((s, c) => s + c.width + CARD_GAP, -CARD_GAP);
+
+  // Average Y, clamped
+  const avgY = Math.max(6, Math.min(
+    H - all[0].height - 6,
+    all.reduce((s, c) => s + c.y, 0) / all.length
+  ));
+
+  // Starting X: prefer leftmost card position, but clamp so row fits
+  let curX = Math.max(6, Math.min(all[0].x, W - totalW - 6));
+
+  const newGid = nextGid++;
+  for (const card of all) {
+    card.x       = curX;
+    card.y       = avgY;
+    card.groupId = newGid;
+    curX        += card.width + CARD_GAP;
+    setPos(card);
+    anim(card.el, 'do-snap');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   INTERACT.JS DRAG SETUP  (called once)
+═══════════════════════════════════════════════════════ */
+function setupDrag() {
+  interact('.card').draggable({
+    inertia: false,
+    listeners: {
+      start(ev) {
+        ensureAudio();
+        if (audioCtx?.state === 'suspended') audioCtx.resume();
+
+        const id   = +ev.target.dataset.id;
+        const card = cards.find(c => c.id === id);
+        if (!card) return;
+
+        activeGid = card.groupId;
+        groupOf(activeGid).forEach(gc => {
+          gc.el.style.zIndex = 500;
+          gc.el.classList.add('dragging');
+        });
+      },
+
+      move(ev) {
+        if (activeGid === null) return;
+        const { width: W, height: H } = wbEl.getBoundingClientRect();
+
+        groupOf(activeGid).forEach(gc => {
+          gc.x = Math.max(0, Math.min(W - gc.width,  gc.x + ev.dx));
+          gc.y = Math.max(0, Math.min(H - gc.height, gc.y + ev.dy));
+          setPos(gc);
+        });
+      },
+
+      end() {
+        if (activeGid === null) return;
+        groupOf(activeGid).forEach(gc => {
+          gc.el.style.zIndex = 10;
+          gc.el.classList.remove('dragging');
+        });
+        trySnap(activeGid);
+        activeGid = null;
+      },
+    },
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   CHECK
+═══════════════════════════════════════════════════════ */
+function checkAnswer() {
+  ensureAudio();
+  if (audioCtx?.state === 'suspended') audioCtx.resume();
+
+  const groups = allGroups();
+  let okQ = false, okA = false;
+
+  for (const gCards of Object.values(groups)) {
+    const txt = sortX(gCards).map(c => c.text).join(' ');
+    if (txt === CORRECT_Q) okQ = true;
+    if (txt === CORRECT_A) okA = true;
+  }
+
+  if (okQ && okA) {
+    playSuccess();
+    spawnConfetti();
+    showFeedback('🎉 Excellent! 🎉', '#FFD96A');
+    cards.forEach(c => anim(c.el, 'do-celebrate'));
+  } else {
+    playError();
+    cards.forEach(c => anim(c.el, 'do-shake'));
+
+    // Subtle magenta tint on wrong multi-card groups
+    for (const gCards of Object.values(groups)) {
+      if (gCards.length < 2) continue;
+      const txt = sortX(gCards).map(c => c.text).join(' ');
+      if (txt !== CORRECT_Q && txt !== CORRECT_A) {
+        gCards.forEach(c => {
+          c.el.style.filter = 'saturate(2.2) hue-rotate(110deg)';
+          setTimeout(() => c.el.style.filter = '', 750);
+        });
+      }
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   FEEDBACK
+═══════════════════════════════════════════════════════ */
+function showFeedback(text, color) {
+  fbMsg.textContent  = text;
+  fbMsg.style.color  = color || '#fff';
+  fbMsg.classList.add('show');
+  setTimeout(() => fbMsg.classList.remove('show'), 2800);
+}
+
+function spawnConfetti() {
+  const palette = [
+    '#FF6B6B','#FFE66D','#4ECDC4','#45B7D1',
+    '#96CEB4','#FF9FF3','#FFEAA7','#81ECEC',
+    '#FDA7DF','#D980FA','#FFD700','#00CEC9',
+  ];
+  for (let i = 0; i < 72; i++) {
+    const bit  = document.createElement('div');
+    const col  = palette[i % palette.length];
+    const size = 7 + Math.random() * 10;
+    const dur  = 1.4 + Math.random() * 1.5;
+    const del  = Math.random() * .9;
+    const x    = Math.random() * 100;
+
+    bit.className = 'cbit';
+    bit.style.cssText = `
+      left:${x}vw; top:-18px;
+      width:${size}px; height:${size}px;
+      background:${col};
+      border-radius:${Math.random() > .45 ? '50%' : '3px'};
+      animation: kf-fall ${dur}s ${del}s ease-out forwards;
+    `;
+    document.body.appendChild(bit);
+    setTimeout(() => bit.remove(), (dur + del + .4) * 1000);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   MODE TOGGLE
+═══════════════════════════════════════════════════════ */
+function applyMode() {
+  hardMode = modeCb.checked;
+  badge.textContent  = hardMode ? '🔥 Hard Mode' : '⭐ Easy Mode';
+  badge.className    = hardMode ? 'badge-hard'   : 'badge-easy';
+  legend.style.opacity = hardMode ? '0' : '1';
+  cards.forEach(c => {
+    c.el.className = cardClass(c.grp);
+  });
+}
+
+/* ═══════════════════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════════════════ */
+modeCb.addEventListener('change',  applyMode);
+checkBtn.addEventListener('click', checkAnswer);
+resetBtn.addEventListener('click', initCards);
+
+// Block native scroll/zoom inside the whiteboard on touch devices
+wbEl.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+wbEl.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
+
+/* ═══════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════ */
+window.addEventListener('load', () => {
+  // Double-rAF ensures fonts are measured before we read card dimensions
+  requestAnimationFrame(() =>
+    requestAnimationFrame(() => {
+      initCards();
+      setupDrag();
+    })
+  );
+});
+</script>
+</body>
+</html>

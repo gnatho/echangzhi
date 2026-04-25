@@ -1,0 +1,42 @@
+const classes = [
+    "Little Explorers",
+    "ABCD Little Fish",
+    "Sunshine Elves",
+    "English",
+    "Little Stars",
+    "Dongshan",
+    "Speak and Spark",
+    "Young Talents",
+    "VIP",
+    "Word Wizards"
+];
+
+const students = [
+    { id: 22, username: "Noah", loginName: "noah", classId: 0 },
+    { id: 23, username: "Ridge", loginName: "ridge", classId: 0 },
+    { id: 24, username: "Aiden", loginName: "aiden", classId: 1 },
+    { id: 25, username: "Emily Jiao", loginName: "emilyj", classId: 1 },
+    { id: 26, username: "Ethan", loginName: "ethan", classId: 1 },
+    { id: 16, username: "Emily", loginName: "emily", classId: 2 },
+    { id: 17, username: "Joy", loginName: "joy", classId: 2 },
+    { id: 18, username: "Summer", loginName: "summer", classId: 2 },
+    { id: 36, username: "Albert", loginName: "albert", classId: 3 },
+    { id: 34, username: "Harry", loginName: "harry", classId: 3 },
+    { id: 35, username: "Tiger", loginName: "tiger", classId: 3 },
+    { id: 19, username: "Amber", loginName: "amber", classId: 4 },
+    { id: 39, username: "Angela", loginName: "angela", classId: 4 },
+    { id: 20, username: "Donnie", loginName: "donnie", classId: 4 },
+    { id: 29, username: "Draco", loginName: "draco", classId: 5 },
+    { id: 27, username: "Leo", loginName: "leo", classId: 5 },
+    { id: 30, username: "Stephen", loginName: "stephen", classId: 5 },
+    { id: 28, username: "Zoe", loginName: "zoe", classId: 5 },
+    { id: 32, username: "Amy", loginName: "amy", classId: 6 },
+    { id: 31, username: "Emma", loginName: "emma", classId: 6 },
+    { id: 33, username: "Mia", loginName: "mia", classId: 6 },
+    { id: 21, username: "Anna", loginName: "anna", classId: 7 },
+    { id: 37, username: "Vivian", loginName: "vivian", classId: 7 },
+    { id: 40, username: "Clarence", loginName: "clarence", classId: 8 },
+    { id: 45, username: "Jason", loginName: "", classId: 9 },
+    { id: 47, username: "Leo S", loginName: "", classId: 9 },
+    { id: 46, username: "Qiqi", loginName: "", classId: 9 }
+];

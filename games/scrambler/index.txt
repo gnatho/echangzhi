@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Scrambler – Word Game</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            color-scheme: light !important;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            html { color-scheme: light !important; }
+        }
+
+        body {
+            margin: 0;
+            overflow-x: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: #2c3e50;
+            min-height: 100vh;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.25);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.25);
+            border: none;
+            border-radius: 10px;
+            padding: 8px 15px;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+            z-index: 1000;
+            text-decoration: none;
+        }
+
+        #config-screen, #game-screen {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        #config-screen.active, #game-screen.active {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .config-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .config-container h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #11998e;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .form-group input[type="text"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input[type="text"]:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .toggle-label {
+            font-weight: 600;
+            color: #34495e;
+        }
+
+        .toggle-label span {
+            display: block;
+            font-size: 0.85rem;
+            color: #7f8c8d;
+            font-weight: 400;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.3s;
+            border-radius: 30px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 24px;
+            width: 24px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .toggle-slider {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(17, 153, 142, 0.4);
+        }
+
+        .start-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Game Screen */
+        .game-header {
+            width: 100%;
+            max-width: 1000px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 10px;
+        }
+
+        .game-stats {
+            background: rgba(255,255,255,0.95);
+            padding: 8px 20px;
+            border-radius: 10px;
+            display: flex;
+            gap: 20px;
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .game-stats span {
+            color: #11998e;
+        }
+
+        .game-zones {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            gap: 30px;
+            flex-direction: column;
+            flex: 1;
+            justify-content: center;
+        }
+
+        .zone {
+            flex: 1;
+            background: rgba(255,255,255,0.9);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .zone-header {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e0e0e0;
+            text-align: center;
+        }
+
+        .zone.sentence .zone-header {
+            color: #3498db;
+        }
+
+        .zone.answer .zone-header {
+            color: #9b59b6;
+        }
+
+        .fragment {
+            padding: 18px 30px;
+            border-radius: 30px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            cursor: grab;
+            touch-action: none;
+            transition: transform 0.1s, box-shadow 0.1s;
+            white-space: nowrap;
+            position: absolute;
+            z-index: 10;
+        }
+
+        .fragment:active {
+            cursor: grabbing;
+            transform: scale(1.08);
+            z-index: 100;
+        }
+
+        .fragment.dragging {
+            z-index: 1000;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            transform: scale(1.1);
+            transition: none;
+        }
+
+        /* Drop zones are now just visual backgrounds */
+        .zone {
+            flex: 1;
+            background: rgba(255,255,255,0.85);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .zone.sentence {
+            border: 4px dashed #3498db;
+        }
+
+        .zone.answer {
+            border: 4px dashed #9b59b6;
+        }
+
+        .zone-header {
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #e0e0e0;
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .zone.sentence .zone-header {
+            color: #3498db;
+        }
+
+        .zone.answer .zone-header {
+            color: #9b59b6;
+        }
+
+        /* Color Mode Colors */
+        .fragment.sentence-fragment {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .fragment.answer-fragment {
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            color: white;
+        }
+
+        /* No Color Mode - Uniform */
+        body.no-color-mode .fragment.sentence-fragment,
+        body.no-color-mode .fragment.answer-fragment {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+        }
+
+        /* Easy Mode Feedback */
+        .fragment.correct-flash {
+            animation: correctPulse 0.5s ease;
+        }
+
+        .fragment.incorrect-flash {
+            animation: incorrectShake 0.5s ease;
+        }
+
+        @keyframes correctPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(46, 204, 113, 0.7); }
+            50% { box-shadow: 0 0 0 15px rgba(46, 204, 113, 0); }
+        }
+
+        @keyframes incorrectShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); background: #e74c3c; }
+            40%, 80% { transform: translateX(8px); background: #e74c3c; }
+        }
+
+        .feedback-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .feedback-overlay.success {
+            background: rgba(46, 204, 113, 0.3);
+            opacity: 1;
+        }
+
+        .feedback-overlay.error {
+            background: rgba(231, 76, 60, 0.3);
+            opacity: 1;
+        }
+
+        .game-complete {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .game-complete.active {
+            display: flex;
+        }
+
+        .complete-content {
+            background: white;
+            padding: 40px 60px;
+            border-radius: 20px;
+            text-align: center;
+        }
+
+        .complete-content h2 {
+            color: #11998e;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .complete-content p {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            color: #34495e;
+        }
+
+        .complete-content button {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            margin: 5px;
+        }
+
+        .complete-content button.secondary {
+            background: #95a5a6;
+        }
+
+        @media (max-width: 768px) {
+            .game-zones {
+                flex-direction: column;
+            }
+
+            .config-container {
+                padding: 25px;
+            }
+
+            .game-header {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        /* Orientation Warning */
+        #orientation-warning {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            z-index: 5000;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #orientation-warning .rotate-icon {
+            font-size: 4rem;
+            animation: rotatePhone 1.5s infinite;
+        }
+
+        #orientation-warning p {
+            color: white;
+            font-size: 1.2rem;
+            margin-top: 20px;
+        }
+
+        @keyframes rotatePhone {
+            0%, 100% { transform: rotate(0deg); }
+            50% { transform: rotate(90deg); }
+        }
+
+        @media screen and (orientation: portrait) {
+            #orientation-warning {
+                display: flex;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
+    <a class="back-btn" href="../index.html">← Back</a>
+
+    <div id="feedback-overlay" class="feedback-overlay"></div>
+
+    <!-- Configuration Screen -->
+    <div id="config-screen" class="active">
+        <div class="config-container">
+            <h1>🧩 Scrambler</h1>
+
+            <div class="form-group">
+                <label for="target-sentence">Target Sentence</label>
+                <input type="text" id="target-sentence" placeholder="Enter the sentence to arrange" value="Do you like apples?">
+            </div>
+
+            <div class="form-group">
+                <label for="target-answer">Answer Phrase</label>
+                <input type="text" id="target-answer" placeholder="Enter the answer phrase" value="Yes I do">
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    Color Mode
+                    <span>Different colors for sentence and answer fragments</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="color-mode" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <div class="toggle-group">
+                <div class="toggle-label">
+                    Easy Mode
+                    <span>Visual and audio feedback on drop</span>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" id="easy-mode" checked>
+                    <span class="toggle-slider"></span>
+                </label>
+            </div>
+
+            <button class="start-btn" onclick="startGame()">Start Game</button>
+        </div>
+    </div>
+
+    <!-- Gameplay Screen -->
+    <div id="game-screen">
+        <div class="game-header">
+            <div class="game-stats">
+                <div>Moves: <span id="move-count">0</span></div>
+                <div>Placed: <span id="placed-count">0</span>/<span id="total-count">0</span></div>
+            </div>
+            <button onclick="resetGame()" style="padding: 10px 20px; background: rgba(255,255,255,0.9); border: none; border-radius: 10px; cursor: pointer; font-weight: 600;">↻ Reset</button>
+        </div>
+
+        <div class="game-zones">
+            <div class="zone sentence" id="sentence-zone">
+                <div class="zone-header">📝 Sentence</div>
+            </div>
+            <div class="zone answer" id="answer-zone">
+                <div class="zone-header">💡 Answer</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Complete Modal -->
+    <div id="game-complete" class="game-complete">
+        <div class="complete-content">
+            <h2>🎉 Congratulations!</h2>
+            <p>You completed the puzzle in <span id="final-moves">0</span> moves!</p>
+            <button onclick="playAgain()">Play Again</button>
+            <button class="secondary" onclick="goBack()">Back to Menu</button>
+        </div>
+    </div>
+
+    <!-- Orientation Warning -->
+    <div id="orientation-warning">
+        <div class="rotate-icon">📱</div>
+        <p>Please rotate your device to landscape mode</p>
+    </div>
+
+    <script>
+        // Game State
+        const state = {
+            sentenceWords: [],
+            answerWords: [],
+            sentenceOrder: [],
+            answerOrder: [],
+            colorMode: true,
+            easyMode: true,
+            moveCount: 0,
+            draggedElement: null,
+            dragOffset: { x: 0, y: 0 }
+        };
+
+        // Audio Context for sounds
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(frequency, duration, type = 'sine') {
+            if (!audioCtx) return;
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.frequency.value = frequency;
+            oscillator.type = type;
+            gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + duration);
+            oscillator.start(audioCtx.currentTime);
+            oscillator.stop(audioCtx.currentTime + duration);
+        }
+
+        function playSuccessSound() {
+            playSound(523.25, 0.1);
+            setTimeout(() => playSound(659.25, 0.1), 100);
+            setTimeout(() => playSound(783.99, 0.2), 200);
+        }
+
+        function playErrorSound() {
+            playSound(200, 0.15, 'square');
+            setTimeout(() => playSound(150, 0.25, 'square'), 150);
+        }
+
+        // Split text into words
+        function splitIntoWords(text) {
+            return text.trim().split(/\s+/).filter(w => w.length > 0);
+        }
+
+        // Shuffle array
+        function shuffle(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Create fragment element
+        function createFragment(word, index, isSentence) {
+            const frag = document.createElement('div');
+            frag.className = `fragment ${isSentence ? 'sentence-fragment' : 'answer-fragment'}`;
+            frag.textContent = word;
+            frag.dataset.word = word;
+            frag.dataset.index = index;
+            frag.dataset.type = isSentence ? 'sentence' : 'answer';
+            frag.dataset.isPlaced = 'false';
+
+            // Mouse events
+            frag.addEventListener('mousedown', handleDragStart);
+
+            // Touch events
+            frag.addEventListener('touchstart', handleTouchStart, { passive: false });
+
+            return frag;
+        }
+
+        // Magnetic snap distance
+        const MAGNET_DISTANCE = 60;
+
+        // Get all fragments in a zone
+        function getFragmentsInZone(zoneId) {
+            const zone = document.getElementById(zoneId);
+            return Array.from(zone.querySelectorAll('.fragment'));
+        }
+
+        // Find nearest fragment in same zone
+        function findNearestFragment(element, clientX, clientY) {
+            const type = element.dataset.type;
+            const zoneId = type === 'sentence' ? 'sentence-zone' : 'answer-zone';
+            const fragments = getFragmentsInZone(zoneId).filter(f => f !== element);
+
+            if (fragments.length === 0) return null;
+
+            let nearest = null;
+            let nearestDist = Infinity;
+
+            const elRect = {
+                left: clientX - 50,
+                top: clientY - 25,
+                right: clientX + 50,
+                bottom: clientY + 25,
+                centerX: clientX,
+                centerY: clientY
+            };
+
+            fragments.forEach(f => {
+                const rect = f.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const dist = Math.hypot(centerX - clientX, centerY - clientY);
+
+                if (dist < nearestDist && dist < MAGNET_DISTANCE * 2) {
+                    nearestDist = dist;
+                    nearest = { element: f, centerX, centerY };
+                }
+            });
+
+            return nearest;
+        }
+
+        // Snap to position relative to another fragment
+        function snapToFragment(element, targetElement, position) {
+            const targetRect = targetElement.getBoundingClientRect();
+            const zone = element.closest('.zone');
+            const zoneRect = zone.getBoundingClientRect();
+
+            let newLeft, newTop;
+
+            if (position === 'before') {
+                newLeft = targetRect.left - zoneRect.left - element.offsetWidth - 10;
+                newTop = targetRect.top - zoneRect.top;
+            } else {
+                newLeft = targetRect.right - zoneRect.left + 10;
+                newTop = targetRect.top - zoneRect.top;
+            }
+
+            element.style.left = newLeft + 'px';
+            element.style.top = newTop + 'px';
+        }
+
+        // Reorder fragments in a zone based on their positions
+        function reorderZone(zoneId) {
+            const zone = document.getElementById(zoneId);
+            const zoneRect = zone.getBoundingClientRect();
+            const fragments = Array.from(zone.querySelectorAll('.fragment'));
+
+            if (fragments.length === 0) return;
+
+            // Sort by horizontal position
+            fragments.sort((a, b) => {
+                const rectA = a.getBoundingClientRect();
+                const rectB = b.getBoundingClientRect();
+                return rectA.left - rectB.left;
+            });
+
+            // Reposition to be evenly spaced
+            const padding = 30;
+            const availableWidth = zoneRect.width - padding * 2;
+            const totalFragments = fragments.length;
+            const spacing = totalFragments > 1 ? availableWidth / (totalFragments - 1) : availableWidth / 2;
+
+            fragments.forEach((frag, i) => {
+                const left = padding + (i * spacing) - (frag.offsetWidth / 2) + (spacing / 2);
+                const top = (zoneRect.height - frag.offsetHeight) / 2 - 20;
+                frag.style.left = Math.max(padding, left) + 'px';
+                frag.style.top = Math.max(40, top) + 'px';
+            });
+        }
+
+        // Drag and Drop Handlers
+        function handleDragStart(e) {
+            e.preventDefault();
+            initAudio();
+            const element = e.target.closest('.fragment');
+            startDrag(element, e.clientX, e.clientY);
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            initAudio();
+            const element = e.target.closest('.fragment');
+            const touch = e.touches[0];
+            startDrag(element, touch.clientX, touch.clientY);
+        }
+
+        function startDrag(element, clientX, clientY) {
+            state.draggedElement = element;
+            element.classList.add('dragging');
+
+            const rect = element.getBoundingClientRect();
+            state.dragOffset.x = clientX - rect.left;
+            state.dragOffset.y = clientY - rect.top;
+
+            document.addEventListener('mousemove', handleDragMove);
+            document.addEventListener('mouseup', handleDragEnd);
+            document.addEventListener('touchmove', handleTouchMove, { passive: false });
+            document.addEventListener('touchend', handleTouchEnd);
+        }
+
+        function handleDragMove(e) {
+            if (!state.draggedElement) return;
+            e.preventDefault();
+            moveDrag(e.clientX, e.clientY);
+        }
+
+        function handleTouchMove(e) {
+            if (!state.draggedElement) return;
+            e.preventDefault();
+            const touch = e.touches[0];
+            moveDrag(touch.clientX, touch.clientY);
+        }
+
+        function moveDrag(clientX, clientY) {
+            const el = state.draggedElement;
+            const zone = el.closest('.zone');
+            const zoneRect = zone.getBoundingClientRect();
+
+            // Allow free movement within reasonable bounds
+            let newLeft = clientX - state.dragOffset.x - zoneRect.left;
+            let newTop = clientY - state.dragOffset.y - zoneRect.top;
+
+            // Keep within zone bounds with some padding
+            const padding = 10;
+            newLeft = Math.max(padding, Math.min(newLeft, zoneRect.width - el.offsetWidth - padding));
+            newTop = Math.max(padding, Math.min(newTop, zoneRect.height - el.offsetHeight - padding));
+
+            el.style.left = newLeft + 'px';
+            el.style.top = newTop + 'px';
+        }
+
+        function handleDragEnd(e) {
+            endDrag(e.clientX, e.clientY);
+        }
+
+        function handleTouchEnd(e) {
+            const touch = e.changedTouches[0];
+            endDrag(touch.clientX, touch.clientY);
+        }
+
+        function endDrag(clientX, clientY) {
+            const element = state.draggedElement;
+            if (!element) return;
+
+            element.classList.remove('dragging');
+
+            // Find which zone the drop is in
+            const zones = document.querySelectorAll('.zone');
+            let targetZone = null;
+
+            zones.forEach(zone => {
+                const rect = zone.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right &&
+                    clientY >= rect.top && clientY <= rect.bottom) {
+                    targetZone = zone;
+                }
+            });
+
+            if (targetZone) {
+                const zoneId = targetZone.id;
+                const elementType = element.dataset.type;
+                const targetType = zoneId === 'sentence-zone' ? 'sentence' : 'answer';
+
+                // Only allow dropping in matching zone type
+                if (elementType !== targetType) {
+                    // Wrong zone - just reorder in current zone
+                    const currentZone = elementType === 'sentence' ? 'sentence-zone' : 'answer-zone';
+                    reorderZone(currentZone);
+                    if (state.easyMode) {
+                        playErrorSound();
+                    }
+                    document.removeEventListener('mousemove', handleDragMove);
+                    document.removeEventListener('mouseup', handleDragEnd);
+                    document.removeEventListener('touchmove', handleTouchMove);
+                    document.removeEventListener('touchend', handleTouchEnd);
+                    state.draggedElement = null;
+                    checkWin();
+                    return;
+                }
+
+                element.dataset.isPlaced = 'true';
+                state.moveCount++;
+                updateStats();
+
+                // Check for magnetic snap to other words in the same zone
+                const nearest = findNearestFragment(element, clientX, clientY);
+
+                if (nearest) {
+                    const elementCenterX = element.getBoundingClientRect().left + element.offsetWidth / 2;
+                    const position = elementCenterX < nearest.centerX ? 'before' : 'after';
+                    snapToFragment(element, nearest.element, position);
+                }
+
+                // Reorder all fragments in the zone
+                reorderZone(zoneId);
+
+                if (state.easyMode) {
+                    playSuccessSound();
+                }
+            }
+
+            document.removeEventListener('mousemove', handleDragMove);
+            document.removeEventListener('mouseup', handleDragEnd);
+            document.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchend', handleTouchEnd);
+
+            state.draggedElement = null;
+
+            // Check win condition
+            checkWin();
+        }
+
+        function checkWin() {
+            const sentenceZone = document.getElementById('sentence-zone');
+            const answerZone = document.getElementById('answer-zone');
+
+            const sentenceFragments = sentenceZone.querySelectorAll('.fragment');
+            const answerFragments = answerZone.querySelectorAll('.fragment');
+
+            // Check if all fragments are placed
+            if (sentenceFragments.length + answerFragments.length !== state.sentenceWords.length + state.answerWords.length) {
+                return;
+            }
+
+            // Sort fragments by horizontal position (left to right)
+            const sortedSentence = Array.from(sentenceFragments).sort((a, b) => {
+                return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
+            });
+
+            const sortedAnswer = Array.from(answerFragments).sort((a, b) => {
+                return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
+            });
+
+            // Verify sentence order
+            let sentenceCorrect = true;
+            const sentenceArr = sortedSentence.map(f => f.dataset.index);
+            for (let i = 0; i < sentenceArr.length; i++) {
+                if (parseInt(sentenceArr[i]) !== i) {
+                    sentenceCorrect = false;
+                    break;
+                }
+            }
+
+            // Verify answer order
+            let answerCorrect = true;
+            const answerArr = sortedAnswer.map(f => f.dataset.index);
+            for (let i = 0; i < answerArr.length; i++) {
+                if (parseInt(answerArr[i]) !== i) {
+                    answerCorrect = false;
+                    break;
+                }
+            }
+
+            if (sentenceCorrect && answerCorrect) {
+                showWinScreen();
+            }
+        }
+
+        function showWinScreen() {
+            document.getElementById('final-moves').textContent = state.moveCount;
+            document.getElementById('game-complete').classList.add('active');
+            playSuccessSound();
+        }
+
+        function updateStats() {
+            document.getElementById('move-count').textContent = state.moveCount;
+            const placed = document.querySelectorAll('#sentence-zone .fragment, #answer-zone .fragment').length;
+            const total = state.sentenceWords.length + state.answerWords.length;
+            document.getElementById('placed-count').textContent = placed;
+            document.getElementById('total-count').textContent = total;
+        }
+
+        function startGame() {
+            const sentence = document.getElementById('target-sentence').value.trim();
+            const answer = document.getElementById('target-answer').value.trim();
+
+            if (!sentence || !answer) {
+                alert('Please enter both a sentence and an answer.');
+                return;
+            }
+
+            state.sentenceWords = splitIntoWords(sentence);
+            state.answerWords = splitIntoWords(answer);
+            state.colorMode = document.getElementById('color-mode').checked;
+            state.easyMode = document.getElementById('easy-mode').checked;
+            state.moveCount = 0;
+
+            // Apply color mode
+            if (!state.colorMode) {
+                document.body.classList.add('no-color-mode');
+            } else {
+                document.body.classList.remove('no-color-mode');
+            }
+
+            // Setup game screen
+            setupGameScreen();
+
+            // Switch screens
+            document.getElementById('config-screen').classList.remove('active');
+            document.getElementById('game-screen').classList.add('active');
+        }
+
+        function setupGameScreen() {
+            const sentenceZone = document.getElementById('sentence-zone');
+            const answerZone = document.getElementById('answer-zone');
+
+            // Clear zones but keep the header
+            sentenceZone.innerHTML = '<div class="zone-header">📝 Sentence</div>';
+            answerZone.innerHTML = '<div class="zone-header">💡 Answer</div>';
+
+            // Shuffle fragments
+            const shuffledSentence = shuffle(state.sentenceWords.map((w, i) => ({ word: w, index: i })));
+            const shuffledAnswer = shuffle(state.answerWords.map((w, i) => ({ word: w, index: i })));
+
+            // Create sentence fragments - spread horizontally
+            shuffledSentence.forEach(({ word, index }) => {
+                const frag = createFragment(word, index, true);
+                frag.style.position = 'absolute';
+                sentenceZone.appendChild(frag);
+            });
+
+            // Create answer fragments - spread horizontally
+            shuffledAnswer.forEach(({ word, index }) => {
+                const frag = createFragment(word, index, false);
+                frag.style.position = 'absolute';
+                answerZone.appendChild(frag);
+            });
+
+            // Initial layout
+            setTimeout(() => {
+                reorderZone('sentence-zone');
+                reorderZone('answer-zone');
+            }, 50);
+
+            updateStats();
+        }
+
+        function resetGame() {
+            setupGameScreen();
+            document.getElementById('game-complete').classList.remove('active');
+        }
+
+        function playAgain() {
+            document.getElementById('game-complete').classList.remove('active');
+            resetGame();
+        }
+
+        function goBack() {
+            document.getElementById('game-complete').classList.remove('active');
+            document.getElementById('game-screen').classList.remove('active');
+            document.getElementById('config-screen').classList.add('active');
+        }
+
+        function toggleFullscreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(() => {});
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
