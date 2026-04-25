@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ESL Baamboozle Game</title>
+    <!-- Tailwind CSS v4 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Canvas Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Google Font: Fredoka (Perfectly playful and readable for young learners) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Fredoka', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior: none;
+        }
+        [x-cloak] { display: none !important; }
+        
+        .tile-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .animate-pulse-slow {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+        
+        @keyframes slideUp {
+            0% { transform: translateY(20px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+        
+        .animate-slide-up {
+            animation: slideUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
+</head>
+<body class="bg-amber-50 text-slate-800 min-h-screen select-none" x-data="gameApp()">
+
+    <!-- 1. MAIN MENU SCREEN -->
+    <div x-show="gameState === 'menu'" class="min-h-screen flex flex-col items-center justify-center p-4 md:p-8" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <div class="max-w-4xl w-full bg-white rounded-3xl shadow-xl border-4 border-slate-200 p-6 md:p-10 flex flex-col items-center gap-8 relative overflow-hidden">
+            <!-- Decorative Background Shapes -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-amber-200 rounded-full opacity-30 blur-2xl"></div>
+            <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-rose-200 rounded-full opacity-30 blur-2xl"></div>
+            
+            <!-- Game Title -->
+            <div class="text-center z-10">
+                <h1 class="text-5xl md:text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-500 via-orange-500 to-rose-500 tracking-tight drop-shadow-sm select-none">
+                    ESL BAAMBOOZLE
+                </h1>
+                <p class="text-lg md:text-xl font-bold text-slate-400 mt-1 flex items-center justify-center gap-1">
+                    <span>⚡ Single-Tablet Shared Classroom Game</span>
+                </p>
+            </div>
+            
+            <!-- Step 1: Theme Selection -->
+            <div class="w-full z-10">
+                <h3 class="text-xl md:text-2xl font-black text-slate-700 mb-4 flex items-center gap-2">
+                    <span class="bg-amber-100 text-amber-600 w-8 h-8 rounded-full flex items-center justify-center text-base">1</span>
+                    Choose a Theme
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Theme: Animals -->
+                    <button @click="selectedTheme = 'animals'" 
+                            :class="selectedTheme === 'animals' ? 'border-amber-500 bg-amber-50 shadow-md scale-102' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+                            class="border-4 rounded-3xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 select-none group min-h-32">
+                        <div class="text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-150">🦁</div>
+                        <div class="text-2xl font-black text-slate-800">Animals</div>
+                        <div class="text-sm text-slate-400 font-bold">24 Questions</div>
+                    </button>
+                    
+                    <!-- Theme: Verbs -->
+                    <button @click="selectedTheme = 'verbs'" 
+                            :class="selectedTheme === 'verbs' ? 'border-rose-500 bg-rose-50 shadow-md scale-102' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+                            class="border-4 rounded-3xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 select-none group min-h-32">
+                        <div class="text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-150">🏃‍♂️</div>
+                        <div class="text-2xl font-black text-slate-800">Actions</div>
+                        <div class="text-sm text-slate-400 font-bold">24 Questions</div>
+                    </button>
+                    
+                    <!-- Theme: Food -->
+                    <button @click="selectedTheme = 'food'" 
+                            :class="selectedTheme === 'food' ? 'border-emerald-500 bg-emerald-50 shadow-md scale-102' : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+                            class="border-4 rounded-3xl p-5 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all duration-150 select-none group min-h-32">
+                        <div class="text-5xl md:text-6xl group-hover:scale-110 transition-transform duration-150">🍕</div>
+                        <div class="text-2xl font-black text-slate-800">Food</div>
+                        <div class="text-sm text-slate-400 font-bold">24 Questions</div>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Step 2: Player Count & Game Mode -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full z-10">
+                <!-- Player Count Stepper -->
+                <div class="bg-slate-50 rounded-2xl border-4 border-slate-200 p-5 flex flex-col items-center">
+                    <h4 class="text-lg md:text-xl font-black text-slate-700 mb-3 w-full flex items-center gap-2">
+                        <span class="bg-sky-100 text-sky-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">2</span>
+                        Number of Students
+                    </h4>
+                    <div class="flex items-center justify-center gap-6 py-2">
+                        <button @click="if(playerCount > 2) playerCount--" 
+                                :disabled="playerCount <= 2"
+                                :class="playerCount <= 2 ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:bg-slate-200'"
+                                class="w-16 h-16 rounded-2xl border-4 text-3xl font-black transition-all cursor-pointer flex items-center justify-center shadow-sm select-none">
+                            −
+                        </button>
+                        <span class="text-4xl font-black text-slate-800 w-10 text-center select-none" x-text="playerCount"></span>
+                        <button @click="if(playerCount < 4) playerCount++" 
+                                :disabled="playerCount >= 4"
+                                :class="playerCount >= 4 ? 'bg-slate-200 text-slate-400 border-slate-300 cursor-not-allowed' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100 hover:border-slate-400 active:bg-slate-200'"
+                                class="w-16 h-16 rounded-2xl border-4 text-3xl font-black transition-all cursor-pointer flex items-center justify-center shadow-sm select-none">
+                            +
+                        </button>
+                    </div>
+                    <div class="text-center text-slate-400 text-xs font-semibold mt-2">Shared tablet setup (2 to 4 players)</div>
+                </div>
+                
+                <!-- Game Mode Toggle -->
+                <div class="bg-slate-50 rounded-2xl border-4 border-slate-200 p-5 flex flex-col">
+                    <h4 class="text-lg md:text-xl font-black text-slate-700 mb-3 flex items-center gap-2">
+                        <span class="bg-violet-100 text-violet-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">3</span>
+                        Select Game Mode
+                    </h4>
+                    <div class="grid grid-cols-2 gap-3 h-full py-2 flex-1">
+                        <button @click="mode = 'easy'"
+                                :class="mode === 'easy' ? 'bg-violet-500 border-violet-600 text-white font-black shadow-md' : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-100 hover:border-slate-300'"
+                                class="rounded-2xl border-4 text-lg transition-all cursor-pointer select-none py-3 flex flex-col items-center justify-center gap-1 border-b-8">
+                            <span class="text-xl">📝 Easy</span>
+                            <span class="text-xs opacity-80 font-bold">(Multiple Choice)</span>
+                        </button>
+                        <button @click="mode = 'hard'"
+                                :class="mode === 'hard' ? 'bg-violet-500 border-violet-600 text-white font-black shadow-md' : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-100 hover:border-slate-300'"
+                                class="rounded-2xl border-4 text-lg transition-all cursor-pointer select-none py-3 flex flex-col items-center justify-center gap-1 border-b-8">
+                            <span class="text-xl">🧠 Hard</span>
+                            <span class="text-xs opacity-80 font-bold">(Question Only)</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Step 3: Grid Size -->
+            <div class="w-full bg-slate-50 rounded-2xl border-4 border-slate-200 p-5 z-10">
+                <h4 class="text-lg md:text-xl font-black text-slate-700 mb-3 flex items-center gap-2">
+                    <span class="bg-emerald-100 text-emerald-600 w-6 h-6 rounded-full flex items-center justify-center text-sm">4</span>
+                    Choose Grid Size
+                </h4>
+                <div class="grid grid-cols-3 gap-3">
+                    <button @click="gridSize = 8"
+                            :class="gridSize === 8 ? 'bg-emerald-500 border-emerald-600 text-white font-black shadow-md' : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-100 hover:border-slate-300'"
+                            class="rounded-2xl border-4 text-lg transition-all cursor-pointer select-none py-3 flex flex-col items-center justify-center border-b-8">
+                        <span class="text-xl font-black">8</span>
+                        <span class="text-xs opacity-80 font-bold">Tiles (Quick)</span>
+                    </button>
+                    <button @click="gridSize = 16"
+                            :class="gridSize === 16 ? 'bg-emerald-500 border-emerald-600 text-white font-black shadow-md' : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-100 hover:border-slate-300'"
+                            class="rounded-2xl border-4 text-lg transition-all cursor-pointer select-none py-3 flex flex-col items-center justify-center border-b-8">
+                        <span class="text-xl font-black">16</span>
+                        <span class="text-xs opacity-80 font-bold">Tiles (Standard)</span>
+                    </button>
+                    <button @click="gridSize = 24"
+                            :class="gridSize === 24 ? 'bg-emerald-500 border-emerald-600 text-white font-black shadow-md' : 'bg-white border-slate-200 text-slate-600 font-bold hover:bg-slate-100 hover:border-slate-300'"
+                            class="rounded-2xl border-4 text-lg transition-all cursor-pointer select-none py-3 flex flex-col items-center justify-center border-b-8">
+                        <span class="text-xl font-black">24</span>
+                        <span class="text-xs opacity-80 font-bold">Tiles (Full)</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Start Game Button -->
+            <button @click="setupGame()" 
+                    class="w-full bg-green-500 hover:bg-green-600 active:translate-y-1 text-white font-black py-5 px-8 rounded-2xl text-2xl md:text-3xl shadow-xl border-b-8 border-green-700 transition-all cursor-pointer flex items-center justify-center gap-3 z-10 select-none">
+                🚀 START GAME 🚀
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- 2. GAME BOARD SCREEN -->
+    <div x-show="gameState === 'playing'" class="min-h-screen pt-24 pb-28 flex flex-col" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100">
+        
+        <!-- Fixed Top Banner for Turn Tracking -->
+        <div class="fixed top-0 left-0 right-0 z-40 bg-white shadow-md p-3 flex items-center justify-between border-b-4 border-slate-100 h-20">
+            <button @click="confirmExit()" class="py-2.5 px-4 bg-slate-100 hover:bg-slate-200 hover:border-slate-300 text-slate-700 border-2 border-slate-200 rounded-xl font-bold text-base cursor-pointer flex items-center gap-1 active:translate-y-0.5">
+                🚪 Main Menu
+            </button>
+            
+            <div class="flex-1 text-center px-4">
+                <div class="inline-flex items-center gap-3 px-6 py-2 rounded-full border-4 text-white font-black text-xl md:text-2xl shadow-md transition-colors duration-300"
+                     :class="playerColors[activePlayerIndex].bg + ' ' + playerColors[activePlayerIndex].border">
+                     <span class="animate-pulse-slow">👉</span>
+                     <span x-text="players[activePlayerIndex]?.name + '\'s Turn'"></span>
+                     <span class="animate-pulse-slow">👈</span>
+                </div>
+            </div>
+            
+            <!-- Hidden spacer for centering layout on desktop -->
+            <div class="w-32 hidden md:block"></div>
+        </div>
+        
+        <!-- The Main Tiles Grid -->
+        <div class="flex-1 max-w-6xl w-full mx-auto px-4 md:px-8">
+            <div class="grid gap-4 p-2 md:gap-6 md:p-4 justify-center"
+                 :class="{
+                    'grid-cols-4': gridSize <= 16,
+                    'grid-cols-4 md:grid-cols-6': gridSize === 24
+                 }">
+                 
+                 <template x-for="tile in tiles" :key="tile.id">
+                     <button 
+                         @click="openTile(tile)"
+                         :disabled="tile.answered"
+                         class="aspect-square flex flex-col items-center justify-center font-black rounded-3xl border-4 select-none min-h-24 md:min-h-32 transition-all duration-150 tile-pop text-5xl md:text-6xl"
+                         :class="tile.answered 
+                             ? 'bg-slate-200 border-slate-300 text-slate-300 opacity-50 cursor-not-allowed transform-none shadow-inner' 
+                             : 'bg-white border-slate-300 text-slate-700 hover:border-slate-400 hover:scale-105 hover:shadow-xl active:scale-95 active:shadow-md cursor-pointer border-b-8 shadow-md'">
+                         <span x-text="tile.id" x-show="!tile.answered"></span>
+                         <span x-show="tile.answered" class="text-3xl md:text-4xl">❌</span>
+                     </button>
+                 </template>
+                 
+            </div>
+        </div>
+        
+        <!-- Question Modal Backdrop & Container -->
+        <div x-show="isModalOpen" 
+             x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto bg-slate-900/80 flex items-center justify-center p-4 md:p-8"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition ease-in duration-100"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0">
+             
+             <!-- Modal Card -->
+             <div class="bg-white rounded-[2.5rem] max-w-4xl w-full text-center relative flex flex-col p-6 md:p-10 shadow-2xl border-8 transform transition-all select-none h-full md:h-auto overflow-y-auto md:max-h-[90vh]"
+                  :class="playerColors[activePlayerIndex]?.border"
+                  x-show="isModalOpen"
+                  x-transition:enter="transition ease-out duration-300"
+                  x-transition:enter-start="scale-90"
+                  x-transition:enter-end="scale-100">
+                  
+                  <!-- Modal Header -->
+                  <div class="flex justify-between items-center border-b-4 border-dashed border-slate-100 pb-4 mb-4">
+                      <span class="px-5 py-1.5 text-white text-xl font-black rounded-full select-none flex items-center gap-1 shadow-sm"
+                            :class="playerColors[activePlayerIndex]?.bg"
+                            x-text="players[activePlayerIndex]?.name"></span>
+                      <span class="text-3xl font-black text-slate-300" x-text="'TILE ' + (currentTileIndex + 1)"></span>
+                  </div>
+                  
+                  <!-- Question Text -->
+                  <div class="flex-1 flex items-center justify-center py-6 min-h-24">
+                      <h2 class="text-3xl md:text-5xl font-black text-slate-800 leading-tight" x-text="currentQuestion?.question"></h2>
+                  </div>
+                  
+                  <!-- Easy Mode: Options Grid -->
+                  <div x-show="mode === 'easy'" class="w-full mt-4 mb-6">
+                      <div class="grid grid-cols-2 gap-4">
+                          <template x-for="option in currentQuestion?.options" :key="option">
+                              <button 
+                                  @click="selectOption(option)"
+                                  :disabled="showAnswer"
+                                  :class="getOptionClass(option)"
+                                  class="py-4 px-6 rounded-2xl font-bold text-xl md:text-2xl border-4 transition-all duration-150 flex items-center justify-center text-center min-h-16 shadow-sm select-none border-b-6">
+                                  <span x-text="option"></span>
+                              </button>
+                          </template>
+                      </div>
+                  </div>
+                  
+                  <!-- Hard Mode: Placeholder when answer is hidden -->
+                  <div x-show="mode === 'hard' && !showAnswer" class="w-full py-8 flex items-center justify-center opacity-10">
+                      <div class="text-9xl">❓</div>
+                  </div>
+                  
+                  <!-- Reveal Button (Teacher action) -->
+                  <div class="w-full flex justify-center mb-4" x-show="!showAnswer">
+                      <button @click="revealAnswer()" 
+                              class="w-full md:w-3/4 bg-amber-500 hover:bg-amber-600 hover:border-amber-700 active:translate-y-1 text-white font-black py-5 px-8 rounded-2xl text-2xl md:text-3xl shadow-lg border-b-8 border-amber-600 transition-all cursor-pointer">
+                          👀 SHOW ANSWER
+                      </button>
+                  </div>
+                  
+                  <!-- Revealed Answer Area -->
+                  <div x-show="showAnswer" 
+                       x-cloak
+                       class="w-full flex flex-col items-center border-t-4 border-dashed border-slate-100 pt-6 mt-2 animate-slide-up">
+                      
+                      <div class="text-base font-black text-slate-400 uppercase tracking-widest mb-1">Correct Answer:</div>
+                      <div class="text-4xl md:text-5xl font-black text-emerald-600 mb-8 bg-emerald-50 px-10 py-4 rounded-2xl border-4 border-emerald-200 shadow-inner select-all" 
+                           x-text="currentQuestion?.correctAnswer"></div>
+                      
+                      <!-- Teacher Validation Buttons -->
+                      <div class="text-sm font-black text-slate-400 uppercase tracking-widest mb-3">Teacher Validation:</div>
+                      <div class="flex gap-4 w-full md:w-3/4">
+                          <button @click="validateAnswer(true)"
+                                  class="flex-1 bg-green-500 hover:bg-green-600 hover:border-green-700 active:translate-y-1 text-white font-black py-5 px-6 rounded-2xl text-2xl md:text-3xl shadow-lg border-b-8 border-green-700 transition-all cursor-pointer flex items-center justify-center gap-2">
+                              ✅ CORRECT (+10)
+                          </button>
+                          <button @click="validateAnswer(false)"
+                                  class="flex-1 bg-red-500 hover:bg-red-600 hover:border-red-700 active:translate-y-1 text-white font-black py-5 px-6 rounded-2xl text-2xl md:text-3xl shadow-lg border-b-8 border-red-700 transition-all cursor-pointer flex items-center justify-center gap-2">
+                              ❌ INCORRECT
+                          </button>
+                      </div>
+                  </div>
+                  
+             </div>
+        </div>
+        
+        <!-- 3. STICKY SCOREBOARD FOOTER -->
+        <div class="fixed bottom-0 left-0 right-0 h-24 bg-white border-t-4 border-slate-200 shadow-2xl flex z-40 select-none overflow-hidden">
+            <template x-for="(player, index) in players" :key="player.id">
+                <div class="flex-1 flex flex-col items-center justify-center transition-all duration-300 border-r last:border-r-0 border-slate-200 relative"
+                     :class="index === activePlayerIndex 
+                         ? playerColors[index].bg + ' ' + playerColors[index].text + ' font-black z-10 shadow-inner border-t-4 ' + playerColors[index].border + ' scale-y-105'
+                         : 'bg-white text-slate-600 hover:bg-slate-50 border-t-4 border-transparent'">
+                     
+                     <!-- Pulse Arrow Indicator for Tablet visibility -->
+                     <div x-show="index === activePlayerIndex" 
+                          class="absolute -top-3 w-5 h-5 rotate-45 border-l-4 border-t-4 shadow-sm"
+                          :class="playerColors[index].bg + ' ' + playerColors[index].border">
+                     </div>
+                     
+                     <div class="text-sm md:text-xl font-black tracking-wide" 
+                          :class="index === activePlayerIndex ? 'text-white/90' : 'text-slate-400'" 
+                          x-text="player.name"></div>
+                     <div class="text-2xl md:text-4xl font-black mt-0.5" 
+                          :class="index === activePlayerIndex ? 'text-white' : 'text-slate-800'"
+                          x-text="player.score + ' pts'"></div>
+                </div>
+            </template>
+        </div>
+        
+    </div>
+
+    <!-- 4. GAME OVER SCREEN -->
+    <div x-show="gameState === 'gameover'" class="min-h-screen flex flex-col items-center justify-center p-4 md:p-8" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100">
+        <div class="max-w-2xl w-full bg-white rounded-3xl shadow-xl border-4 border-slate-200 p-6 md:p-10 flex flex-col items-center text-center gap-8 relative overflow-hidden">
+            <!-- Decorative shapes -->
+            <div class="absolute -top-10 -right-10 w-40 h-40 bg-yellow-200 rounded-full opacity-30 blur-2xl animate-pulse"></div>
+            
+            <div class="z-10">
+                <h1 class="text-5xl md:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-500 via-amber-500 to-orange-500 drop-shadow-sm select-none">
+                    🎉 GAME OVER! 🎉
+                </h1>
+                <p class="text-xl md:text-2xl font-bold text-slate-400 mt-2">Congratulations students!</p>
+            </div>
+            
+            <!-- Winners Podium Box -->
+            <div class="w-full flex flex-col items-center py-6 px-4 bg-amber-50 rounded-3xl border-4 border-dashed border-amber-300 relative z-10">
+                <div class="text-7xl mb-4 animate-bounce-short">🏆</div>
+                <div class="text-3xl md:text-5xl font-black text-amber-600" x-text="getWinnerText()"></div>
+                <div class="text-xl md:text-2xl font-bold text-slate-500 mt-2" x-text="getWinnerScoreText()"></div>
+            </div>
+            
+            <!-- Final Scores Leaderboard -->
+            <div class="w-full z-10">
+                <h3 class="text-lg font-black text-slate-400 text-left mb-3 border-b-2 border-slate-100 pb-2 uppercase tracking-wider">Final Leaderboard</h3>
+                <div class="flex flex-col gap-3">
+                    <template x-for="(player, idx) in sortedPlayers" :key="player.id">
+                        <div class="flex items-center justify-between p-4 rounded-2xl border-4 font-black text-xl md:text-2xl text-white shadow-md border-b-6 active:translate-y-0.5"
+                             :class="playerColors[player.id].bg + ' ' + playerColors[player.id].border">
+                            <div class="flex items-center gap-3">
+                                <span class="text-lg flex items-center justify-center bg-white/20 w-8 h-8 rounded-full" x-text="(idx + 1)"></span>
+                                <span x-text="player.name"></span>
+                                <span x-show="idx === 0" class="text-2xl animate-pulse-slow">👑</span>
+                            </div>
+                            <div class="text-2xl md:text-3xl" x-text="player.score + ' pts'"></div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+            
+            <!-- Play Again Button -->
+            <button @click="gameState = 'menu'" 
+                    class="w-full bg-sky-500 hover:bg-sky-600 hover:border-sky-700 active:translate-y-1 text-white font-black py-5 px-8 rounded-2xl text-2xl md:text-3xl shadow-xl border-b-8 border-sky-700 transition-all cursor-pointer flex items-center justify-center gap-2 z-10">
+                🔄 PLAY AGAIN
+            </button>
+            
+        </div>
+    </div>
+
+    <!-- QUESTIONS AND GAME LOGIC -->
+    <script>
+        // Data Structure: 3 themes, 24 questions each
+        const QUESTION_BANK = {
+            animals: [
+                { id: 1, question: "What animal is known as the 'King of the Jungle'?", options: ["Lion", "Tiger", "Elephant", "Monkey"], correctAnswer: "Lion" },
+                { id: 2, question: "Which animal has a very long neck to eat leaves from tall trees?", options: ["Giraffe", "Zebra", "Hippo", "Elephant"], correctAnswer: "Giraffe" },
+                { id: 3, question: "Which bird cannot fly but is an excellent swimmer?", options: ["Penguin", "Eagle", "Ostrich", "Duck"], correctAnswer: "Penguin" },
+                { id: 4, question: "What is the favorite food of a giant panda?", options: ["Bamboo", "Fish", "Bananas", "Eucalyptus"], correctAnswer: "Bamboo" },
+                { id: 5, question: "Which animal lives in the desert and has humps to store water/fat?", options: ["Camel", "Horse", "Donkey", "Goat"], correctAnswer: "Camel" },
+                { id: 6, question: "Which is the largest animal in the world?", options: ["Blue Whale", "Elephant", "Shark", "Dinosaur"], correctAnswer: "Blue Whale" },
+                { id: 7, question: "What animal hops and carries its baby in a pouch?", options: ["Kangaroo", "Koala", "Wallaby", "Possum"], correctAnswer: "Kangaroo" },
+                { id: 8, question: "Which small, flying insect makes sweet honey?", options: ["Bee", "Butterfly", "Mosquito", "Ant"], correctAnswer: "Bee" },
+                { id: 9, question: "Which slow-moving sea animal lives inside a hard shell?", options: ["Turtle", "Snake", "Frog", "Lizard"], correctAnswer: "Turtle" },
+                { id: 10, question: "Which pink farm animal is famous for saying 'oink'?", options: ["Pig", "Cow", "Sheep", "Horse"], correctAnswer: "Pig" },
+                { id: 11, question: "Which furry flying mammal sleeps upside down in caves?", options: ["Bat", "Bird", "Squirrel", "Mouse"], correctAnswer: "Bat" },
+                { id: 12, question: "Which African animal is white with black stripes?", options: ["Zebra", "Tiger", "Leopard", "Dalmatian"], correctAnswer: "Zebra" },
+                { id: 13, question: "Which eight-legged creature spins webs to catch insects?", options: ["Spider", "Ant", "Beetle", "Scorpion"], correctAnswer: "Spider" },
+                { id: 14, question: "Which animal is commonly known as 'man's best friend' and barks?", options: ["Dog", "Cat", "Hamster", "Rabbit"], correctAnswer: "Dog" },
+                { id: 15, question: "What talking bird can imitate human speech?", options: ["Parrot", "Owl", "Eagle", "Penguin"], correctAnswer: "Parrot" },
+                { id: 16, question: "What do we call a baby cat?", options: ["Kitten", "Puppy", "Cub", "Calf"], correctAnswer: "Kitten" },
+                { id: 17, question: "Which sea creature has eight arms and can squirt ink?", options: ["Octopus", "Squid", "Jellyfish", "Starfish"], correctAnswer: "Octopus" },
+                { id: 18, question: "Which animal purrs when it is happy and loves to chase mice?", options: ["Cat", "Dog", "Hamster", "Rabbit"], correctAnswer: "Cat" },
+                { id: 19, question: "Which farm animal lays eggs and says 'cluck'?", options: ["Chicken", "Duck", "Turkey", "Goose"], correctAnswer: "Chicken" },
+                { id: 20, question: "Which large land animal has a long trunk and big tusks?", options: ["Elephant", "Rhino", "Hippo", "Giraffe"], correctAnswer: "Elephant" },
+                { id: 21, question: "What do we call a baby dog?", options: ["Puppy", "Kitten", "Calf", "Foal"], correctAnswer: "Puppy" },
+                { id: 22, question: "Which furry animal is famous for loving carrots and having long ears?", options: ["Rabbit", "Mouse", "Squirrel", "Hamster"], correctAnswer: "Rabbit" },
+                { id: 23, question: "Which large animal can sleep standing up and is used for riding?", options: ["Horse", "Cow", "Donkey", "Camel"], correctAnswer: "Horse" },
+                { id: 24, question: "Which nocturnal bird is known for being wise and saying 'hooot'?", options: ["Owl", "Eagle", "Parrot", "Falcon"], correctAnswer: "Owl" }
+            ],
+            verbs: [
+                { id: 1, question: "What do you do with a book to understand the words?", options: ["Read", "Write", "Draw", "Paint"], correctAnswer: "Read" },
+                { id: 2, question: "What action do you do in a bed at night when you close your eyes?", options: ["Sleep", "Jump", "Run", "Eat"], correctAnswer: "Sleep" },
+                { id: 3, question: "What do you do when you put food in your mouth and swallow?", options: ["Eat", "Drink", "Chew", "Cook"], correctAnswer: "Eat" },
+                { id: 4, question: "What do you do when you take a glass of water and swallow it?", options: ["Drink", "Eat", "Wash", "Pour"], correctAnswer: "Drink" },
+                { id: 5, question: "What action do you do with a soccer ball using your foot?", options: ["Kick", "Throw", "Catch", "Hit"], correctAnswer: "Kick" },
+                { id: 6, question: "What do you do in a swimming pool to move through the water?", options: ["Swim", "Dive", "Float", "Sink"], correctAnswer: "Swim" },
+                { id: 7, question: "What do you do with a pencil or pen on a piece of paper?", options: ["Write", "Read", "Cut", "Fold"], correctAnswer: "Write" },
+                { id: 8, question: "What do you do when you move your body to the rhythm of music?", options: ["Dance", "Sing", "Run", "Jump"], correctAnswer: "Dance" },
+                { id: 9, question: "What action do you do with a door to enter into a room?", options: ["Open", "Close", "Lock", "Push"], correctAnswer: "Open" },
+                { id: 10, question: "What do you do with a bicycle to go down the street?", options: ["Ride", "Drive", "Walk", "Run"], correctAnswer: "Ride" },
+                { id: 11, question: "What action do you do with scissors to a piece of paper?", options: ["Cut", "Glue", "Fold", "Tear"], correctAnswer: "Cut" },
+                { id: 12, question: "What do you do when you hear something very funny?", options: ["Laugh", "Cry", "Sleep", "Shout"], correctAnswer: "Laugh" },
+                { id: 13, question: "What action do you do with a car to travel on roads?", options: ["Drive", "Ride", "Fly", "Sail"], correctAnswer: "Drive" },
+                { id: 14, question: "What do you do when a telephone rings and you pick it up?", options: ["Answer", "Call", "Hang up", "Text"], correctAnswer: "Answer" },
+                { id: 15, question: "What do you do at a store when you give money for an item?", options: ["Buy", "Sell", "Borrow", "Rent"], correctAnswer: "Buy" },
+                { id: 16, question: "What do you do with soap and water to clean your hands?", options: ["Wash", "Dry", "Wipe", "Scrub"], correctAnswer: "Wash" },
+                { id: 17, question: "What do you do when you move your legs extremely fast in a race?", options: ["Run", "Walk", "Jog", "Jump"], correctAnswer: "Run" },
+                { id: 18, question: "What action do you do when you use your voice to make music?", options: ["Sing", "Shout", "Talk", "Whisper"], correctAnswer: "Sing" },
+                { id: 19, question: "What do you do with a ball in baseball using a bat?", options: ["Hit", "Throw", "Catch", "Kick"], correctAnswer: "Hit" },
+                { id: 20, question: "What do you do with crayons in a coloring book?", options: ["Color", "Cut", "Read", "Erase"], correctAnswer: "Color" },
+                { id: 21, question: "What do you do when you shed tears because you are sad?", options: ["Cry", "Laugh", "Smile", "Frown"], correctAnswer: "Cry" },
+                { id: 22, question: "What do you do with your eyes when looking at something far?", options: ["Look", "Hear", "Smell", "Touch"], correctAnswer: "Look" },
+                { id: 23, question: "What do you do with a seed in the dirt to make a plant grow?", options: ["Plant", "Pick", "Water", "Dig"], correctAnswer: "Plant" },
+                { id: 24, question: "What violent breath do you make when pepper gets in your nose?", options: ["Sneeze", "Cough", "Yawn", "Sigh"], correctAnswer: "Sneeze" }
+            ],
+            food: [
+                { id: 1, question: "What long, yellow fruit do monkeys love to eat?", options: ["Banana", "Apple", "Orange", "Mango"], correctAnswer: "Banana" },
+                { id: 2, question: "What red fruit has small seeds on the outside and is very sweet?", options: ["Strawberry", "Cherry", "Raspberry", "Grape"], correctAnswer: "Strawberry" },
+                { id: 3, question: "What round Italian food is made with dough, cheese, and tomato sauce?", options: ["Pizza", "Pasta", "Burger", "Sandwich"], correctAnswer: "Pizza" },
+                { id: 4, question: "What sweet, sticky substance is made by bees?", options: ["Honey", "Sugar", "Syrup", "Jam"], correctAnswer: "Honey" },
+                { id: 5, question: "What cold dessert comes in flavors like vanilla, chocolate, or strawberry?", options: ["Ice Cream", "Cake", "Pudding", "Jelly"], correctAnswer: "Ice Cream" },
+                { id: 6, question: "What orange root vegetable is famous for being loved by rabbits?", options: ["Carrot", "Potato", "Onion", "Broccoli"], correctAnswer: "Carrot" },
+                { id: 7, question: "What round, juicy red fruit is used to make ketchup?", options: ["Tomato", "Apple", "Strawberry", "Pepper"], correctAnswer: "Tomato" },
+                { id: 8, question: "What white grain is the most popular staple food in China and Japan?", options: ["Rice", "Wheat", "Corn", "Barley"], correctAnswer: "Rice" },
+                { id: 9, question: "What sweet baked food do we usually eat to celebrate a birthday?", options: ["Cake", "Cookie", "Pie", "Bread"], correctAnswer: "Cake" },
+                { id: 10, question: "What yellow dairy product is sliced for sandwiches and loved by mice?", options: ["Cheese", "Butter", "Cream", "Yogurt"], correctAnswer: "Cheese" },
+                { id: 11, question: "What white liquid comes from cows and builds strong bones?", options: ["Milk", "Water", "Juice", "Soda"], correctAnswer: "Milk" },
+                { id: 12, question: "What extremely sour, yellow citrus fruit is used to make a cold summer drink?", options: ["Lemon", "Lime", "Orange", "Grapefruit"], correctAnswer: "Lemon" },
+                { id: 13, question: "What green vegetable looks like a bunch of small, bushy trees?", options: ["Broccoli", "Lettuce", "Spinach", "Cabbage"], correctAnswer: "Broccoli" },
+                { id: 14, question: "What fast food is made of a grilled beef patty inside a sesame bun?", options: ["Hamburger", "Sandwich", "Hot Dog", "Taco"], correctAnswer: "Hamburger" },
+                { id: 15, question: "What dried grape is wrinkled, sweet, and often put into baked goods?", options: ["Raisin", "Date", "Prune", "Fig"], correctAnswer: "Raisin" },
+                { id: 16, question: "What do we call bread after it has been heated until brown and crispy?", options: ["Toast", "Cake", "Biscuit", "Cracker"], correctAnswer: "Toast" },
+                { id: 17, question: "What breakfast item comes from chickens and can be boiled, fried, or scrambled?", options: ["Egg", "Bacon", "Sausage", "Pancake"], correctAnswer: "Egg" },
+                { id: 18, question: "Which round citrus fruit shares its exact name with a primary color?", options: ["Orange", "Lemon", "Lime", "Tangerine"], correctAnswer: "Orange" },
+                { id: 19, question: "What large, orange squash do people carve into Jack-o'-lanterns?", options: ["Pumpkin", "Watermelon", "Squash", "Melon"], correctAnswer: "Pumpkin" },
+                { id: 20, question: "What sweet, brown treat is made from roasted cocoa beans?", options: ["Chocolate", "Vanilla", "Caramel", "Toffee"], correctAnswer: "Chocolate" },
+                { id: 21, question: "What tiny white crystals do we add to food to make it taste savory?", options: ["Salt", "Sugar", "Pepper", "Spice"], correctAnswer: "Salt" },
+                { id: 22, question: "What long, thin Italian noodle dish is usually slurped from a bowl with sauce?", options: ["Spaghetti", "Rice", "Soup", "Bread"], correctAnswer: "Spaghetti" },
+                { id: 23, question: "What transparent, tasteless liquid is essential for all living things to drink?", options: ["Water", "Juice", "Soda", "Milk"], correctAnswer: "Water" },
+                { id: 24, question: "What circular, flat breakfast cake is cooked on a griddle and topped with syrup?", options: ["Pancake", "Waffle", "Toast", "Muffin"], correctAnswer: "Pancake" }
+            ]
+        };
+
+        function gameApp() {
+            return {
+                // Game States
+                gameState: 'menu', // 'menu', 'playing', 'gameover'
+                selectedTheme: 'animals', // 'animals', 'verbs', 'food'
+                playerCount: 3, // Numeric stepper (2-4, default 3)
+                mode: 'easy', // 'easy' (Multiple Choice), 'hard' (Question only)
+                gridSize: 16, // 8, 16, 24
+                
+                // Active Game Variables
+                players: [],
+                tiles: [],
+                activePlayerIndex: 0,
+                
+                // Modal State
+                isModalOpen: false,
+                currentTileIndex: null,
+                currentQuestion: null,
+                showAnswer: false,
+                selectedOption: null,
+                
+                // Player Color Mapping (Tailwind Classes for dynamic insertion)
+                playerColors: [
+                    { 
+                        bg: 'bg-rose-500', 
+                        border: 'border-rose-600', 
+                        text: 'text-white', 
+                        textDark: 'text-rose-700', 
+                        light: 'bg-rose-50',
+                        ring: 'ring-rose-400'
+                    },
+                    { 
+                        bg: 'bg-sky-500', 
+                        border: 'border-sky-600', 
+                        text: 'text-white', 
+                        textDark: 'text-sky-700', 
+                        light: 'bg-sky-50',
+                        ring: 'ring-sky-400'
+                    },
+                    { 
+                        bg: 'bg-emerald-500', 
+                        border: 'border-emerald-600', 
+                        text: 'text-white', 
+                        textDark: 'text-emerald-700', 
+                        light: 'bg-emerald-50',
+                        ring: 'ring-emerald-400'
+                    },
+                    { 
+                        bg: 'bg-violet-500', 
+                        border: 'border-violet-600', 
+                        text: 'text-white', 
+                        textDark: 'text-violet-700', 
+                        light: 'bg-violet-50',
+                        ring: 'ring-violet-400'
+                    }
+                ],
+                
+                // Initialize/Restart Game
+                setupGame() {
+                    // 1. Deep clone question bank to avoid mutating the original source
+                    let baseQuestions = JSON.parse(JSON.stringify(QUESTION_BANK[this.selectedTheme]));
+                    
+                    // 2. Fisher-Yates Shuffle the 24 questions
+                    for (let i = baseQuestions.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [baseQuestions[i], baseQuestions[j]] = [baseQuestions[j], baseQuestions[i]];
+                    }
+                    
+                    // 3. Slice questions to fit the chosen Grid Size
+                    let selectedQuestions = baseQuestions.slice(0, this.gridSize);
+                    
+                    // 4. In Easy mode, shuffle the options array for each question so correct answer isn't fixed
+                    selectedQuestions.forEach(q => {
+                        for (let i = q.options.length - 1; i > 0; i--) {
+                            const j = Math.floor(Math.random() * (i + 1));
+                            [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
+                        }
+                    });
+                    
+                    // 5. Build Players array
+                    this.players = Array.from({ length: this.playerCount }, (_, i) => ({
+                        id: i,
+                        name: `Player ${i + 1}`,
+                        score: 0
+                    }));
+                    
+                    // 6. Build Tiles array
+                    this.tiles = selectedQuestions.map((q, index) => ({
+                        id: index + 1,
+                        question: q,
+                        answered: false
+                    }));
+                    
+                    // 7. Reset all gameplay pointers
+                    this.activePlayerIndex = 0;
+                    this.currentTileIndex = null;
+                    this.currentQuestion = null;
+                    this.showAnswer = false;
+                    this.selectedOption = null;
+                    this.isModalOpen = false;
+                    
+                    // 8. Swap screen
+                    this.gameState = 'playing';
+                    
+                    // Ensure scroll is at the top
+                    window.scrollTo(0, 0);
+                },
+                
+                // Open Tile Modal
+                openTile(tile) {
+                    if (tile.answered) return;
+                    this.currentTileIndex = tile.id - 1;
+                    this.currentQuestion = this.tiles[this.currentTileIndex].question;
+                    this.showAnswer = false;
+                    this.selectedOption = null;
+                    this.isModalOpen = true;
+                },
+                
+                // Student selecting an option in Easy Mode (visual feedback)
+                selectOption(option) {
+                    if (this.showAnswer) return;
+                    this.selectedOption = option;
+                },
+                
+                // Teacher clicking 'Show Answer'
+                revealAnswer() {
+                    this.showAnswer = true;
+                },
+                
+                // Teacher validation button handler
+                validateAnswer(isCorrect) {
+                    // 1. Award +10 points to active player if correct
+                    if (isCorrect) {
+                        this.players[this.activePlayerIndex].score += 10;
+                    }
+                    
+                    // 2. Mark the tile as used
+                    this.tiles[this.currentTileIndex].answered = true;
+                    
+                    // 3. Close Modal
+                    this.isModalOpen = false;
+                    
+                    // 4. Check for End Game
+                    const allAnswered = this.tiles.every(tile => tile.answered);
+                    if (allAnswered) {
+                        this.gameState = 'gameover';
+                        // Wait for transition, then fire confetti
+                        setTimeout(() => this.triggerConfetti(), 300);
+                    } else {
+                        // 5. Move turn to the next player
+                        this.activePlayerIndex = (this.activePlayerIndex + 1) % this.playerCount;
+                    }
+                },
+                
+                // Confirm return to menu
+                confirmExit() {
+                    if (confirm("Are you sure you want to quit the current game? All scores will be lost!")) {
+                        this.gameState = 'menu';
+                    }
+                },
+                
+                // Easy Mode Multiple Choice Button Styling Logic
+                getOptionClass(option) {
+                    // If answer is revealed
+                    if (this.showAnswer) {
+                        if (option === this.currentQuestion.correctAnswer) {
+                            return 'bg-green-100 border-green-500 text-green-700 font-black scale-102 border-b-6 shadow-md z-10 animate-pulse-slow';
+                        }
+                        if (option === this.selectedOption) {
+                            return 'bg-red-100 border-red-400 text-red-600 font-bold border-b-6 opacity-70';
+                        }
+                        return 'bg-slate-50 border-slate-100 text-slate-300 opacity-40 cursor-not-allowed border-b-4';
+                    } 
+                    // If before answer is revealed
+                    else {
+                        if (option === this.selectedOption) {
+                            const pColor = this.playerColors[this.activePlayerIndex];
+                            return `${pColor.bg} ${pColor.border} text-white font-black shadow-inner scale-98 border-t-4 border-b-2`;
+                        }
+                        return 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 hover:border-slate-300 active:bg-slate-200 cursor-pointer border-b-6';
+                    }
+                },
+                
+                // LEADERBOARD & WINNER LOGIC
+                get sortedPlayers() {
+                    return [...this.players].sort((a, b) => b.score - a.score);
+                },
+                
+                getWinners() {
+                    if (this.players.length === 0) return [];
+                    const maxScore = Math.max(...this.players.map(p => p.score));
+                    return this.players.filter(p => p.score === maxScore);
+                },
+                
+                getWinnerText() {
+                    const winners = this.getWinners();
+                    if (winners.length === 0) return "";
+                    if (winners.length === 1) {
+                        return winners[0].name + " Wins!";
+                    } else {
+                        // Tie breaker display
+                        return "Tie! " + winners.map(p => p.name).join(' & ');
+                    }
+                },
+                
+                getWinnerScoreText() {
+                    const winners = this.getWinners();
+                    if (winners.length > 0) {
+                        return `with a total of ${winners[0].score} points!`;
+                    }
+                    return "";
+                },
+                
+                // 3D CONFETTI BURST (Canvas-Confetti)
+                triggerConfetti() {
+                    if (typeof confetti === 'function') {
+                        const duration = 5 * 1000;
+                        const end = Date.now() + duration;
+                        const colors = ['#f43f5e', '#38bdf8', '#10b981', '#8b5cf6', '#f59e0b'];
+                        
+                        (function frame() {
+                            // Left side blast
+                            confetti({
+                                particleCount: 5,
+                                angle: 60,
+                                spread: 55,
+                                origin: { x: 0, y: 0.8 },
+                                colors: colors
+                            });
+                            // Right side blast
+                            confetti({
+                                particleCount: 5,
+                                angle: 120,
+                                spread: 55,
+                                origin: { x: 1, y: 0.8 },
+                                colors: colors
+                            });
+
+                            if (Date.now() < end) {
+                                requestAnimationFrame(frame);
+                            }
+                        }());
+                    }
+                }
+            };
+        }
+    </script>
+
+</body>
+</html>
