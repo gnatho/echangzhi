@@ -76,6 +76,206 @@ body::before {
   gap: 10px;
 }
 
+/* ─── Main Menu ─────────────────────────────────────── */
+#menu-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  background: linear-gradient(145deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+}
+
+#menu-screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70%  8%, rgba(255,255,255,.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,.30) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,.20) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,.28) 0%, transparent 100%),
+    radial-gradient(2px 2px at 28% 48%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 85%, rgba(255,255,255,.20) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#menu-title {
+  font-family: var(--font-head);
+  font-size: clamp(32px, 7vw, 58px);
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,.45);
+  text-align: center;
+}
+
+#menu-title span { color: #FFD96A; }
+
+.menu-btn {
+  min-width: 240px;
+  padding: 18px 42px;
+  font-family: var(--font-head);
+  font-size: clamp(18px, 3.2vw, 24px);
+  letter-spacing: .5px;
+  color: #fff;
+  background: linear-gradient(140deg, var(--blue), var(--blue-dk));
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 6px 0 var(--blue-sh), 0 10px 28px rgba(47,126,245,.42);
+  text-shadow: 0 1px 4px rgba(0,0,0,.25);
+  transition: transform .12s, box-shadow .12s;
+  touch-action: manipulation;
+}
+
+.menu-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 0 var(--blue-sh), 0 14px 32px rgba(47,126,245,.5); }
+.menu-btn:active { transform: translateY(4px); box-shadow: 0 2px 0 var(--blue-sh), 0 4px 14px rgba(47,126,245,.35); }
+
+.menu-btn.green { background: linear-gradient(140deg, var(--green), var(--green-dk)); box-shadow: 0 6px 0 var(--green-sh), 0 10px 28px rgba(24,199,122,.42); }
+.menu-btn.green:hover { box-shadow: 0 8px 0 var(--green-sh), 0 14px 32px rgba(24,199,122,.5); }
+.menu-btn.green:active { box-shadow: 0 2px 0 var(--green-sh), 0 4px 14px rgba(24,199,122,.35); }
+
+.menu-btn.purple { background: linear-gradient(140deg, var(--purple), var(--purple-dk)); box-shadow: 0 6px 0 var(--purple-sh), 0 10px 28px rgba(155,92,246,.42); }
+.menu-btn.purple:hover { box-shadow: 0 8px 0 var(--purple-sh), 0 14px 32px rgba(155,92,246,.5); }
+.menu-btn.purple:active { box-shadow: 0 2px 0 var(--purple-sh), 0 4px 14px rgba(155,92,246,.35); }
+
+#timer-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 12px 24px;
+  border-radius: 50px;
+  backdrop-filter: blur(12px);
+}
+
+#timer-toggle-wrap span {
+  font-size: clamp(14px, 2.2vw, 18px);
+  font-weight: 800;
+  color: rgba(255,255,255,.9);
+}
+
+.sw { position: relative; display: inline-block; width: 52px; height: 28px; }
+.sw input { display: none; }
+.sw-track {
+  position: absolute; inset: 0;
+  background: rgba(255,255,255,.22);
+  border-radius: 28px;
+  transition: background .3s;
+  cursor: pointer;
+}
+.sw-track::before {
+  content: '';
+  position: absolute;
+  width: 22px; height: 22px;
+  background: white;
+  border-radius: 50%;
+  top: 3px; left: 3px;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25);
+  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
+}
+.sw input:checked ~ .sw-track { background: rgba(24,199,122,.65); }
+.sw input:checked ~ .sw-track::before { transform: translateX(24px); }
+
+/* ─── Edit Panel ────────────────────────────────────── */
+#edit-screen {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  background: linear-gradient(145deg, var(--bg-top) 0%, var(--bg-bot) 100%);
+  padding: 30px;
+  overflow-y: auto;
+}
+
+#edit-screen::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 15% 20%, rgba(255,255,255,.35) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70%  8%, rgba(255,255,255,.25) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 35%, rgba(255,255,255,.30) 0%, transparent 100%),
+    radial-gradient(1px 1px at 40% 75%, rgba(255,255,255,.20) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 55%, rgba(255,255,255,.28) 0%, transparent 100%),
+    radial-gradient(2px 2px at 28% 48%, rgba(255,255,255,.15) 0%, transparent 100%),
+    radial-gradient(1px 1px at 82% 85%, rgba(255,255,255,.20) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
+#edit-title {
+  font-family: var(--font-head);
+  font-size: clamp(26px, 5vw, 42px);
+  color: #fff;
+  text-shadow: 0 3px 16px rgba(0,0,0,.45);
+}
+
+.edit-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.edit-group label {
+  font-family: var(--font-head);
+  font-size: clamp(16px, 2.8vw, 20px);
+  color: #FFD96A;
+}
+
+.edit-group input, .edit-group textarea {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 2.5vw, 20px);
+  padding: 14px 20px;
+  border: none;
+  border-radius: 16px;
+  background: rgba(255,255,255,.95);
+  box-shadow: 0 4px 16px rgba(0,0,0,.2);
+}
+
+.edit-group input:focus, .edit-group textarea:focus {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.edit-group textarea {
+  resize: none;
+  height: 70px;
+}
+
+.edit-hint {
+  font-size: clamp(12px, 1.8vw, 14px);
+  color: rgba(255,255,255,.7);
+}
+
+#edit-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 10px;
+}
+
+/* ─── Game Screen ───────────────────────────────────── */
+#game-screen {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+}
+
+#game-screen.active { display: flex; }
+
 /* ─── Header ───────────────────────────────────────── */
 #header {
   display: flex;
@@ -96,6 +296,35 @@ body::before {
 
 #title span { color: #FFD96A; }
 
+#header-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+/* Timer display */
+#timer-display {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.18);
+  padding: 6px 14px;
+  border-radius: 50px;
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  transition: opacity .3s;
+}
+
+#timer-display.show { opacity: 1; }
+
+#timer-display span {
+  font-family: var(--font-head);
+  font-size: clamp(14px, 2vw, 18px);
+  color: #FFD96A;
+  min-width: 60px;
+}
+
 /* Mode toggle pill */
 #mode-wrap {
   display: flex;
@@ -113,28 +342,6 @@ body::before {
   font-weight: 800;
   color: rgba(255,255,255,.85);
 }
-
-.sw { position: relative; display: inline-block; width: 48px; height: 26px; }
-.sw input { display: none; }
-.sw-track {
-  position: absolute; inset: 0;
-  background: rgba(255,255,255,.22);
-  border-radius: 26px;
-  transition: background .3s;
-  cursor: pointer;
-}
-.sw-track::before {
-  content: '';
-  position: absolute;
-  width: 20px; height: 20px;
-  background: white;
-  border-radius: 50%;
-  top: 3px; left: 3px;
-  box-shadow: 0 2px 6px rgba(0,0,0,.25);
-  transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-}
-.sw input:checked ~ .sw-track { background: rgba(155, 92, 246, .65); }
-.sw input:checked ~ .sw-track::before { transform: translateX(22px); }
 
 /* ─── Whiteboard ───────────────────────────────────── */
 #wb {
@@ -164,7 +371,7 @@ body::before {
   z-index: 0;
 }
 
-/* Margin line – left red line like a real notebook */
+/* Margin line */
 #wb::after {
   content: '';
   position: absolute;
@@ -218,7 +425,6 @@ body::before {
 }
 .leg-dot { width: 11px; height: 11px; border-radius: 3px; }
 
-/* Snap-zone highlight (shown briefly when cards are close) */
 .snap-glow {
   outline: 3px solid rgba(255, 220, 60, .7);
   outline-offset: 2px;
@@ -236,7 +442,6 @@ body::before {
   touch-action: none;
   white-space: nowrap;
   z-index: 10;
-  /* 3-D bevel effect */
   box-shadow:
     0 5px 0 rgba(0,0,0,.24),
     0 7px 22px rgba(0,0,0,.14);
@@ -343,12 +548,112 @@ body::before {
 #reset-btn:hover  { background: rgba(255,255,255,.2); transform: translateY(-1px); }
 #reset-btn:active { transform: translateY(2px); }
 
+#menu-btn {
+  height: 52px;
+  padding: 0 20px;
+  font-family: var(--font-body);
+  font-size: clamp(14px, 1.9vw, 17px);
+  font-weight: 800;
+  color: rgba(255,255,255,.88);
+  background: rgba(155,92,246,.3);
+  border: 2px solid rgba(155,92,246,.5);
+  border-radius: 50px;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: background .2s, transform .1s;
+  touch-action: manipulation;
+}
+#menu-btn:hover  { background: rgba(155,92,246,.5); transform: translateY(-1px); }
+#menu-btn:active { transform: translateY(2px); }
+
+/* ─── Completion Overlay ───────────────────────────── */
+#complete-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.75);
+  z-index: 9999;
+  backdrop-filter: blur(8px);
+}
+
+#complete-overlay.show { display: flex; }
+
+#complete-content {
+  text-align: center;
+  padding: 40px 50px;
+  background: linear-gradient(155deg, #1a5cd1 0%, #2d0a5e 100%);
+  border-radius: 30px;
+  box-shadow: 0 20px 60px rgba(0,0,0,.5);
+  border: 3px solid rgba(255,255,255,.2);
+  animation: kf-popup .5s cubic-bezier(.34,1.56,.64,1);
+}
+
+@keyframes kf-popup {
+  0% { transform: scale(.3); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+#complete-title {
+  font-family: var(--font-head);
+  font-size: clamp(36px, 8vw, 64px);
+  color: #FFD96A;
+  text-shadow: 0 4px 20px rgba(0,0,0,.4);
+  margin-bottom: 20px;
+}
+
+.complete-sentence {
+  font-family: var(--font-body);
+  font-size: clamp(16px, 3vw, 22px);
+  color: #fff;
+  margin: 10px 0;
+  padding: 10px 20px;
+  background: rgba(255,255,255,.15);
+  border-radius: 12px;
+}
+
+#complete-time {
+  font-family: var(--font-head);
+  font-size: clamp(18px, 3.5vw, 26px);
+  color: #18c77a;
+  margin-top: 24px;
+}
+
+#complete-buttons {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 30px;
+}
+
+.complete-btn {
+  padding: 14px 32px;
+  font-family: var(--font-head);
+  font-size: clamp(16px, 2.5vw, 20px);
+  color: #fff;
+  background: linear-gradient(140deg, var(--green), var(--green-dk));
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 5px 0 var(--green-sh), 0 8px 20px rgba(24,199,122,.4);
+  transition: transform .12s, box-shadow .12s;
+}
+
+.complete-btn:hover { transform: translateY(-2px); }
+.complete-btn:active { transform: translateY(3px); box-shadow: 0 2px 0 var(--green-sh); }
+
+.complete-btn.secondary {
+  background: linear-gradient(140deg, var(--purple), var(--purple-dk));
+  box-shadow: 0 5px 0 var(--purple-sh), 0 8px 20px rgba(155,92,246,.4);
+}
+
 /* ─── Feedback Overlay ─────────────────────────────── */
 #fb-overlay {
   position: fixed; inset: 0;
   display: flex; align-items: center; justify-content: center;
   pointer-events: none;
-  z-index: 9999;
+  z-index: 9998;
 }
 #fb-msg {
   font-family: var(--font-head);
@@ -368,7 +673,7 @@ body::before {
 .cbit {
   position: fixed;
   pointer-events: none;
-  z-index: 9998;
+  z-index: 9997;
   border-radius: 3px;
 }
 @keyframes kf-fall {
@@ -381,33 +686,90 @@ body::before {
 <body>
 
 <div id="app">
-  <!-- Header -->
-  <div id="header">
-    <div id="title">✏️ <span>Sentence</span> Builder</div>
-    <div id="mode-wrap">
-      <span>Easy</span>
+  <!-- Main Menu Screen -->
+  <div id="menu-screen">
+    <div id="menu-title">✏️ Sentence <span>Scrambler</span></div>
+    <button class="menu-btn green" id="start-btn">▶ Start Game</button>
+    <button class="menu-btn purple" id="edit-btn">✏ Edit Content</button>
+    <div id="timer-toggle-wrap">
+      <span>⏱ Timer</span>
       <label class="sw">
-        <input type="checkbox" id="mode-cb">
+        <input type="checkbox" id="menu-timer-cb">
         <span class="sw-track"></span>
       </label>
-      <span>Hard</span>
     </div>
   </div>
 
-  <!-- Whiteboard -->
-  <div id="wb">
-    <div id="wb-hint">📖 Drag the cards to build the sentences!</div>
-    <div id="badge" class="badge-easy">⭐ Easy Mode</div>
-    <div id="legend">
-      <div class="leg"><div class="leg-dot" style="background:var(--blue)"></div>Question</div>
-      <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Answer</div>
+  <!-- Edit Screen -->
+  <div id="edit-screen">
+    <div id="edit-title">✏ Edit Content</div>
+    <div class="edit-group">
+      <label>Question Sentence (words separated by spaces)</label>
+      <textarea id="edit-question" placeholder="Do you like apples?"></textarea>
+      <div class="edit-hint">Enter the words that form the question</div>
+    </div>
+    <div class="edit-group">
+      <label>Answer Sentence (words separated by spaces)</label>
+      <textarea id="edit-answer" placeholder="Yes I do."></textarea>
+      <div class="edit-hint">Enter the words that form the answer</div>
+    </div>
+    <div id="edit-buttons">
+      <button class="menu-btn" id="save-edit-btn">💾 Save</button>
+      <button class="menu-btn purple" id="cancel-edit-btn">✕ Cancel</button>
     </div>
   </div>
 
-  <!-- Bottom bar -->
-  <div id="bar">
-    <button id="reset-btn">🔄 Reset</button>
-    <button id="check-btn">✅ Check Sentences!</button>
+  <!-- Game Screen -->
+  <div id="game-screen">
+    <!-- Header -->
+    <div id="header">
+      <div id="title">✏️ <span>Sentence</span> Builder</div>
+      <div id="header-controls">
+        <div id="timer-display">
+          <span>⏱</span>
+          <span id="timer-value">00:00</span>
+        </div>
+        <div id="mode-wrap">
+          <span>Easy</span>
+          <label class="sw">
+            <input type="checkbox" id="mode-cb">
+            <span class="sw-track"></span>
+          </label>
+          <span>Hard</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Whiteboard -->
+    <div id="wb">
+      <div id="wb-hint">📖 Drag the cards to build the sentences!</div>
+      <div id="badge" class="badge-easy">⭐ Easy Mode</div>
+      <div id="legend">
+        <div class="leg"><div class="leg-dot" style="background:var(--blue)"></div>Question</div>
+        <div class="leg"><div class="leg-dot" style="background:var(--green)"></div>Answer</div>
+      </div>
+    </div>
+
+    <!-- Bottom bar -->
+    <div id="bar">
+      <button id="menu-btn">🏠 Menu</button>
+      <button id="reset-btn">🔄 Reset</button>
+      <button id="check-btn">✅ Check Sentences!</button>
+    </div>
+  </div>
+</div>
+
+<!-- Completion Overlay -->
+<div id="complete-overlay">
+  <div id="complete-content">
+    <div id="complete-title">🎉 Success! 🎉</div>
+    <div class="complete-sentence" id="complete-q"></div>
+    <div class="complete-sentence" id="complete-a"></div>
+    <div id="complete-time"></div>
+    <div id="complete-buttons">
+      <button class="complete-btn" id="play-again-btn">🔄 Play Again</button>
+      <button class="complete-btn secondary" id="to-menu-btn">🏠 Menu</button>
+    </div>
   </div>
 </div>
 
@@ -420,46 +782,67 @@ body::before {
 'use strict';
 
 /* ═══════════════════════════════════════════════════════
-   CONSTANTS
+   DEFAULT DATA
 ═══════════════════════════════════════════════════════ */
-const WORD_DATA = [
-  { text: 'Do',      grp: 0 },
-  { text: 'you',     grp: 0 },
-  { text: 'like',    grp: 0 },
-  { text: 'apples?', grp: 0 },
-  { text: 'Yes,',    grp: 1 },
-  { text: 'I',       grp: 1 },
-  { text: 'do.',     grp: 1 },
-];
-
-const CORRECT_Q  = 'Do you like apples?';
-const CORRECT_A  = 'Yes, I do.';
-const SNAP_DIST  = 70;    // px – edge distance to trigger snap
-const CARD_GAP   = 8;     // px – gap between snapped cards
-const V_TOLERANCE = 1.5;  // multiplier of card height for vertical snap tolerance
+const DEFAULT_QUESTION = 'Do you like apples?';
+const DEFAULT_ANSWER   = 'Yes I do.';
 
 /* ═══════════════════════════════════════════════════════
    STATE
 ═══════════════════════════════════════════════════════ */
-let cards       = [];
-let nextGid     = 0;
-let hardMode    = false;
-let activeGid   = null;   // groupId currently being dragged
-let audioCtx    = null;
+let wordData      = [];
+let correctQ      = '';
+let correctA      = '';
+let cards         = [];
+let nextGid       = 0;
+let hardMode      = false;
+let activeGid     = null;
+let audioCtx      = null;
+
+// Timer state
+let timerEnabled  = false;
+let timerRunning  = false;
+let timerSeconds  = 0;
+let timerInterval = null;
 
 /* ═══════════════════════════════════════════════════════
    DOM REFS
 ═══════════════════════════════════════════════════════ */
-const wbEl     = document.getElementById('wb');
-const badge    = document.getElementById('badge');
-const legend   = document.getElementById('legend');
-const fbMsg    = document.getElementById('fb-msg');
-const modeCb   = document.getElementById('mode-cb');
-const checkBtn = document.getElementById('check-btn');
-const resetBtn = document.getElementById('reset-btn');
+const menuScreen    = document.getElementById('menu-screen');
+const editScreen    = document.getElementById('edit-screen');
+const gameScreen    = document.getElementById('game-screen');
+const wbEl          = document.getElementById('wb');
+const badge         = document.getElementById('badge');
+const legend        = document.getElementById('legend');
+const fbMsg         = document.getElementById('fb-msg');
+const modeCb        = document.getElementById('mode-cb');
+const checkBtn      = document.getElementById('check-btn');
+const resetBtn      = document.getElementById('reset-btn');
+const menuBtn       = document.getElementById('menu-btn');
+const timerDisplay  = document.getElementById('timer-display');
+const timerValue    = document.getElementById('timer-value');
+const completeOverlay = document.getElementById('complete-overlay');
+
+// Menu elements
+const startBtn        = document.getElementById('start-btn');
+const editBtn         = document.getElementById('edit-btn');
+const menuTimerCb     = document.getElementById('menu-timer-cb');
+
+// Edit elements
+const editQuestion    = document.getElementById('edit-question');
+const editAnswer      = document.getElementById('edit-answer');
+const saveEditBtn     = document.getElementById('save-edit-btn');
+const cancelEditBtn   = document.getElementById('cancel-edit-btn');
+
+// Completion elements
+const completeQ       = document.getElementById('complete-q');
+const completeA       = document.getElementById('complete-a');
+const completeTime    = document.getElementById('complete-time');
+const playAgainBtn    = document.getElementById('play-again-btn');
+const toMenuBtn       = document.getElementById('to-menu-btn');
 
 /* ═══════════════════════════════════════════════════════
-   AUDIO  (Web Audio API – no external files needed)
+   AUDIO
 ═══════════════════════════════════════════════════════ */
 function ensureAudio() {
   if (audioCtx) return;
@@ -484,7 +867,6 @@ function tone(freq, type, vol, dur, delay = 0) {
 }
 
 function playSuccess() {
-  // Bright C-major arpeggio + sustain chord
   [523.25, 659.25, 783.99, 1046.5, 1318.51].forEach((f, i) =>
     tone(f, 'sine', 0.22, 0.5, i * 0.12)
   );
@@ -497,6 +879,128 @@ function playError() {
 
 function playSnap() {
   tone(920, 'sine', 0.07, 0.14);
+}
+
+/* ═══════════════════════════════════════════════════════
+   TIMER FUNCTIONS
+═══════════════════════════════════════════════════════ */
+function formatTime(secs) {
+  const m = Math.floor(secs / 60).toString().padStart(2, '0');
+  const s = (secs % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function startTimer() {
+  if (!timerEnabled || timerRunning) return;
+  timerRunning = true;
+  timerSeconds = 0;
+  timerValue.textContent = '00:00';
+  timerDisplay.classList.add('show');
+  timerInterval = setInterval(() => {
+    timerSeconds++;
+    timerValue.textContent = formatTime(timerSeconds);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (!timerRunning) return;
+  timerRunning = false;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+}
+
+function resetTimer() {
+  stopTimer();
+  timerSeconds = 0;
+  timerValue.textContent = '00:00';
+  if (!timerEnabled) {
+    timerDisplay.classList.remove('show');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONTENT MANAGEMENT
+═══════════════════════════════════════════════════════ */
+function parseContent(question, answer) {
+  const qWords = question.trim().split(/\s+/).filter(w => w.length > 0);
+  const aWords = answer.trim().split(/\s+/).filter(w => w.length > 0);
+
+  const data = [];
+  qWords.forEach((text, i) => {
+    data.push({ text, grp: 0, idx: i });
+  });
+  aWords.forEach((text, i) => {
+    data.push({ text, grp: 1, idx: i });
+  });
+
+  return {
+    wordData: data,
+    correctQ: qWords.join(' '),
+    correctA: aWords.join(' ')
+  };
+}
+
+function loadContent() {
+  const storedQ = localStorage.getItem('scrambler_question') || DEFAULT_QUESTION;
+  const storedA = localStorage.getItem('scrambler_answer') || DEFAULT_ANSWER;
+  const parsed = parseContent(storedQ, storedA);
+  wordData = parsed.wordData;
+  correctQ = parsed.correctQ;
+  correctA = parsed.correctA;
+
+  editQuestion.value = storedQ;
+  editAnswer.value = storedA;
+}
+
+function saveContent() {
+  const q = editQuestion.value.trim() || DEFAULT_QUESTION;
+  const a = editAnswer.value.trim() || DEFAULT_ANSWER;
+  localStorage.setItem('scrambler_question', q);
+  localStorage.setItem('scrambler_answer', a);
+  loadContent();
+}
+
+/* ═══════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════ */
+function showMenu() {
+  stopTimer();
+  resetTimer();
+  gameScreen.classList.remove('active');
+  editScreen.style.display = 'none';
+  menuScreen.style.display = 'flex';
+}
+
+function showGame() {
+  menuScreen.style.display = 'none';
+  editScreen.style.display = 'none';
+  gameScreen.classList.add('active');
+  resetTimer();
+  initCards();
+}
+
+function showEdit() {
+  menuScreen.style.display = 'none';
+  editScreen.style.display = 'flex';
+}
+
+function showCompletion() {
+  stopTimer();
+  completeQ.textContent = 'Q: ' + correctQ;
+  completeA.textContent = 'A: ' + correctA;
+
+  if (timerEnabled) {
+    completeTime.textContent = '⏱ Time: ' + formatTime(timerSeconds);
+    completeTime.style.display = 'block';
+  } else {
+    completeTime.style.display = 'none';
+  }
+
+  playSuccess();
+  spawnConfetti();
+  completeOverlay.classList.add('show');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -528,22 +1032,25 @@ function sortX(arr) {
 
 function anim(el, cls) {
   el.classList.remove(cls);
-  void el.offsetWidth;          // force reflow to restart
+  void el.offsetWidth;
   el.classList.add(cls);
   el.addEventListener('animationend', () => el.classList.remove(cls), { once: true });
 }
 
 /* ═══════════════════════════════════════════════════════
-   INIT & SCATTER
-═══════════════════════════════════════════════════════ */
+   CARD INIT & SCATTER
+════════════════════════════════��══════════════════════ */
+const SNAP_DIST  = 70;
+const CARD_GAP   = 8;
+const V_TOLERANCE = 1.5;
+
 function initCards() {
   wbEl.querySelectorAll('.card').forEach(e => e.remove());
   cards   = [];
   nextGid = 0;
   activeGid = null;
 
-  // Create elements off-screen so we can measure them
-  WORD_DATA.forEach((wd, i) => {
+  wordData.forEach((wd, i) => {
     const el = document.createElement('div');
     el.className = cardClass(wd.grp);
     el.dataset.id = i;
@@ -572,14 +1079,12 @@ function scatterCards() {
   const { width: W, height: H } = wbEl.getBoundingClientRect();
   const pad = 20;
 
-  // Three loose horizontal zones
   const zones = [
     { y0: pad,           y1: H * .30 },
     { y0: H * .34,       y1: H * .64 },
     { y0: H * .68,       y1: H - pad },
   ];
 
-  // Shuffle
   const shuffled = [...cards].sort(() => Math.random() - .5);
   const placed   = [];
 
@@ -628,10 +1133,8 @@ function trySnap(movedGid) {
         const tcR  = tc.x + tc.width;
         const tcCY = tc.y + tc.height * .5;
 
-        // Must be on roughly the same horizontal band
         if (Math.abs(mcCY - tcCY) > mc.height * V_TOLERANCE) continue;
 
-        // Nearest-edge distance (right-of-mc to left-of-tc, or vice versa)
         const d = Math.min(
           Math.abs(mcR - tcL),
           Math.abs(mcL - tcR)
@@ -654,13 +1157,11 @@ function mergeGroups(gid1, gid2) {
   const { width: W, height: H } = wbEl.getBoundingClientRect();
   const totalW = all.reduce((s, c) => s + c.width + CARD_GAP, -CARD_GAP);
 
-  // Average Y, clamped
   const avgY = Math.max(6, Math.min(
     H - all[0].height - 6,
     all.reduce((s, c) => s + c.y, 0) / all.length
   ));
 
-  // Starting X: prefer leftmost card position, but clamp so row fits
   let curX = Math.max(6, Math.min(all[0].x, W - totalW - 6));
 
   const newGid = nextGid++;
@@ -675,7 +1176,7 @@ function mergeGroups(gid1, gid2) {
 }
 
 /* ═══════════════════════════════════════════════════════
-   INTERACT.JS DRAG SETUP  (called once)
+   DRAG SETUP
 ═══════════════════════════════════════════════════════ */
 function setupDrag() {
   interact('.card').draggable({
@@ -694,6 +1195,9 @@ function setupDrag() {
           gc.el.style.zIndex = 500;
           gc.el.classList.add('dragging');
         });
+
+        // Start timer on first interaction
+        startTimer();
       },
 
       move(ev) {
@@ -721,7 +1225,7 @@ function setupDrag() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   CHECK
+   CHECK ANSWER
 ═══════════════════════════════════════════════════════ */
 function checkAnswer() {
   ensureAudio();
@@ -732,24 +1236,21 @@ function checkAnswer() {
 
   for (const gCards of Object.values(groups)) {
     const txt = sortX(gCards).map(c => c.text).join(' ');
-    if (txt === CORRECT_Q) okQ = true;
-    if (txt === CORRECT_A) okA = true;
+    if (txt === correctQ) okQ = true;
+    if (txt === correctA) okA = true;
   }
 
   if (okQ && okA) {
-    playSuccess();
-    spawnConfetti();
-    showFeedback('🎉 Excellent! 🎉', '#FFD96A');
+    showCompletion();
     cards.forEach(c => anim(c.el, 'do-celebrate'));
   } else {
     playError();
     cards.forEach(c => anim(c.el, 'do-shake'));
 
-    // Subtle magenta tint on wrong multi-card groups
     for (const gCards of Object.values(groups)) {
       if (gCards.length < 2) continue;
       const txt = sortX(gCards).map(c => c.text).join(' ');
-      if (txt !== CORRECT_Q && txt !== CORRECT_A) {
+      if (txt !== correctQ && txt !== correctA) {
         gCards.forEach(c => {
           c.el.style.filter = 'saturate(2.2) hue-rotate(110deg)';
           setTimeout(() => c.el.style.filter = '', 750);
@@ -810,13 +1311,43 @@ function applyMode() {
 }
 
 /* ═══════════════════════════════════════════════════════
-   EVENTS
+   EVENT LISTENERS
 ═══════════════════════════════════════════════════════ */
-modeCb.addEventListener('change',  applyMode);
-checkBtn.addEventListener('click', checkAnswer);
-resetBtn.addEventListener('click', initCards);
+// Menu
+startBtn.addEventListener('click', showGame);
+editBtn.addEventListener('click', showEdit);
+menuTimerCb.addEventListener('change', () => {
+  timerEnabled = menuTimerCb.checked;
+});
 
-// Block native scroll/zoom inside the whiteboard on touch devices
+// Edit
+saveEditBtn.addEventListener('click', () => {
+  saveContent();
+  showMenu();
+});
+cancelEditBtn.addEventListener('click', showMenu);
+
+// Game
+modeCb.addEventListener('change', applyMode);
+checkBtn.addEventListener('click', checkAnswer);
+resetBtn.addEventListener('click', () => {
+  resetTimer();
+  initCards();
+});
+menuBtn.addEventListener('click', showMenu);
+
+// Completion
+playAgainBtn.addEventListener('click', () => {
+  completeOverlay.classList.remove('show');
+  resetTimer();
+  initCards();
+});
+toMenuBtn.addEventListener('click', () => {
+  completeOverlay.classList.remove('show');
+  showMenu();
+});
+
+// Touch blocking
 wbEl.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
 wbEl.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
 
@@ -824,10 +1355,9 @@ wbEl.addEventListener('touchmove',  e => e.preventDefault(), { passive: false })
    BOOT
 ═══════════════════════════════════════════════════════ */
 window.addEventListener('load', () => {
-  // Double-rAF ensures fonts are measured before we read card dimensions
+  loadContent();
   requestAnimationFrame(() =>
     requestAnimationFrame(() => {
-      initCards();
       setupDrag();
     })
   );
