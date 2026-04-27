@@ -96,6 +96,48 @@
             transform: translateY(-2px) scale(0.98);
         }
 
+        .card-label {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255,255,255,0.95);
+            padding: 10px 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.15);
+        }
+
+        .game-card {
+            position: relative;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: transform 0.25s, box-shadow 0.25s;
+            text-decoration: none;
+            color: #2c3e50;
+            display: flex;
+            flex-direction: column;
+            aspect-ratio: 1;
+        }
+
+        @media (max-width: 600px) {
+            .card-label {
+                padding: 6px 8px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card-label {
+                padding: 5px 6px;
+                font-size: 0.75rem;
+            }
+        }
+
         .card-icon {
             flex: 1;
             display: flex;
@@ -110,26 +152,38 @@
         .card-icon.shooter { background: linear-gradient(135deg, #0a0c0f, #1a2a1a); }
 
         .card-icon.scrambler { background: linear-gradient(135deg, #11998e, #38ef7d); }
-
         .card-icon.baamboozle { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
 
-        /* Force Landscape View */
-        @media screen and (orientation: portrait) {
-            body {
-                transform: rotate(-90deg);
-                transform-origin: center center;
-                width: 100vh !important;
-                height: 100vw !important;
-                overflow: hidden;
-            }
+        @media (max-width: 900px) {
             .games-grid {
-                grid-template-columns: repeat(2, 1fr) !important;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 20px;
             }
         }
 
         @media (max-width: 600px) {
-            .games-grid { gap: 16px; }
-            .card-icon { font-size: 4rem; }
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+                padding: 15px;
+                width: 95%;
+            }
+            .card-icon { font-size: 3.5rem; }
+            .game-card { border-radius: 15px; }
+            .fullscreen-btn, .back-btn {
+                padding: 8px 12px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .games-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 8px;
+                padding: 10px;
+            }
+            .card-icon { font-size: 2.8rem; }
+            .game-card { border-radius: 12px; }
         }
     </style>
 </head>
@@ -141,34 +195,42 @@
     <div class="games-grid">
         <a class="game-card" href="car/index.html">
             <div class="card-icon car">🏎️</div>
+            <div class="card-label">Car Racing</div>
         </a>
 
         <a class="game-card" href="chooser/index.html">
             <div class="card-icon chooser">🎯</div>
+            <div class="card-label">Word Chooser</div>
         </a>
 
         <a class="game-card" href="memory/index.html">
             <div class="card-icon memory">🧩</div>
+            <div class="card-label">Memory Match</div>
         </a>
 
         <a class="game-card" href="shooter/index.html">
             <div class="card-icon shooter">🔫</div>
+            <div class="card-label">Word Shooter</div>
         </a>
 
         <a class="game-card" href="snakes/index.html">
             <div class="card-icon" style="background: linear-gradient(135deg, #1a5a1a, #2d8a2d);">🐍</div>
+            <div class="card-label">Snakes</div>
         </a>
 
         <a class="game-card" href="bomberman/index.html">
             <div class="card-icon" style="background: linear-gradient(135deg, #1a1a2e, #16213e);">💣</div>
+            <div class="card-label">Bomberman</div>
         </a>
 
         <a class="game-card" href="scrambler/index.html">
-            <div class="card-icon scrambler">🧩</div>
+            <div class="card-icon scrambler">🔤</div>
+            <div class="card-label">Scrambler</div>
         </a>
 
         <a class="game-card" href="baamboozle/index.html">
-            <div class="card-icon baamboozle">🎯</div>
+            <div class="card-icon baamboozle">🌟</div>
+            <div class="card-label">Baamboozle</div>
         </a>
     </div>
 

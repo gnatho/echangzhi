@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Student Pair Selector</title>
+<style>
+  /* ===== Reset & Base ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --clr-bg: #f0f2f5;
+    --clr-panel-left: #e8f0fe;
+    --clr-panel-right: #fce8e6;
+    --clr-left-accent: #1a73e8;
+    --clr-right-accent: #d93025;
+    --clr-text: #202124;
+    --clr-muted: #5f6368;
+    --clr-tile: #ffffff;
+    --clr-tile-used: #9aa0a6;
+    --clr-overlay: rgba(32, 33, 36, 0.92);
+    --radius: 16px;
+    --shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+
+  html, body {
+    height: 100%; width: 100%;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background: var(--clr-bg);
+    color: var(--clr-text);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    user-select: none;
+  }
+
+  /* ===== Page Layout ===== */
+  #app {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* ===== Number Status Bar ===== */
+  #status-bar {
+    background: #ffffff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    padding: 8px 12px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  #status-bar::-webkit-scrollbar { height: 4px; }
+  #status-bar::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 2px; }
+
+  #tile-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: center;
+    min-width: max-content;
+  }
+
+  .tile {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    background: var(--clr-tile);
+    color: var(--clr-text);
+    box-shadow: 0 1px 3px rgba(0,0,0,.1);
+    transition: background .3s, color .3s, opacity .3s, transform .3s;
+  }
+
+  .tile.used {
+    background: var(--clr-tile-used);
+    color: #fff;
+    opacity: 0.45;
+    transform: scale(0.88);
+  }
+
+  /* ===== Main Panels ===== */
+  #panels {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    min-height: 0;
+  }
+
+  .panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    cursor: pointer;
+    transition: transform .1s, box-shadow .1s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .panel:active {
+    transform: scale(0.97);
+    box-shadow: 0 1px 4px rgba(0,0,0,.15);
+  }
+
+  .panel-left  { background: var(--clr-panel-left); }
+  .panel-right { background: var(--clr-panel-right); }
+
+  .panel-label {
+    font-size: clamp(14px, 2.5vw, 20px);
+    font-weight: 500;
+    color: var(--clr-muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.02em;
+  }
+
+  .panel-number {
+    font-size: clamp(64px, 18vw, 180px);
+    font-weight: 800;
+    line-height: 1;
+    color: var(--clr-text);
+    transition: color .2s;
+  }
+
+  .panel-left .panel-number  { color: var(--clr-left-accent); }
+  .panel-right .panel-number { color: var(--clr-right-accent); }
+
+  .panel-hint {
+    font-size: clamp(12px, 2vw, 18px);
+    color: var(--clr-muted);
+    margin-top: 8px;
+  }
+
+  /* Bounce animation */
+  @keyframes bounce-in {
+    0%   { transform: scale(0.3); opacity: 0; }
+    50%  { transform: scale(1.12); opacity: 1; }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
+
+  .panel-number.animate {
+    animation: bounce-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .panel-number.done {
+    font-size: clamp(20px, 4vw, 36px);
+    color: var(--clr-tile-used) !important;
+    font-weight: 600;
+  }
+
+  /* ===== Footer / Timer Button ===== */
+  #footer {
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-end;
+    padding: 8px 16px 12px 16px;
+    position: relative;
+  }
+
+  #timer-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
+    height: 48px;
+    border-radius: 24px;
+    background: #202124;
+    color: #fff;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 0 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,.25);
+    transition: transform .1s, box-shadow .1s;
+    z-index: 10;
+  }
+
+  #timer-pill:active { transform: scale(0.95); }
+
+  /* ===== Timer Overlay ===== */
+  #timer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: var(--clr-overlay);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 32px;
+    opacity: 0;
+    transition: opacity .3s;
+  }
+
+  #timer-overlay.show {
+    display: flex;
+    opacity: 1;
+  }
+
+  #overlay-time {
+    font-size: clamp(80px, 22vw, 240px);
+    font-weight: 800;
+    color: #ffffff;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    text-shadow: 0 4px 24px rgba(0,0,0,.3);
+  }
+
+  #overlay-controls {
+    display: flex;
+    gap: 20px;
+  }
+
+  .overlay-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 120px;
+    height: 56px;
+    border-radius: 28px;
+    border: none;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform .1s, background .2s;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .overlay-btn:active { transform: scale(0.95); }
+
+  .btn-start {
+    background: #1a73e8;
+    color: #fff;
+  }
+
+  .btn-pause {
+    background: #f9ab00;
+    color: #202124;
+  }
+
+  .btn-back {
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    border: 2px solid rgba(255,255,255,.3);
+  }
+
+  .overlay-btn:disabled {
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  /* ===== Responsive Fine-tuning ===== */
+  @media (max-height: 500px) {
+    #status-bar { padding: 4px 8px; }
+    .tile { min-width: 28px; height: 28px; font-size: 11px; border-radius: 6px; }
+    #panels { gap: 8px; padding: 6px; }
+    #footer { padding: 4px 12px 6px; }
+    #timer-pill { height: 38px; min-width: 80px; font-size: 18px; border-radius: 19px; }
+  }
+
+  @media (min-width: 1200px) {
+    .tile { min-width: 42px; height: 42px; font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- Number Status Bar -->
+  <div id="status-bar">
+    <div id="tile-container"></div>
+  </div>
+
+  <!-- Main Panels -->
+  <div id="panels">
+    <div class="panel panel-left" id="panel-left">
+      <div class="panel-label">Left Student</div>
+      <div class="panel-number" id="num-left">&mdash;</div>
+      <div class="panel-hint">Tap to pick a student</div>
+    </div>
+    <div class="panel panel-right" id="panel-right">
+      <div class="panel-label">Right Student</div>
+      <div class="panel-number" id="num-right">&mdash;</div>
+      <div class="panel-hint">Tap to pick a student</div>
+    </div>
+  </div>
+
+  <!-- Footer with Timer Pill -->
+  <div id="footer">
+    <div id="timer-pill" aria-label="Open timer">03:00</div>
+  </div>
+
+</div>
+
+<!-- Timer Overlay -->
+<div id="timer-overlay">
+  <div id="overlay-time">03:00</div>
+  <div id="overlay-controls">
+    <button class="overlay-btn btn-start" id="btn-start">Start</button>
+    <button class="overlay-btn btn-pause" id="btn-pause" disabled>Pause</button>
+  </div>
+  <button class="overlay-btn btn-back" id="btn-back">Back to Pairs</button>
+</div>
+
+<script>
+(function() {
+  "use strict";
+
+  /* ===== State ===== */
+  const TOTAL = 40;
+  const available = [];          // numbers still available
+  for (let i = 1; i <= TOTAL; i++) available.push(i);
+
+  let leftNum = null;
+  let rightNum = null;
+  let allUsed = false;
+
+  /* ===== DOM refs ===== */
+  const tileContainer = document.getElementById("tile-container");
+  const numLeft  = document.getElementById("num-left");
+  const numRight = document.getElementById("num-right");
+  const panelLeft  = document.getElementById("panel-left");
+  const panelRight = document.getElementById("panel-right");
+  const hintLeft   = panelLeft.querySelector(".panel-hint");
+  const hintRight  = panelRight.querySelector(".panel-hint");
+  const timerPill  = document.getElementById("timer-pill");
+  const overlay    = document.getElementById("timer-overlay");
+  const overlayTime = document.getElementById("overlay-time");
+  const btnStart   = document.getElementById("btn-start");
+  const btnPause   = document.getElementById("btn-pause");
+  const btnBack    = document.getElementById("btn-back");
+
+  /* ===== Build status bar tiles ===== */
+  const tiles = {};
+  for (let i = 1; i <= TOTAL; i++) {
+    const t = document.createElement("span");
+    t.className = "tile";
+    t.textContent = i;
+    tiles[i] = t;
+    tileContainer.appendChild(t);
+  }
+
+  /* ===== Helper: pick random from array ===== */
+  function pickRandom() {
+    if (available.length === 0) return null;
+    const idx = Math.floor(Math.random() * available.length);
+    const num = available[idx];
+    available.splice(idx, 1);
+    // mark tile
+    tiles[num].classList.add("used");
+    return num;
+  }
+
+  /* ===== Helper: animate number ===== */
+  function showNumber(el, num, isDone) {
+    el.classList.remove("animate", "done");
+    // force reflow
+    void el.offsetWidth;
+    if (isDone) {
+      el.textContent = "No students left";
+      el.classList.add("done");
+    } else {
+      el.textContent = num;
+      el.classList.add("animate");
+    }
+  }
+
+  /* ===== Panel tap handlers ===== */
+  panelLeft.addEventListener("click", function() {
+    if (allUsed) return;
+    const n = pickRandom();
+    if (n === null) {
+      allUsed = true;
+      showNumber(numLeft, null, true);
+      showNumber(numRight, null, true);
+      hintLeft.textContent = "";
+      hintRight.textContent = "";
+      panelLeft.style.cursor = "default";
+      panelRight.style.cursor = "default";
+      return;
+    }
+    leftNum = n;
+    showNumber(numLeft, n, false);
+    hintLeft.textContent = "Left Student #" + n;
+
+    if (available.length === 0) {
+      allUsed = true;
+      showNumber(numRight, null, true);
+      hintRight.textContent = "";
+      panelLeft.style.cursor = "default";
+      panelRight.style.cursor = "default";
+    }
+  });
+
+  panelRight.addEventListener("click", function() {
+    if (allUsed) return;
+    const n = pickRandom();
+    if (n === null) {
+      allUsed = true;
+      showNumber(numLeft, null, true);
+      showNumber(numRight, null, true);
+      hintLeft.textContent = "";
+      hintRight.textContent = "";
+      panelLeft.style.cursor = "default";
+      panelRight.style.cursor = "default";
+      return;
+    }
+    rightNum = n;
+    showNumber(numRight, n, false);
+    hintRight.textContent = "Right Student #" + n;
+
+    if (available.length === 0) {
+      allUsed = true;
+      showNumber(numLeft, null, true);
+      hintLeft.textContent = "";
+      panelLeft.style.cursor = "default";
+      panelRight.style.cursor = "default";
+    }
+  });
+
+  /* ===== Timer Logic ===== */
+  let timerSeconds = 180;
+  let timerInterval = null;
+  let timerRunning = false;
+  let audioCtx = null;
+
+  function formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return String(m).padStart(2, "0") + ":" + String(sec).padStart(2, "0");
+  }
+
+  function updateTimerDisplay() {
+    const txt = formatTime(timerSeconds);
+    timerPill.textContent = txt;
+    overlayTime.textContent = txt;
+  }
+
+  function unlockAudio() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+  }
+
+  function playBeep() {
+    if (!audioCtx) return;
+    // Play three short beeps
+    for (let i = 0; i < 3; i++) {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      gain.gain.value = 0.4;
+      const start = audioCtx.currentTime + i * 0.3;
+      osc.start(start);
+      osc.stop(start + 0.18);
+      gain.gain.setValueAtTime(0.4, start);
+      gain.gain.exponentialRampToValueAtTime(0.001, start + 0.18);
+    }
+  }
+
+  function tickTimer() {
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      btnStart.disabled = true;
+      btnPause.disabled = true;
+      playBeep();
+      return;
+    }
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) {
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timerRunning = false;
+      btnStart.disabled = true;
+      btnPause.disabled = true;
+      playBeep();
+    }
+  }
+
+  /* Open overlay */
+  timerPill.addEventListener("click", function() {
+    overlay.classList.add("show");
+    // ensure correct button states
+    if (timerSeconds <= 0) {
+      btnStart.disabled = true;
+      btnPause.disabled = true;
+    } else if (timerRunning) {
+      btnStart.disabled = true;
+      btnPause.disabled = false;
+    } else {
+      btnStart.disabled = false;
+      btnPause.disabled = true;
+    }
+  });
+
+  /* Start */
+  btnStart.addEventListener("click", function() {
+    unlockAudio();
+    if (timerSeconds <= 0) return;
+    timerRunning = true;
+    btnStart.disabled = true;
+    btnPause.disabled = false;
+    timerInterval = setInterval(tickTimer, 1000);
+  });
+
+  /* Pause */
+  btnPause.addEventListener("click", function() {
+    if (!timerRunning) return;
+    timerRunning = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    btnStart.disabled = false;
+    btnPause.disabled = true;
+    btnStart.textContent = "Resume";
+  });
+
+  /* Close overlay */
+  function closeOverlay() {
+    overlay.classList.remove("show");
+  }
+
+  btnBack.addEventListener("click", closeOverlay);
+
+  /* Prevent closing on overlay background tap – only close via button */
+  overlay.addEventListener("click", function(e) {
+    if (e.target === overlay) closeOverlay();
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Student Pair Selector</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+  background: #0d1117;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  height: 100dvh;
+  width: 100vw;
+  width: 100dvw;
+  position: relative;
+}
+
+/* ── Number Status Bar ── */
+.number-bar {
+  display: flex;
+  gap: 2px;
+  padding: 6px 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #161b22;
+  border-bottom: 1px solid #21262d;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: #30363d transparent;
+  align-items: center;
+  min-height: 40px;
+}
+
+.number-bar::-webkit-scrollbar { height: 3px; }
+.number-bar::-webkit-scrollbar-track { background: transparent; }
+.number-bar::-webkit-scrollbar-thumb { background: #30363d; border-radius: 2px; }
+
+.num-badge {
+  min-width: 28px;
+  height: 28px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  transition: background 0.25s ease, color 0.25s ease, opacity 0.25s ease;
+}
+
+.num-badge.available {
+  background: #1f6feb;
+  color: #ffffff;
+}
+
+.num-badge.used {
+  background: #21262d;
+  color: #484f58;
+  opacity: 0.6;
+}
+
+/* ── Main Panels ── */
+.panels {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  transition: background 0.12s ease;
+  touch-action: manipulation;
+  min-height: 0;
+}
+
+.panel-left {
+  background: #0d1117;
+  border-right: 1px solid #21262d;
+}
+
+.panel-left:active { background: #161b22; }
+
+.panel-right {
+  background: #0d1117;
+}
+
+.panel-right:active { background: #161b22; }
+
+.panel-number {
+  font-size: clamp(5rem, 12vw, 15rem);
+  font-weight: 900;
+  line-height: 1;
+  transition: color 0.3s ease;
+}
+
+#leftNumber:not(.placeholder) {
+  color: #58a6ff;
+  text-shadow: 0 0 40px rgba(88, 166, 255, 0.25);
+}
+
+#rightNumber:not(.placeholder) {
+  color: #f78166;
+  text-shadow: 0 0 40px rgba(247, 129, 102, 0.25);
+}
+
+.panel-number.placeholder {
+  font-size: clamp(1.5rem, 4vw, 3rem);
+  color: #6e7681;
+  text-shadow: none;
+  font-weight: 400;
+}
+
+.panel-number.picked {
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes popIn {
+  0%   { transform: scale(0.2); opacity: 0; }
+  60%  { transform: scale(1.1); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+.panel-label {
+  font-size: clamp(0.85rem, 2vw, 1.2rem);
+  color: #8b949e;
+  margin-top: 12px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+/* ── Timer Pill ── */
+.timer-pill {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 50;
+  background: #21262d;
+  border: 1px solid #30363d;
+  color: #c9d1d9;
+  padding: 12px 22px;
+  border-radius: 50px;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+  transition: all 0.2s ease;
+  letter-spacing: 1px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+
+.timer-pill:hover {
+  border-color: #58a6ff;
+  box-shadow: 0 4px 20px rgba(88, 166, 255, 0.2);
+}
+
+.timer-pill:active {
+  transform: scale(0.95);
+}
+
+.timer-pill.finished {
+  border-color: #f85149;
+  animation: pillPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes pillPulse {
+  0%, 100% { box-shadow: 0 4px 16px rgba(248, 81, 73, 0.2); }
+  50%      { box-shadow: 0 4px 28px rgba(248, 81, 73, 0.5); }
+}
+
+.timer-pill-icon { font-size: 22px; line-height: 1; }
+
+/* ── Timer Overlay ── */
+.timer-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 100;
+  background: rgba(13, 17, 23, 0.96);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  animation: fadeIn 0.25s ease;
+}
+
+.timer-overlay.hidden { display: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.close-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid #30363d;
+  background: #21262d;
+  color: #c9d1d9;
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s;
+  z-index: 101;
+  line-height: 1;
+  touch-action: manipulation;
+}
+
+.close-btn:active {
+  background: #30363d;
+  border-color: #8b949e;
+}
+
+.timer-overlay-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 36px;
+}
+
+.timer-display {
+  font-size: clamp(7rem, 22vw, 18rem);
+  font-weight: 900;
+  color: #c9d1d9;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 6px;
+  line-height: 1;
+  transition: color 0.5s ease;
+}
+
+.timer-display.warning {
+  color: #d29922;
+  text-shadow: 0 0 60px rgba(210, 153, 34, 0.3);
+}
+
+.timer-display.finished {
+  color: #f85149;
+  text-shadow: 0 0 60px rgba(248, 81, 73, 0.5);
+  animation: timerPulse 1s ease-in-out infinite;
+}
+
+@keyframes timerPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+
+.timer-controls {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.timer-btn {
+  padding: 18px 40px;
+  border-radius: 50px;
+  border: none;
+  font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+  min-width: 140px;
+  touch-action: manipulation;
+}
+
+.timer-btn:active { transform: scale(0.96); }
+
+.timer-btn.start {
+  background: #238636;
+  color: #ffffff;
+}
+
+.timer-btn.start:hover:not(:disabled) { background: #2ea043; }
+
+.timer-btn.start:disabled {
+  background: #21262d;
+  color: #484f58;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.timer-btn.pause {
+  background: #d29922;
+  color: #ffffff;
+}
+
+.timer-btn.pause:hover:not(:disabled) { background: #e3b341; }
+
+.timer-btn.pause:disabled {
+  background: #21262d;
+  color: #484f58;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.timer-btn.reset {
+  background: #21262d;
+  color: #c9d1d9;
+  border: 1px solid #30363d;
+}
+
+.timer-btn.reset:hover { border-color: #8b949e; }
+
+.back-btn {
+  background: transparent;
+  border: 1px solid #30363d;
+  color: #8b949e;
+  padding: 16px 36px;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 500;
+  touch-action: manipulation;
+}
+
+.back-btn:active {
+  border-color: #8b949e;
+  color: #c9d1d9;
+  background: #21262d;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .num-badge {
+    min-width: 24px;
+    height: 24px;
+    font-size: 10px;
+    border-radius: 4px;
+  }
+  .timer-pill {
+    padding: 10px 16px;
+    font-size: 16px;
+    bottom: 12px;
+    right: 12px;
+  }
+  .timer-pill-icon { font-size: 18px; }
+  .timer-display { font-size: clamp(4rem, 18vw, 7rem); }
+  .close-btn { top: 16px; right: 16px; width: 44px; height: 44px; font-size: 24px; }
+}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <div class="number-bar" id="numberBar"></div>
+
+  <div class="panels">
+    <div class="panel panel-left" id="panelLeft">
+      <div class="panel-number placeholder" id="leftNumber">&mdash;</div>
+      <div class="panel-label">Left student #</div>
+    </div>
+    <div class="panel panel-right" id="panelRight">
+      <div class="panel-number placeholder" id="rightNumber">&mdash;</div>
+      <div class="panel-label">Right student #</div>
+    </div>
+  </div>
+
+  <div class="timer-pill" id="timerPill">
+    <span class="timer-pill-icon">&#9201;</span>
+    <span id="timerPillText">03:00</span>
+  </div>
+</div>
+
+<div class="timer-overlay hidden" id="timerOverlay">
+  <button class="close-btn" id="closeTimer" aria-label="Close timer">&times;</button>
+  <div class="timer-overlay-content">
+    <div class="timer-display" id="timerDisplay">03:00</div>
+    <div class="timer-controls">
+      <button class="timer-btn start" id="startBtn">Start</button>
+      <button class="timer-btn pause" id="pauseBtn" disabled>Pause</button>
+      <button class="timer-btn reset" id="resetBtn">Reset</button>
+    </div>
+    <button class="back-btn" id="backBtn">Back to pairs</button>
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  var TOTAL = 40;
+  var INITIAL_TIME = 180;
+
+  var available = [];
+  var used = {};
+  var timeLeft = INITIAL_TIME;
+  var timerId = null;
+  var running = false;
+  var audioCtx = null;
+
+  var numberBar = document.getElementById('numberBar');
+  var panelLeft = document.getElementById('panelLeft');
+  var panelRight = document.getElementById('panelRight');
+  var leftNum = document.getElementById('leftNumber');
+  var rightNum = document.getElementById('rightNumber');
+  var pill = document.getElementById('timerPill');
+  var pillText = document.getElementById('timerPillText');
+  var overlay = document.getElementById('timerOverlay');
+  var display = document.getElementById('timerDisplay');
+  var startBtn = document.getElementById('startBtn');
+  var pauseBtn = document.getElementById('pauseBtn');
+  var resetBtn = document.getElementById('resetBtn');
+  var closeBtn = document.getElementById('closeTimer');
+  var backBtn = document.getElementById('backBtn');
+
+  function init() {
+    available = [];
+    used = {};
+    for (var i = 1; i <= TOTAL; i++) available.push(i);
+    timeLeft = INITIAL_TIME;
+    running = false;
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    buildBar();
+    updateTimerUI();
+    leftNum.textContent = '\u2014';
+    leftNum.className = 'panel-number placeholder';
+    rightNum.textContent = '\u2014';
+    rightNum.className = 'panel-number placeholder';
+  }
+
+  function buildBar() {
+    numberBar.innerHTML = '';
+    for (var i = 1; i <= TOTAL; i++) {
+      var badge = document.createElement('div');
+      badge.className = 'num-badge ' + (used[i] ? 'used' : 'available');
+      badge.textContent = i;
+      numberBar.appendChild(badge);
+    }
+  }
+
+  function pick() {
+    if (available.length === 0) return null;
+    var idx = Math.floor(Math.random() * available.length);
+    var n = available[idx];
+    available.splice(idx, 1);
+    used[n] = true;
+    return n;
+  }
+
+  function fmt(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec % 60;
+    return (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+  }
+
+  function updateTimerUI() {
+    var str = fmt(timeLeft);
+    pillText.textContent = str;
+    display.textContent = str;
+
+    display.classList.remove('warning', 'finished');
+    pill.classList.remove('finished');
+
+    if (timeLeft === 0) {
+      display.classList.add('finished');
+      pill.classList.add('finished');
+    } else if (timeLeft <= 30) {
+      display.classList.add('warning');
+    }
+
+    if (timeLeft <= 0 && !running) {
+      startBtn.disabled = true;
+      startBtn.textContent = 'Start';
+      pauseBtn.disabled = true;
+    } else if (running) {
+      startBtn.disabled = true;
+      startBtn.textContent = 'Running\u2026';
+      pauseBtn.disabled = false;
+    } else {
+      startBtn.disabled = false;
+      startBtn.textContent = timeLeft < INITIAL_TIME ? 'Resume' : 'Start';
+      pauseBtn.disabled = true;
+    }
+  }
+
+  function startTimer() {
+    if (running || timeLeft <= 0) return;
+
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(e) {}
+    }
+    if (audioCtx && audioCtx.state === 'suspended') { audioCtx.resume(); }
+
+    running = true;
+    updateTimerUI();
+
+    timerId = setInterval(function() {
+      timeLeft--;
+      updateTimerUI();
+      if (timeLeft <= 0) {
+        stopTimer(true);
+      }
+    }, 1000);
+  }
+
+  function pauseTimer() {
+    if (!running) return;
+    running = false;
+    clearInterval(timerId);
+    timerId = null;
+    updateTimerUI();
+  }
+
+  function stopTimer(playSound) {
+    running = false;
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    updateTimerUI();
+    if (playSound) { beep(); }
+  }
+
+  function resetTimer() {
+    running = false;
+    if (timerId) { clearInterval(timerId); timerId = null; }
+    timeLeft = INITIAL_TIME;
+    display.classList.remove('warning', 'finished');
+    pill.classList.remove('finished');
+    updateTimerUI();
+  }
+
+  function beep() {
+    if (!audioCtx) return;
+    try {
+      if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+      var osc = audioCtx.createOscillator();
+      var gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.6);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + 0.6);
+    } catch(e) {}
+  }
+
+  function tapPanel(side) {
+    if (available.length === 0) {
+      leftNum.textContent = 'No students left';
+      leftNum.className = 'panel-number placeholder';
+      rightNum.textContent = 'No students left';
+      rightNum.className = 'panel-number placeholder';
+      return;
+    }
+
+    var el = side === 'left' ? leftNum : rightNum;
+    var num = pick();
+
+    el.classList.remove('picked');
+    el.className = 'panel-number';
+    el.textContent = num;
+    void el.offsetWidth;
+    el.classList.add('picked');
+
+    buildBar();
+  }
+
+  function openOverlay() {
+    overlay.classList.remove('hidden');
+    updateTimerUI();
+  }
+
+  function closeOverlay() {
+    overlay.classList.add('hidden');
+  }
+
+  panelLeft.addEventListener('click', function() { tapPanel('left'); });
+  panelRight.addEventListener('click', function() { tapPanel('right'); });
+  pill.addEventListener('click', openOverlay);
+  closeBtn.addEventListener('click', closeOverlay);
+  backBtn.addEventListener('click', closeOverlay);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) closeOverlay();
+  });
+  startBtn.addEventListener('click', startTimer);
+  pauseBtn.addEventListener('click', pauseTimer);
+  resetBtn.addEventListener('click', resetTimer);
+
+  init();
+})();
+</script>
+
+</body>
+</html>
