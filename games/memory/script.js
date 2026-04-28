@@ -13,7 +13,7 @@ async function playWordAudio(word) {
     if (!audioEnabled) return;
     
     const normalized = normalizeWord(word);
-    const audioPath = `static/audio/${normalized}.mp3`;
+    const audioPath = `../../static/audio/${normalized}.mp3`;
     
     if (audioCache[audioPath]) {
         audioCache[audioPath].currentTime = 0;
