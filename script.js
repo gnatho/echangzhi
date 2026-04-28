@@ -247,7 +247,7 @@ function generateGrid() {
     
     if (mode === 'phonemes') {
         const selectedSet = selectorElement.value;
-        words = [...(phonemeSets[selectedSet] || [])];
+        words = [...getWordsByKey(selectedSet)];
         
         // If there are more than 30 words, let's just pick 30 randomly so the grid doesn't get too small,
         // but you can adjust this slice if you want all of them on screen at once.
@@ -949,8 +949,8 @@ function showSpellingActivity() {
     // Also add words from phoneme sets as backup
     if (spellingState.words.length < 3) {
         const allPhonemeWords = [];
-        Object.values(phonemeSets).forEach(set => {
-            set.forEach(word => {
+        PHONEME_DATA.forEach(({ words: wordList }) => {
+            wordList.forEach(word => {
                 const cleanWord = word.replace(/\[|\]/g, '');
                 if (!cleanWord.includes(' ') && cleanWord.length > 2) {
                     allPhonemeWords.push(cleanWord);
