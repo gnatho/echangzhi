@@ -883,7 +883,7 @@ function moveInteraction(e) {
     if (deltaAngle > 180) deltaAngle -= 360;
     if (deltaAngle < -180) deltaAngle += 360;
 
-    windTension += deltaAngle;
+    windTension += deltaAngle * 3;
     lastMouseAngle = currentMouseAngle;
 
     updatePenVisuals();
@@ -909,7 +909,7 @@ function endInteraction() {
     if (Math.abs(windTension) > 20) {
         playSpringSound();
         const randomFactor = 0.9 + Math.random() * 0.2;
-        currentVelocity = -(windTension / 15) * randomFactor;
+        currentVelocity = -(windTension / 5) * randomFactor;
         baseRotation += windTension;
         windTension = 0;
         isSpinning = true;
