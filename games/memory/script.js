@@ -408,6 +408,35 @@ function endGame(win) {
 
 // Fullscreen
 document.getElementById('fullscreen-btn').addEventListener('click', () => {
-    if (!document.fullscreenElement) document.documentElement.requestFullscreen();
-    else document.exitFullscreen();
+    if (!document.fullscreenElement) {
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen();
+        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+    } else {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+    }
 });
+
+// Handle fullscreen changes
+document.addEventListener('fullscreenchange', handleResize);
+document.addEventListener('webkitfullscreenchange', handleResize);
+
+// Handle window resize
+let resizeTimeout;
+window.addEventListener('resize', () => {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(handleResize, 100);
+});
+
+function handleResize() {
+    if (!gridEl || !currentDifficulty) return;
+
+    const config = DIFFICULTIES[currentDifficulty];
+    if (!config) return;
+
+    const availableHeight = window.innerHeight - 45;
+    const availableWidth = window.innerWidth;
+    const aspect = (availableWidth * config.rows) / (availableHeight * config.cols);
+    document.documentElement.style.setProperty('--tile-aspect', aspect);
+}
