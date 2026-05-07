@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-component="spin-wheel">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -27,7 +27,7 @@
             touch-action: manipulation;
         }
 
-        body.flipped {
+        #wheelModal.flipped {
             transform: rotate(180deg);
             transition: transform 0.3s ease;
         }
@@ -343,7 +343,7 @@
 
         function toggleFlip() {
             isFlipped = !isFlipped;
-            document.body.classList.toggle('flipped', isFlipped);
+            document.getElementById('wheelModal').classList.toggle('flipped', isFlipped);
         }
 
         function createWheel() {
@@ -477,5 +477,6 @@
 
         createWheel();
     </script>
+<script src="version-display.js"></script>
 </body>
 </html>

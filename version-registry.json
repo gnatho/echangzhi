@@ -1,0 +1,195 @@
+{
+  "hub": {
+    "name": "Hub Page",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "index.html"
+    ]
+  },
+  "phonics-app": {
+    "name": "Phonics App",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "phonics.html",
+      "script.js",
+      "styles.css"
+    ]
+  },
+  "spin-wheel": {
+    "name": "Spin Wheel",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "wheel.html"
+    ]
+  },
+  "spin-pen": {
+    "name": "Spin the Pen",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "bottle.html"
+    ]
+  },
+  "soundboard": {
+    "name": "Soundboard",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "sounds.html"
+    ]
+  },
+  "key-tester": {
+    "name": "Key Tester",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "keys.html"
+    ]
+  },
+  "pair-selector-uni": {
+    "name": "Student Pair Selector (Uni)",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "uni.html"
+    ]
+  },
+  "pair-selector-mid": {
+    "name": "Student Pair Selector (Mid)",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "mid.html"
+    ]
+  },
+  "games-hub": {
+    "name": "Games Hub",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/index.html"
+    ]
+  },
+  "car-game": {
+    "name": "Arcade Bumpers",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/car/index.html",
+      "games/car/game.js",
+      "games/car/controls.js",
+      "games/car/styles.css"
+    ]
+  },
+  "chooser-game": {
+    "name": "Word Chooser",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/chooser/index.html",
+      "games/chooser/chooser.js",
+      "games/chooser/questions.js",
+      "games/chooser/chooser.css"
+    ]
+  },
+  "memory-game": {
+    "name": "Memory Game",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/memory/index.html",
+      "games/memory/script.js",
+      "games/memory/style.css"
+    ]
+  },
+  "shooter-game": {
+    "name": "Crosshair Assault",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/shooter/index.html"
+    ]
+  },
+  "snakes-game": {
+    "name": "Snakes & Ladders",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/snakes/index.html",
+      "games/snakes/snakes.js",
+      "games/snakes/questions.js",
+      "games/snakes/dice-controller.js",
+      "games/snakes/snakes.css"
+    ]
+  },
+  "bomberman-game": {
+    "name": "Bomber Battle",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/bomberman/index.html",
+      "games/bomberman/bomberman.js",
+      "games/bomberman/config.js",
+      "games/bomberman/map.js",
+      "games/bomberman/player.js",
+      "games/bomberman/bombs.js",
+      "games/bomberman/collision.js",
+      "games/bomberman/renderer.js",
+      "games/bomberman/controllers.js",
+      "games/bomberman/input.js",
+      "games/bomberman/particles.js",
+      "games/bomberman/bomberman.css"
+    ]
+  },
+  "scrambler-game": {
+    "name": "Sentence Scrambler",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/scrambler/index.html"
+    ]
+  },
+  "baamboozle-game": {
+    "name": "ESL Baamboozle",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "games/baamboozle/index.html"
+    ]
+  },
+  "data-phonems": {
+    "name": "Phoneme Data",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "data/phonems.js"
+    ]
+  },
+  "data-level-words": {
+    "name": "Level Words Data",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "data/level_words.js"
+    ]
+  },
+  "data-grammar-ex": {
+    "name": "Grammar Exercises Data",
+    "version": "1.0.0",
+    "date": "2026-05-07",
+    "files": [
+      "data/grammar_ex.js"
+    ]
+  },
+  "data-students": {
+    "name": "Student Roster",
+    "version": "1.0.1",
+    "date": "2026-05-07",
+    "files": [
+      "data/students.js"
+    ]
+  }
+}
