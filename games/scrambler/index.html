@@ -1470,9 +1470,53 @@ wbEl.addEventListener('click', e => {
   }
 });
 
-// Touch blocking
-wbEl.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
-wbEl.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
+// Touch unbind: tap on bound group to separate cards
+let touchMoved = false;
+let touchStartX = 0;
+let touchStartY = 0;
+const TAP_MOVE_THRESHOLD = 8;
+
+wbEl.addEventListener('touchstart', e => {
+  touchMoved = false;
+  const t = e.touches[0];
+  touchStartX = t.clientX;
+  touchStartY = t.clientY;
+}, { passive: true });
+
+wbEl.addEventListener('touchmove', e => {
+  const t = e.touches[0];
+  const dx = t.clientX - touchStartX;
+  const dy = t.clientY - touchStartY;
+  if (dx * dx + dy * dy > TAP_MOVE_THRESHOLD * TAP_MOVE_THRESHOLD) {
+    touchMoved = true;
+  }
+  e.preventDefault();
+}, { passive: false });
+
+wbEl.addEventListener('touchend', e => {
+  e.preventDefault();
+  if (touchMoved) return;
+
+  const touch = e.changedTouches[0];
+  const cardEl = document.elementFromPoint(touch.clientX, touch.clientY);
+  if (!cardEl || !cardEl.classList.contains('card')) return;
+
+  const id = +cardEl.dataset.id;
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+
+  const members = groupOf(card.groupId);
+  if (members.length < 2) return;
+
+  setTimeout(() => {
+    unbindGroup(card.groupId);
+    playSnap();
+  }, 0);
+}, { passive: false });
+
+wbEl.addEventListener('touchcancel', () => {
+  touchMoved = false;
+}, { passive: true });
 
 /* ═══════════════════════════════════════════════════════
    BOOT
