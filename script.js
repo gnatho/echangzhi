@@ -177,13 +177,11 @@ function handleModeChange() {
         gridElement.style.display = 'grid';
         generateGrid();
     } else if (mode === 'levels') {
-        populateUnitSelector('unitSelector', levelSelector.value);
         levelSelector.style.display = 'block';
         unitSelector.style.display = 'block';
         gridElement.style.display = 'grid';
         generateGrid();
     } else if (mode === 'grammar') {
-        populateUnitSelector('unitSelector', levelSelector.value);
         levelSelector.style.display = 'block';
         unitSelector.style.display = 'block';
         grammarActivitySelector.style.display = 'block';
