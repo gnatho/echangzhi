@@ -1013,7 +1013,7 @@
             document.getElementById('player-track-num').textContent = '#' + String(track).padStart(3, '0');
 
             var audio = document.getElementById('audio-element');
-            audio.src = 'audio/level' + level + '/track' + String(track).padStart(3, '0') + '.mp3';
+            audio.src = 'https://pub-21546641f8b64e6b8428ff1edc5b0f9a.r2.dev/LEVEL%20' + level + '/AUDIO/Track%20' + String(track).padStart(3, '0') + '.mp3';
             audio.load();
             audio.currentTime = 0;
             document.getElementById('audio-play-btn').textContent = '▶️';
