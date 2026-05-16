@@ -43,11 +43,11 @@ const PHONEME_DATA = [
         words: [
             "b[i]ke", "n[igh]t", "fl[y]", "p[ie]",
             "l[i]ke", "l[igh]t", "cr[y]", "t[ie]",
-            "t[i]me", "h[high]", "sk[y]", "d[ie]",
+            "t[i]me", "h[igh]", "sk[y]", "d[ie]",
             "f[i]ve", "r[igh]t", "tr[y]", "l[ie]",
             "n[i]ne", "f[igh]t", "dr[y]", "p[ie]",
             "r[i]de", "s[igh]t", "fl[y]", "t[ie]",
-            "sm[i]le", "br[igh]t", "m[y]", "cr[y]"
+            "sm[i]le", "br[igh]t", "m[y]", "fr[y]","h[i]", "sp[y]"
         ]
     },
     {
@@ -169,7 +169,7 @@ const PHONEME_DATA = [
             "do[g]", "bo[g]", "ho[g]", "fo[g]", "jo[g]",
             "lo[g]", "ba[g]", "fla[g]", "dra[g]", "slu[g]",
             "bu[g]", "hu[g]", "mu[g]", "pu[g]", "ru[g]",
-            "plu[g]", "[g]ross", "[g]reat", "[g]grow", "[g]rass"
+            "plu[g]", "[g]ross", "[g]reat", "[g]row", "[g]rass"
         ]
     },
     {
