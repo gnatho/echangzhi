@@ -183,6 +183,18 @@ const PHONEME_DATA = [
         "[h]ide", "[h]igh", "[h]ead", "[h]old", "[h]ard",
         "[h]urt", "[h]ear", "[h]air", "[h]ole", "[h]unt"
     ]
+},
+{
+    key: "blendST",
+    name: "Blend ST",
+    words: [
+        "[st]ar", "[st]op", "[st]ep", "[st]ay", "[st]ir",
+        "[st]and", "[st]and", "[st]amp", "[st]ill", "[st]one",
+        "[st]ep", "[st]ick", "[st]iff", "[st]uck", "[st]ory",
+        "[st]art", "[st]ore", "[st]orm", "[st]age", "[st]air",
+        "[st]ool", "[st]ove", "[st]udy", "[st]eel", "[st]eem",
+        "[st]ring", "[st]reet", "[st]raw", "[st]rike", "[st]rong"
+    ]
 }
 ];
 
