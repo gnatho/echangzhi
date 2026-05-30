@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en" data-component="quiz-game">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #EFF3F8;
+  --card:       #FFFFFF;
+  --navy:       #1A2744;
+  --accent:     #3B6CF4;
+  --amber:      #F59E0B;
+  --amber-bg:   #FFFBEB;
+  --teal:       #0EA58E;
+  --teal-bg:    #ECFDF5;
+  --rose:       #E8344A;
+  --rose-bg:    #FFF1F2;
+  --purple:     #7C3AED;
+  --purple-bg:  #F5F3FF;
+  --text:       #1A2744;
+  --muted:      #64748B;
+  --border:     #DEE5EE;
+  --shadow:     0 24px 56px rgba(26,39,68,0.13);
+}
+
+html, body {
+  height: 100%;
+  font-family: 'Nunito', 'Segoe UI', sans-serif;
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 16px;
+}
+
+/* ─── CARD ─────────────────────────────── */
+.card {
+  width: 100%;
+  max-width: 600px;
+  background: var(--card);
+  border-radius: 28px;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* ─── HEADER ────────────────────────────── */
+.q-header {
+  padding: 18px 24px 14px;
+  border-bottom: 1.5px solid var(--border);
+}
+
+.h-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.q-label {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.h-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.streak-pill {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--amber);
+  background: var(--amber-bg);
+  padding: 4px 10px;
+  border-radius: 999px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  opacity: 0;
+  transform: scale(0.85);
+}
+.streak-pill.on {
+  opacity: 1;
+  transform: scale(1);
+}
+.streak-pill.pop {
+  animation: pillPop 0.3s ease;
+}
+@keyframes pillPop {
+  0%,100% { transform: scale(1); }
+  50%      { transform: scale(1.2); }
+}
+
+.score-pill {
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--navy);
+  background: var(--bg);
+  padding: 4px 12px;
+  border-radius: 999px;
+}
+
+/* Timer in header */
+.timer-wrap {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+.timer-svg {
+  width: 42px;
+  height: 42px;
+  transform: rotate(-90deg);
+}
+.t-bg   { fill: none; stroke: var(--border); stroke-width: 3.5; }
+.t-ring {
+  fill: none;
+  stroke: var(--teal);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100.53;   /* 2π × 16 */
+  stroke-dashoffset: 0;
+  transition: stroke-dashoffset 1s linear, stroke 0.4s ease;
+}
+.t-ring.warn   { stroke: var(--amber); }
+.t-ring.danger { stroke: var(--rose);  }
+.timer-num {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--text);
+}
+
+/* Progress bar */
+.prog-track {
+  width: 100%;
+  height: 7px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.prog-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent) 0%, var(--rose) 100%);
+  border-radius: 999px;
+  transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── QUESTION BODY ──────────────────────── */
+.q-body {
+  padding: 20px 28px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+  min-height: 260px;
+}
+
+.type-badge {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  padding: 5px 13px;
+  border-radius: 999px;
+}
+.type-badge.qt { background: var(--purple-bg); color: var(--purple); }
+.type-badge.mw { background: var(--amber-bg);  color: #92400E; }
+
+.q-text {
+  width: 100%;
+  font-size: 23px;
+  font-weight: 800;
+  line-height: 1.45;
+  color: var(--navy);
+  text-align: center;
+}
+
+/* ─── OPTIONS ────────────────────────────── */
+.opts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+}
+
+.opt {
+  min-height: 56px;
+  padding: 13px 16px;
+  background: var(--bg);
+  border: 2.5px solid var(--border);
+  border-radius: 16px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+  user-select: none;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+.opt:hover:not(:disabled) {
+  background: #EEF3FF;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(59,108,244,0.15);
+}
+.opt:active:not(:disabled) {
+  transform: scale(0.97) translateY(0);
+}
+.opt:disabled { cursor: default; }
+
+.opt.correct {
+  background: var(--teal-bg);
+  border-color: var(--teal);
+  color: #065F46;
+  animation: optPop 0.4s ease;
+}
+.opt.wrong {
+  background: var(--rose-bg);
+  border-color: var(--rose);
+  color: #9F1239;
+  animation: optShake 0.42s ease;
+}
+@keyframes optPop {
+  0%,100% { transform: scale(1); }
+  45%     { transform: scale(1.06); }
+}
+@keyframes optShake {
+  0%,100% { transform: translateX(0); }
+  22%     { transform: translateX(-6px); }
+  66%     { transform: translateX(6px); }
+}
+
+/* ─── EXPLANATION ────────────────────────── */
+.explain {
+  width: 100%;
+  padding: 11px 15px;
+  border-radius: 0 12px 12px 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  line-height: 1.55;
+  border-left: 4px solid var(--teal);
+  background: var(--teal-bg);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  pointer-events: none;
+}
+.explain.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+.explain.err {
+  border-left-color: var(--rose);
+  background: var(--rose-bg);
+}
+
+/* ─── FOOTER ─────────────────────────────── */
+.q-footer {
+  padding: 14px 28px 26px;
+  display: flex;
+  justify-content: center;
+}
+
+.next-btn {
+  min-height: 52px;
+  padding: 13px 52px;
+  background: var(--navy);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  box-shadow: 0 8px 24px rgba(26,39,68,0.22);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+}
+.next-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(26,39,68,0.28);
+}
+.next-btn:active:not(:disabled) { transform: scale(0.97); }
+.next-btn:disabled { opacity: 0; pointer-events: none; }
+
+/* ─── END SCREEN ─────────────────────────── */
+.end-screen {
+  padding: 36px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.trophy-icon {
+  font-size: 76px;
+  line-height: 1;
+  filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+  animation: trophyIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes trophyIn {
+  from { transform: scale(0) rotate(-15deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+
+.end-title {
+  font-size: 32px;
+  font-weight: 900;
+  color: var(--navy);
+}
+
+.end-score {
+  font-size: 58px;
+  font-weight: 900;
+  background: linear-gradient(135deg, var(--accent), var(--rose));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+}
+
+.end-streak {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.end-msg {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--muted);
+  max-width: 380px;
+  line-height: 1.55;
+}
+
+/* Review */
+.review-hd {
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--rose);
+  margin-top: 6px;
+}
+
+.review-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  text-align: left;
+}
+
+.rev-item {
+  padding: 10px 14px;
+  border-left: 4px solid var(--rose);
+  border-radius: 0 12px 12px 0;
+  background: var(--rose-bg);
+}
+.rev-sentence {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--navy);
+  margin-bottom: 3px;
+}
+.rev-detail {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.rev-wrong   { color: var(--rose); }
+.rev-correct { color: var(--teal); }
+
+/* Play again */
+.again-btn {
+  min-height: 52px;
+  padding: 13px 52px;
+  background: linear-gradient(135deg, var(--accent) 0%, var(--rose) 100%);
+  color: #fff;
+  font-family: 'Nunito', sans-serif;
+  font-size: 17px;
+  font-weight: 900;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  letter-spacing: 0.4px;
+  box-shadow: 0 8px 28px rgba(232,52,74,0.28);
+  transition: transform 0.15s, box-shadow 0.15s;
+  margin-top: 6px;
+}
+.again-btn:hover { transform: translateY(-2px); box-shadow: 0 14px 36px rgba(232,52,74,0.36); }
+.again-btn:active { transform: scale(0.97); }
+
+/* ─── CONFETTI ────────────────────────────── */
+#confetti {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 999;
+}
+.cp {
+  position: absolute;
+  top: -12px;
+  border-radius: 3px;
+  animation: cpFall linear forwards;
+}
+@keyframes cpFall {
+  0%   { transform: translateY(0)    rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(105vh) rotate(600deg); opacity: 0; }
+}
+
+.hidden { display: none !important; }
+
+/* ─── PICKER ────────────────────────────── */
+.picker {
+  padding: 36px 28px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+}
+.picker-title {
+  font-size: 28px;
+  font-weight: 900;
+  color: var(--navy);
+}
+.picker-sub {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: -10px;
+}
+.set-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
+.set-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  background: var(--bg);
+  border: 2.5px solid var(--border);
+  border-radius: 18px;
+  cursor: pointer;
+  text-align: left;
+  font-family: 'Nunito', sans-serif;
+  transition: background 0.15s, border-color 0.15s, transform 0.12s, box-shadow 0.15s;
+}
+.set-card:hover {
+  background: #EEF3FF;
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(59,108,244,0.15);
+}
+.set-card:active { transform: scale(0.98); }
+.set-icon {
+  font-size: 36px;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--card);
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(26,39,68,0.08);
+}
+.set-info { flex: 1; min-width: 0; }
+.set-name {
+  font-size: 17px;
+  font-weight: 900;
+  color: var(--navy);
+  margin-bottom: 2px;
+}
+.set-desc {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+}
+.set-meta {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--accent);
+  background: #EEF3FF;
+  padding: 4px 10px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+/* Menu (back-to-picker) button */
+.menu-btn {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.menu-btn:hover { background: var(--bg); color: var(--navy); }
+
+/* ─── MOBILE ──────────────────────────────── */
+@media (max-width: 480px) {
+  .card       { border-radius: 20px; }
+  .q-body     { padding: 16px 20px 8px; }
+  .q-footer   { padding: 12px 20px 22px; }
+  .q-header   { padding: 14px 20px 12px; }
+  .q-text     { font-size: 19px; }
+  .opt        { font-size: 15px; min-height: 50px; }
+  .end-screen { padding: 28px 20px 26px; }
+  .end-score  { font-size: 48px; }
+  .end-title  { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+
+<div id="confetti"></div>
+
+<!-- Question sets (populate window.QUIZ_SETS before main script runs) -->
+<script src="data/quantifiers.js"></script>
+<script src="data/present-perfect.js"></script>
+
+<div class="card">
+
+  <!-- ── PICKER ── -->
+  <div id="picker-view" class="picker">
+    <div class="trophy-icon">📚</div>
+    <h1 class="picker-title">Choose a Quiz</h1>
+    <p class="picker-sub">Pick a question set to begin</p>
+    <div class="set-list" id="set-list"></div>
+  </div>
+
+  <!-- ── QUIZ ── -->
+  <div id="quiz-view" class="hidden">
+    <header class="q-header">
+      <div class="h-row">
+        <span class="q-label" id="q-label">Q 1 / 16</span>
+        <div class="h-right">
+          <button class="menu-btn" id="menu-btn" title="Back to menu" aria-label="Back to menu">☰</button>
+          <span class="streak-pill" id="streak-pill">🔥 <span id="streak-num">0</span></span>
+          <span class="score-pill">⭐ <span id="score-num">0</span></span>
+          <div class="timer-wrap">
+            <svg class="timer-svg" viewBox="0 0 42 42">
+              <circle class="t-bg" cx="21" cy="21" r="16"/>
+              <circle class="t-ring" id="t-ring" cx="21" cy="21" r="16"/>
+            </svg>
+            <span class="timer-num" id="t-num">15</span>
+          </div>
+        </div>
+      </div>
+      <div class="prog-track">
+        <div class="prog-fill" id="prog-fill"></div>
+      </div>
+    </header>
+
+    <main class="q-body">
+      <span class="type-badge" id="type-badge">Quantifier</span>
+      <div class="q-text" id="q-text"></div>
+      <div class="opts" id="opts"></div>
+      <div class="explain" id="explain"></div>
+    </main>
+
+    <footer class="q-footer">
+      <button class="next-btn" id="next-btn" disabled>Next →</button>
+    </footer>
+  </div>
+
+  <!-- ── END ── -->
+  <div id="end-view" class="end-screen hidden">
+    <div class="trophy-icon" id="trophy">🏆</div>
+    <h1 class="end-title" id="end-title">Amazing!</h1>
+    <div class="end-score" id="end-score">0 / 16</div>
+    <div class="end-streak" id="end-streak"></div>
+    <p class="end-msg" id="end-msg"></p>
+    <div id="review-wrap" class="hidden" style="width:100%">
+      <p class="review-hd">Review your mistakes</p>
+      <div class="review-list" id="review-list"></div>
+    </div>
+    <button class="again-btn" id="again-btn">Play Again 🔄</button>
+    <button class="menu-btn" id="pick-again-btn" style="margin-top:4px;font-size:14px;font-weight:800;">← Choose another quiz</button>
+  </div>
+
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   QUESTION SETS  (loaded from data/*.js into window.QUIZ_SETS)
+══════════════════════════════════════════ */
+const QUIZ_SETS = window.QUIZ_SETS || {};
+
+/* Default badge fallback if a set doesn't define one for a type */
+const DEFAULT_BADGE = { label: "Question", cls: "qt" };
+
+/* ══════════════════════════════════════════
+   CONSTANTS
+══════════════════════════════════════════ */
+const TIMER_MAX   = 15;
+const CIRCUM      = 2 * Math.PI * 16; // 100.53 (r=16)
+
+/* ══════════════════════════════════════════
+   STATE
+══════════════════════════════════════════ */
+const S = {
+  setId:      null,
+  set:        null,
+  order:      [],
+  idx:        0,
+  score:      0,
+  streak:     0,
+  bestStreak: 0,
+  answered:   false,
+  wrongs:     [],
+  timerId:    null,
+  timeLeft:   TIMER_MAX
+};
+
+/* ══════════════════════════════════════════
+   DOM REFS
+══════════════════════════════════════════ */
+const el = id => document.getElementById(id);
+const D = {
+  pickerView: el('picker-view'),
+  setList:    el('set-list'),
+  quizView:   el('quiz-view'),
+  endView:    el('end-view'),
+  menuBtn:    el('menu-btn'),
+  qLabel:     el('q-label'),
+  progFill:   el('prog-fill'),
+  streakPill: el('streak-pill'),
+  streakNum:  el('streak-num'),
+  scoreNum:   el('score-num'),
+  tRing:      el('t-ring'),
+  tNum:       el('t-num'),
+  typeBadge:  el('type-badge'),
+  qText:      el('q-text'),
+  opts:       el('opts'),
+  explain:    el('explain'),
+  nextBtn:    el('next-btn'),
+  trophy:     el('trophy'),
+  endTitle:   el('end-title'),
+  endScore:   el('end-score'),
+  endStreak:  el('end-streak'),
+  endMsg:     el('end-msg'),
+  reviewWrap: el('review-wrap'),
+  reviewList: el('review-list'),
+  againBtn:   el('again-btn'),
+  pickAgainBtn: el('pick-again-btn'),
+  confetti:   el('confetti')
+};
+
+/* ══════════════════════════════════════════
+   AUDIO  (Web Audio API)
+══════════════════════════════════════════ */
+let _ctx = null;
+const ctx = () => {
+  if (!_ctx) _ctx = new (window.AudioContext || window.webkitAudioContext)();
+  return _ctx;
+};
+
+function tone(freq1, freq2, dur, type='sine', vol=0.12) {
+  try {
+    const c = ctx();
+    const osc = c.createOscillator();
+    const gain = c.createGain();
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq1, c.currentTime);
+    if (freq2) osc.frequency.setValueAtTime(freq2, c.currentTime + dur * 0.5);
+    gain.gain.setValueAtTime(vol, c.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, c.currentTime + dur);
+    osc.start(c.currentTime);
+    osc.stop(c.currentTime + dur);
+  } catch(e){}
+}
+
+function playSound(type) {
+  switch(type) {
+    case 'correct':
+      tone(523, null, 0.12);
+      setTimeout(()=>tone(659, null, 0.12), 110);
+      setTimeout(()=>tone(784, null, 0.25), 220);
+      break;
+    case 'wrong':
+      tone(220, 165, 0.35, 'sawtooth', 0.09);
+      break;
+    case 'tick':
+      tone(900, null, 0.05, 'sine', 0.04);
+      break;
+    case 'timeout':
+      tone(280, 200, 0.4, 'triangle', 0.09);
+      break;
+    case 'finish':
+      tone(523, null, 0.15);
+      setTimeout(()=>tone(659, null, 0.15), 130);
+      setTimeout(()=>tone(784, null, 0.15), 260);
+      setTimeout(()=>tone(1047, null, 0.35), 390);
+      break;
+  }
+}
+
+/* ══════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════ */
+function startTimer() {
+  clearInterval(S.timerId);
+  S.timeLeft = TIMER_MAX;
+  renderTimer();
+  S.timerId = setInterval(() => {
+    S.timeLeft--;
+    if (S.timeLeft <= 5 && S.timeLeft > 0) playSound('tick');
+    renderTimer();
+    if (S.timeLeft <= 0) { clearInterval(S.timerId); handleTimeout(); }
+  }, 1000);
+}
+
+function stopTimer() { clearInterval(S.timerId); }
+
+function renderTimer() {
+  const t = S.timeLeft;
+  const offset = CIRCUM * (1 - t / TIMER_MAX);
+  D.tRing.style.strokeDashoffset = offset;
+  D.tNum.textContent = t;
+  D.tRing.classList.remove('warn','danger');
+  if (t <= 5)      D.tRing.classList.add('danger');
+  else if (t <= 9) D.tRing.classList.add('warn');
+}
+
+function handleTimeout() {
+  if (S.answered) return;
+  S.answered = true;
+  playSound('timeout');
+  const q = S.order[S.idx];
+  Array.from(D.opts.children).forEach(b => {
+    b.disabled = true;
+    if (b.dataset.v === q.correct) b.classList.add('correct');
+  });
+  showExplain(q, false, true);
+  S.wrongs.push({ q, chosen: null });
+  S.streak = 0;
+  renderStreak();
+  D.nextBtn.disabled = false;
+}
+
+/* ══════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════ */
+function shuffle(a) {
+  const b = [...a];
+  for (let i = b.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [b[i],b[j]] = [b[j],b[i]];
+  }
+  return b;
+}
+
+function renderStreak() {
+  const s = S.streak;
+  D.streakNum.textContent = s;
+  if (s >= 2) {
+    D.streakPill.classList.add('on');
+    D.streakPill.classList.remove('pop');
+    void D.streakPill.offsetWidth; // reflow
+    D.streakPill.classList.add('pop');
+  } else {
+    D.streakPill.classList.remove('on','pop');
+  }
+}
+
+function showExplain(q, correct, timeout=false) {
+  const box = D.explain;
+  box.textContent = '💡 ' + q.tip;
+  box.className = 'explain show' + (correct ? '' : ' err');
+}
+
+/* ══════════════════════════════════════════
+   PICKER
+══════════════════════════════════════════ */
+function showPicker() {
+  stopTimer();
+  D.quizView.classList.add('hidden');
+  D.endView.classList.add('hidden');
+  D.pickerView.classList.remove('hidden');
+  renderPicker();
+}
+
+function renderPicker() {
+  D.setList.innerHTML = '';
+  const ids = Object.keys(QUIZ_SETS);
+  if (ids.length === 0) {
+    D.setList.innerHTML = '<p style="color:var(--muted);font-weight:700;">No question sets loaded.</p>';
+    return;
+  }
+  ids.forEach(id => {
+    const set = QUIZ_SETS[id];
+    const card = document.createElement('button');
+    card.type = 'button';
+    card.className = 'set-card';
+    card.innerHTML = `
+      <span class="set-icon">${set.icon || '❓'}</span>
+      <span class="set-info">
+        <span class="set-name">${set.name}</span>
+        <span class="set-desc">${set.description || ''}</span>
+      </span>
+      <span class="set-meta">${set.questions.length} Q</span>`;
+    card.addEventListener('click', () => startGame(id));
+    D.setList.appendChild(card);
+  });
+}
+
+/* ══════════════════════════════════════════
+   GAME FLOW
+══════════════════════════════════════════ */
+function startGame(setId) {
+  if (setId) S.setId = setId;
+  const set = QUIZ_SETS[S.setId];
+  if (!set) { showPicker(); return; }
+  S.set        = set;
+  S.order      = shuffle(set.questions);
+  S.idx        = 0;
+  S.score      = 0;
+  S.streak     = 0;
+  S.bestStreak = 0;
+  S.answered   = false;
+  S.wrongs     = [];
+  D.pickerView.classList.add('hidden');
+  D.endView.classList.add('hidden');
+  D.quizView.classList.remove('hidden');
+  renderStreak();
+  showQuestion();
+}
+
+function showQuestion() {
+  S.answered = false;
+  const total = S.order.length;
+  const q     = S.order[S.idx];
+
+  D.qLabel.textContent     = `Q ${S.idx + 1} / ${total}`;
+  D.scoreNum.textContent   = S.score;
+  D.progFill.style.width   = `${(S.idx / total) * 100}%`;
+
+  // Type badge (from current set's badge map)
+  const badges = (S.set && S.set.badges) || {};
+  const badge = badges[q.type] || DEFAULT_BADGE;
+  D.typeBadge.textContent = badge.label;
+  D.typeBadge.className   = 'type-badge ' + (badge.cls || 'qt');
+
+  D.qText.textContent = q.sentence;
+
+  // Reset explain
+  D.explain.className  = 'explain';
+  D.explain.textContent = '';
+
+  // Render options
+  D.opts.innerHTML = '';
+  shuffle(q.options).forEach(val => {
+    const btn = document.createElement('button');
+    btn.className   = 'opt';
+    btn.type        = 'button';
+    btn.textContent = val;
+    btn.dataset.v   = val;
+    btn.addEventListener('click', () => pick(btn, q));
+    D.opts.appendChild(btn);
+  });
+
+  D.nextBtn.disabled   = true;
+  D.nextBtn.textContent = (S.idx === total - 1) ? 'Finish ✓' : 'Next →';
+
+  startTimer();
+}
+
+function pick(btn, q) {
+  if (S.answered) return;
+  S.answered = true;
+  stopTimer();
+
+  const chosen  = btn.dataset.v;
+  const correct = chosen === q.correct;
+
+  Array.from(D.opts.children).forEach(b => {
+    b.disabled = true;
+    if (b.dataset.v === q.correct) b.classList.add('correct');
+    else if (b === btn && !correct) b.classList.add('wrong');
+  });
+
+  if (correct) {
+    S.score++;
+    S.streak++;
+    if (S.streak > S.bestStreak) S.bestStreak = S.streak;
+    playSound('correct');
+  } else {
+    S.wrongs.push({ q, chosen });
+    S.streak = 0;
+    playSound('wrong');
+  }
+
+  D.scoreNum.textContent = S.score;
+  renderStreak();
+  showExplain(q, correct);
+  D.nextBtn.disabled = false;
+}
+
+function nextQ() {
+  if (S.idx < S.order.length - 1) {
+    S.idx++;
+    showQuestion();
+  } else {
+    endGame();
+  }
+}
+
+/* ══════════════════════════════════════════
+   END SCREEN
+══════════════════════════════════════════ */
+function endGame() {
+  stopTimer();
+  const total = S.order.length;
+  const score = S.score;
+  const pct   = score / total;
+
+  D.progFill.style.width = '100%';
+  D.quizView.classList.add('hidden');
+  D.endView.classList.remove('hidden');
+
+  D.endScore.textContent = `${score} / ${total}`;
+  D.endStreak.textContent = S.bestStreak >= 3
+    ? `🔥 Best streak: ${S.bestStreak} in a row!`
+    : '';
+
+  let trophy, title, msg;
+  if (pct === 1) {
+    trophy='🏆'; title='Perfect Score!';
+    msg='Incredible! You got every single answer right. You are a grammar champion!';
+    playSound('finish');
+  } else if (pct >= 0.8) {
+    trophy='🌟'; title='Excellent!';
+    msg='Great work! You have a strong command of this topic.';
+    playSound('finish');
+  } else if (pct >= 0.6) {
+    trophy='👍'; title='Good Job!';
+    msg='Solid effort! Check your mistakes below to keep improving.';
+  } else if (pct >= 0.4) {
+    trophy='📚'; title='Keep Practicing!';
+    msg='You\'re learning! Study the grammar tips in the review and try again.';
+  } else {
+    trophy='💪'; title='Don\'t Give Up!';
+    msg='Practice makes perfect! Review the mistakes below and have another go.';
+  }
+
+  D.trophy.textContent  = trophy;
+  D.endTitle.textContent = title;
+  D.endMsg.textContent   = msg;
+
+  // Wrong-answers review
+  if (S.wrongs.length > 0) {
+    D.reviewWrap.classList.remove('hidden');
+    D.reviewList.innerHTML = '';
+    S.wrongs.forEach(({ q, chosen }) => {
+      const item = document.createElement('div');
+      item.className = 'rev-item';
+      const chosenHTML = chosen
+        ? `You answered: <span class="rev-wrong">${chosen}</span> &nbsp;·&nbsp; `
+        : `<span class="rev-wrong">⏱ Time ran out</span> &nbsp;·&nbsp; `;
+      item.innerHTML = `
+        <div class="rev-sentence">${q.sentence}</div>
+        <div class="rev-detail">
+          ${chosenHTML}Correct: <span class="rev-correct">${q.correct}</span>
+        </div>`;
+      D.reviewList.appendChild(item);
+    });
+  } else {
+    D.reviewWrap.classList.add('hidden');
+  }
+
+  if (pct >= 0.75) launchConfetti();
+}
+
+/* ══════════════════════════════════════════
+   CONFETTI
+══════════════════════════════════════════ */
+function launchConfetti() {
+  const colors = ['#3B6CF4','#F59E0B','#0EA58E','#E8344A','#7C3AED','#EC4899'];
+  D.confetti.innerHTML = '';
+  for (let i = 0; i < 80; i++) {
+    const p   = document.createElement('div');
+    const sz  = 6 + Math.random() * 9;
+    p.className = 'cp';
+    p.style.cssText = `
+      left:${Math.random()*100}%;
+      width:${sz}px; height:${sz}px;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      border-radius:${Math.random()>0.45?'50%':'3px'};
+      animation-delay:${(Math.random()*0.7).toFixed(2)}s;
+      animation-duration:${(1.3+Math.random()*1.3).toFixed(2)}s;
+    `;
+    D.confetti.appendChild(p);
+  }
+  setTimeout(() => { D.confetti.innerHTML = ''; }, 4000);
+}
+
+/* ══════════════════════════════════════════
+   INIT
+══════════════════════════════════════════ */
+D.tRing.style.strokeDasharray = CIRCUM;
+D.nextBtn.addEventListener('click', nextQ);
+D.againBtn.addEventListener('click', () => startGame());
+D.menuBtn.addEventListener('click', showPicker);
+D.pickAgainBtn.addEventListener('click', showPicker);
+showPicker();
+</script>
+<script src="../../version-display.js"></script>
+</body>
+</html>

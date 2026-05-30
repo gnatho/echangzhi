@@ -1,198 +1,129 @@
 <!DOCTYPE html>
-<html lang="en" data-component="snakes-game">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="color-scheme" content="light">
-    <title>Snakes & Ladders – Grammar Game</title>
-    <link rel="stylesheet" href="snakes.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Snakes &amp; Ladders</title>
+  <link rel="stylesheet" href="snakes.css">
 </head>
 <body>
 
+  <div class="portrait-warning" aria-hidden="true">
+    <div class="rotate-phone">📱</div>
+    <p>Please rotate your device to landscape mode</p>
+  </div>
 
-    <div id="orientation-warning">
-        <div class="rotate-icon">📱</div>
-        <p>Please rotate your device to landscape mode</p>
+  <div id="start-screen" class="screen-overlay" style="display:flex">
+    <div class="card">
+      <div class="settings-title">🐍 Snakes &amp; Ladders 🪜</div>
+      <div class="settings-grid">
+        <div class="setting-group">
+          <label for="setting-players">Players</label>
+          <select id="setting-players">
+            <option value="2" selected>2 Players</option>
+            <option value="3">3 Players</option>
+            <option value="4">4 Players</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="setting-grid">Board Size</label>
+          <select id="setting-grid">
+            <option value="6">6 &times; 6</option>
+            <option value="8">8 &times; 8</option>
+            <option value="10">10 &times; 10</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label for="setting-difficulty">Difficulty Level</label>
+          <select id="setting-difficulty">
+            <option value="1">1 &ndash; Easy</option>
+            <option value="2">2 &ndash; Basic</option>
+            <option value="3">3 &ndash; Intermediate</option>
+            <option value="4">4 &ndash; Challenging</option>
+            <option value="5">5 &ndash; Hard</option>
+            <option value="6" selected>6 &ndash; Expert</option>
+            <option value="7">7 &ndash; Master</option>
+          </select>
+        </div>
+        <div class="setting-group">
+          <label>Options</label>
+          <div class="checkbox-wrap">
+            <input type="checkbox" id="setting-miss-turn" checked>
+            <span>Miss turn if wrong</span>
+          </div>
+          <div class="checkbox-wrap">
+            <input type="checkbox" id="setting-sound" checked>
+            <span>Sound effects</span>
+          </div>
+        </div>
+      </div>
+      <div class="token-pickers-title">Choose Tokens</div>
+      <div id="token-pickers" class="token-pickers"></div>
+      <div class="start-buttons">
+        <button class="btn btn-secondary" onclick="goToStart()">&#8592; Back</button>
+        <button class="btn btn-primary" onclick="startGame()">&#9654; Start Game</button>
+      </div>
     </div>
+  </div>
 
-    <!-- ═══ START SCREEN ═══ -->
-    <div id="start-screen">
-        <div id="start-content">
-            <h1>🐍🪜 Snakes &amp; Ladders</h1>
-            <p class="subtitle">Roll the dice · Answer questions · Race to the finish!</p>
-
-            <div class="settings-container">
-
-                <!-- Settings -->
-                <div class="settings-panel">
-                    <h3>⚙️ Game Settings</h3>
-
-                    <div class="setting-group">
-                        <label for="num-players">Number of Players</label>
-                        <select id="num-players">
-                            <option value="2" selected>2 Players</option>
-                            <option value="3">3 Players</option>
-                            <option value="4">4 Players</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="grid-size">Board Size</label>
-                        <select id="grid-size">
-                            <option value="6">6×6 – Small</option>
-                            <option value="8">8×8 – Medium</option>
-                            <option value="10" selected>10×10 – Large</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-group">
-                        <label for="difficulty">Difficulty Level</label>
-                        <select id="difficulty">
-                            <option value="0">Level 0 – Basics</option>
-                            <option value="1">Level 1 – Words</option>
-                            <option value="2">Level 2 – Simple Sentences</option>
-                            <option value="3">Level 3 – Intermediate</option>
-                            <option value="4">Level 4 – Advanced</option>
-                            <option value="5">Level 5 – Expert</option>
-                            <option value="6" selected>Level 6 – Discussion</option>
-                        </select>
-                    </div>
-
-                    <div class="setting-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="skip-turn" checked>
-                            <span>Miss turn if answer is wrong</span>
-                        </label>
-                    </div>
-
-                    <div class="setting-group checkbox-group">
-                        <label>
-                            <input type="checkbox" id="sound-enabled" checked>
-                            <span>Sound Effects</span>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Token Selection -->
-                <div class="token-panel">
-                    <h3>🎯 Select Your Token</h3>
-                    <div class="token-selection" id="token-selection-area">
-                        <div class="player-token-select" id="player1-token">
-                            <div class="token-label">🔴 Player 1</div>
-                            <div class="token-options"></div>
-                        </div>
-                        <div class="player-token-select" id="player2-token" style="display:none">
-                            <div class="token-label">🔵 Player 2</div>
-                            <div class="token-options"></div>
-                        </div>
-                        <div class="player-token-select" id="player3-token" style="display:none">
-                            <div class="token-label">🟢 Player 3</div>
-                            <div class="token-options"></div>
-                        </div>
-                        <div class="player-token-select" id="player4-token" style="display:none">
-                            <div class="token-label">🟡 Player 4</div>
-                            <div class="token-options"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="action-buttons">
-                <button id="begin-btn" onclick="startGame()">▶ Start Game</button>
-                <button id="back-btn" onclick="goBack()">← Back</button>
-            </div>
+  <div id="game-screen" class="screen-overlay">
+    <div class="game-header">
+      <div id="turn-indicator" class="turn-indicator" aria-live="polite">Player 1's turn</div>
+      <div class="header-right">
+        <div class="header-dice-wrap">
+          <div id="header-dice" role="button" tabindex="0" aria-label="Click to roll dice">🎲</div>
+          <span id="header-dice-value" aria-live="polite">-</span>
         </div>
+        <button class="btn-icon" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">⛶</button>
+      </div>
     </div>
-
-    <!-- ═══ GAME SCREEN ═══ -->
-    <div id="game-screen">
-        <div id="dice-overlay">
-            <div id="dice-anim-wrap">
-                <div id="dice-anim-face">⚀</div>
-                <div id="dice-anim-label">Rolling…</div>
-            </div>
-            <div id="dice-result-display">
-                <span id="dice-total">0</span>
-            </div>
-        </div>
-        <div id="game-header">
-            <div id="turn-indicator">Player 1's Turn</div>
-            <button id="fullscreen-btn" class="fullscreen-btn" title="Toggle Fullscreen">⛶</button>
-            <div id="dice-area">
-                <div id="dice" onclick="rollDice()" title="Click to roll">🎲</div>
-                <div id="dice-value">Click!</div>
-            </div>
-        </div>
-
-        <div id="board-container">
-            <div id="board-wrapper">
-                <div id="board"></div>
-                <!-- SVG drawn over board for snakes & ladders visuals -->
-                <svg id="snake-ladder-svg" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
-            </div>
-        </div>
-
-        <div id="game-footer">
-            <div id="player-cards"></div>
-        </div>
+    <div class="game-center">
+      <div id="board-wrapper">
+        <div id="board"></div>
+        <svg id="board-svg" aria-hidden="true"></svg>
+        <div id="game-message"></div>
+      </div>
     </div>
-
-    <!-- ═══ QUESTION MODAL ═══ -->
-    <div id="question-modal" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="question-title">Question</h2>
-                <span id="question-level" class="level-badge"></span>
-            </div>
-            <div class="modal-body">
-                <div id="question-text"></div>
-                <div id="question-type"></div>
-
-                <!-- Teacher clicks Correct or Wrong — no typing needed -->
-                <div id="judge-buttons">
-                    <button id="correct-btn" class="judge-btn correct-btn" onclick="submitCorrect()">
-                        <span class="judge-icon">✓</span>
-                        <span class="judge-label">Correct</span>
-                    </button>
-                    <button id="wrong-btn" class="judge-btn wrong-btn" onclick="submitWrong()">
-                        <span class="judge-icon">✗</span>
-                        <span class="judge-label">Wrong</span>
-                    </button>
-                </div>
-            </div>
-            <div id="question-result"></div>
-        </div>
+    <div class="game-footer">
+      <div id="player-cards" class="player-cards"></div>
     </div>
+  </div>
 
-    <!-- ═══ WIN SCREEN ═══ -->
-    <div id="win-screen" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-content win-content">
-            <div class="win-header">
-                <div id="winner-emoji">🏆</div>
-                <h2 id="winner-text">Player 1 Wins!</h2>
-            </div>
-            <div class="win-stats">
-                <div id="final-positions"></div>
-            </div>
-            <div class="win-actions">
-                <button onclick="playAgain()">🔄 Play Again</button>
-                <button onclick="goToMenu()">🏠 Main Menu</button>
-            </div>
-        </div>
+  <div id="dice-overlay" aria-hidden="true">
+    <div id="dice-3d-container"></div>
+    <div id="dice-display">⚀</div>
+    <div id="dice-result"></div>
+    <div id="dice-emoji" style="display:none"></div>
+  </div>
+
+  <div id="question-modal" aria-labelledby="question-level">
+    <div class="question-card">
+      <div id="question-level" class="question-level">Level 1</div>
+      <div id="question-text" class="question-text">Question goes here</div>
+      <div class="question-buttons">
+        <button class="btn-correct" onclick="answerCorrect()">&#10003; Correct</button>
+        <button class="btn-wrong" onclick="answerWrong()">&#10007; Wrong</button>
+      </div>
+      <div id="question-result" class="question-result" aria-live="assertive"></div>
     </div>
+  </div>
 
-    <script src="dice-controller.js"></script>
-    <script src="questions.js"></script>
-    <script src="snakes.js"></script>
-    <script>
-function toggleFullscreen() {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-        document.exitFullscreen();
-    }
-}
-</script>
-<script src="../../version-display.js"></script>
+  <div id="win-screen" class="screen-overlay">
+    <div class="card">
+      <span class="trophy">🏆</span>
+      <h2 id="win-heading" class="win-heading">Player 1 Wins!</h2>
+      <ul id="win-list" class="win-list"></ul>
+      <div class="win-buttons">
+        <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+        <button class="btn btn-secondary" onclick="goToStart()">Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="dice-controller.js"></script>
+  <script src="questions.js"></script>
+  <script src="snakes.js"></script>
+  <script src="../../version-display.js"></script>
 </body>
 </html>

@@ -160,6 +160,16 @@
       "games/baamboozle/index.html"
     ]
   },
+  "quiz-game": {
+    "name": "Grammar Quiz",
+    "version": "1.1.0",
+    "date": "2026-05-30",
+    "files": [
+      "games/quiz/index.html",
+      "games/quiz/data/quantifiers.js",
+      "games/quiz/data/present-perfect.js"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",
