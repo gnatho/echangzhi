@@ -40,7 +40,53 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  padding: 16px;
+  padding: 64px 16px 16px;
+}
+
+/* ─── TOP NAV (Back / Main Menu / Fullscreen) ─── */
+.nav-bar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  pointer-events: none;
+  z-index: 100;
+}
+.nav-left, .nav-right {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+.nav-btn {
+  background: rgba(255,255,255,0.92);
+  color: var(--navy);
+  border: 1.5px solid var(--border);
+  border-radius: 12px;
+  padding: 8px 14px;
+  font-family: 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(26,39,68,0.12);
+  transition: transform 0.15s, box-shadow 0.15s, background 0.15s;
+}
+.nav-btn:hover {
+  transform: translateY(-2px);
+  background: #fff;
+  box-shadow: 0 8px 20px rgba(26,39,68,0.18);
+}
+.nav-btn:active { transform: scale(0.96); }
+.nav-btn.icon-only {
+  padding: 8px 12px;
+  font-size: 18px;
+  line-height: 1;
 }
 
 /* ─── CARD ─────────────────────────────── */
@@ -541,16 +587,137 @@ body {
   .end-screen { padding: 28px 20px 26px; }
   .end-score  { font-size: 48px; }
   .end-title  { font-size: 26px; }
+  .nav-btn    { padding: 6px 10px; font-size: 12px; border-radius: 10px; }
+  .nav-btn.icon-only { padding: 6px 10px; font-size: 16px; }
+  body        { padding: 56px 10px 10px; }
+}
+
+/* ─── TABLET LANDSCAPE ──────────────────────
+   Optimised for iPads / 10-12" tablets held sideways.
+   Uses the wider viewport for a side-by-side layout. */
+@media (min-width: 768px) and (orientation: landscape) {
+  body {
+    padding: 70px 24px 24px;
+    justify-content: center;
+  }
+  .nav-btn { padding: 10px 18px; font-size: 15px; }
+  .nav-btn.icon-only { padding: 10px 14px; font-size: 20px; }
+
+  .card {
+    max-width: 960px;
+    border-radius: 32px;
+  }
+
+  /* Header: more breathing room */
+  .q-header { padding: 22px 32px 18px; }
+  .q-label  { font-size: 14px; }
+  .score-pill, .streak-pill { font-size: 15px; padding: 5px 14px; }
+  .timer-wrap { width: 48px; height: 48px; }
+  .timer-svg  { width: 48px; height: 48px; }
+  .timer-num  { font-size: 15px; }
+
+  /* Side-by-side question + options */
+  .q-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "badge   opts"
+      "qtext   opts"
+      "explain explain";
+    column-gap: 32px;
+    row-gap: 16px;
+    align-items: start;
+    padding: 28px 36px 14px;
+    min-height: 280px;
+  }
+  .type-badge { grid-area: badge; align-self: start; }
+  .q-text {
+    grid-area: qtext;
+    text-align: left;
+    font-size: 26px;
+    line-height: 1.45;
+    align-self: center;
+  }
+  .opts {
+    grid-area: opts;
+    align-self: center;
+    gap: 12px;
+  }
+  /* When only 2 options, stack them full-width for easier tapping */
+  .opts:has(.opt:nth-child(2):last-child) {
+    grid-template-columns: 1fr;
+  }
+  .opt {
+    min-height: 64px;
+    font-size: 19px;
+    padding: 16px 18px;
+    border-radius: 18px;
+  }
+  .explain {
+    grid-area: explain;
+    font-size: 15px;
+    padding: 14px 18px;
+  }
+
+  .q-footer { padding: 18px 36px 28px; }
+  .next-btn { min-height: 56px; padding: 14px 60px; font-size: 18px; }
+
+  /* Picker: wider, two-column set list */
+  .picker { padding: 44px 36px 40px; }
+  .picker-title { font-size: 32px; }
+  .set-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+  .set-card { padding: 18px 20px; }
+  .set-icon { width: 60px; height: 60px; font-size: 38px; }
+  .set-name { font-size: 18px; }
+
+  /* End screen */
+  .end-screen { padding: 44px 36px 40px; }
+  .end-title  { font-size: 36px; }
+  .end-score  { font-size: 68px; }
+  .review-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+}
+
+/* Shorter landscape tablets (e.g. iPad mini) — keep layout tighter */
+@media (min-width: 768px) and (orientation: landscape) and (max-height: 600px) {
+  body { padding: 60px 20px 16px; }
+  .q-body { min-height: 220px; padding: 20px 32px 10px; }
+  .q-text { font-size: 22px; }
+  .opt    { min-height: 56px; font-size: 17px; }
+  .picker { padding: 28px 32px 24px; }
+  .picker-title { font-size: 26px; }
+  .end-screen { padding: 28px 32px 24px; }
+  .end-score { font-size: 54px; }
+  .trophy-icon { font-size: 60px; }
 }
 </style>
 </head>
 <body>
+
+<nav class="nav-bar">
+  <div class="nav-left">
+    <a href="../index.html" class="nav-btn" title="Back to Games">← Back</a>
+    <a href="../../index.html" class="nav-btn" title="Main Menu">🏠 Menu</a>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn icon-only" id="fullscreen-btn" title="Toggle Fullscreen" aria-label="Toggle Fullscreen">⛶</button>
+  </div>
+</nav>
 
 <div id="confetti"></div>
 
 <!-- Question sets (populate window.QUIZ_SETS before main script runs) -->
 <script src="data/quantifiers.js"></script>
 <script src="data/present-perfect.js"></script>
+<script src="data/do-you-like.js"></script>
+<script src="data/is-he-she-ing.js"></script>
 
 <div class="card">
 
@@ -1038,6 +1205,27 @@ D.nextBtn.addEventListener('click', nextQ);
 D.againBtn.addEventListener('click', () => startGame());
 D.menuBtn.addEventListener('click', showPicker);
 D.pickAgainBtn.addEventListener('click', showPicker);
+
+/* Fullscreen toggle */
+const fsBtn = document.getElementById('fullscreen-btn');
+function isFullscreen() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+function updateFsIcon() {
+  fsBtn.textContent = isFullscreen() ? '⤡' : '⛶';
+  fsBtn.title = isFullscreen() ? 'Exit Fullscreen' : 'Toggle Fullscreen';
+}
+fsBtn.addEventListener('click', () => {
+  if (!isFullscreen()) {
+    const el = document.documentElement;
+    (el.requestFullscreen || el.webkitRequestFullscreen || (()=>{})).call(el);
+  } else {
+    (document.exitFullscreen || document.webkitExitFullscreen || (()=>{})).call(document);
+  }
+});
+document.addEventListener('fullscreenchange', updateFsIcon);
+document.addEventListener('webkitfullscreenchange', updateFsIcon);
+
 showPicker();
 </script>
 <script src="../../version-display.js"></script>

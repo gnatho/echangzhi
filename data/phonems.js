@@ -26,16 +26,16 @@ const PHONEME_DATA = [
         ]
     },
     {
-        key: "longE",
-        name: "Long E",
-        words: [
-            "f[ee]t", "m[ea]t", "f[ie]ld", "c[ei]ling", "happ[y]", "k[ey]",
-            "s[see]", "s[sea]", "p[pie]ce", "rec[ei]ve", "bab[y]", "mon[ey]",
-            "tr[ee]", "b[ea]d", "ch[ie]f", "br[ie]f", "ver[y]", "hon[ey]",
-            "gr[ee]n", "l[ea]f", "sh[ie]ld", "dec[ei]t", "funn[y]", "donk[ey]",
-            "sl[ee]p", "t[ea]", "y[ie]ld", "c[ei]se", "sorr[y]", "j[ey]",
-            "sw[ee]t", "s[ea]l", "th[ie]f", "rel[ei]f", "earl[y]", "vall[ey]"
-        ]
+		key: "longE",
+			name: "Long E",
+			words: [
+				"f[ee]t", "m[ea]t", "f[ie]ld", "c[ei]ling", "happ[y]", "k[ey]",
+				"s[ee]", "s[ea]", "p[ie]ce", "rec[ei]ve", "bab[y]", "mon[ey]",
+				"tr[ee]", "b[ea]d", "ch[ie]f", "br[ie]f", "ver[y]", "hon[ey]",
+				"gr[ee]n", "l[ea]f", "th[ie]f", "dec[ei]t", "funn[y]", "donk[ey]",
+				"sl[ee]p", "t[ea]", "y[ie]ld", "c[ei]l", "sorr[y]", "v[ey]",
+				"sw[ee]t", "s[ea]l", "th[ie]f", "rel[ei]f", "onl[y]", "l[ey]"
+			]
     },
     {
         key: "longI",
