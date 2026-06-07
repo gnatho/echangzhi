@@ -55,7 +55,47 @@ p  { margin: 0 0 6px; }
 /* ═══════════════════════════════════════════════════════════
    CONTAINER
 ═══════════════════════════════════════════════════════════ */
-.container { max-width: 1300px; margin: 0 auto; padding: 18px 22px; }
+.container { max-width: 1400px; margin: 0 auto; padding: 18px 22px; }
+
+/* Leave room for floating top-right controls */
+#books-screen, #units-screen, #mode-screen { padding-top: 60px; }
+.screen.quiz-header { padding-right: 230px !important; }
+@media (max-width: 600px) {
+  .screen.quiz-header { padding-right: 80px !important; }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FLOATING TOP-RIGHT CONTROLS (Main Menu + Full Screen)
+═══════════════════════════════════════════════════════════ */
+.top-controls {
+  position: fixed; top: 14px; right: 14px;
+  display: flex; gap: 8px; z-index: 1000;
+}
+.top-controls button {
+  background: rgba(255,255,255,.95);
+  color: var(--text);
+  border: 2px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 10px 16px;
+  font-size: .95em; font-weight: 800;
+  min-height: 44px;
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(6px);
+}
+.top-controls button:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: #fff;
+}
+.top-controls .icon-only {
+  padding: 10px 14px;
+  font-size: 1.2em;
+  min-width: 44px;
+}
+@media (max-width: 600px) {
+  .top-controls button .btn-label { display: none; }
+  .top-controls button { padding: 10px 14px; min-width: 44px; }
+}
 
 /* ═══════════════════════════════════════════════════════════
    BUTTONS — structural base (no default color)
@@ -326,19 +366,19 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 }
 
 .screen.quiz-header h1 {
-  font-size: 1.2em; font-weight: 900; margin: 0;
+  font-size: 1.5em; font-weight: 900; margin: 0;
   flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .screen.quiz-header .description {
-  color: var(--muted); font-size: .84em; margin: 0; font-weight: 600;
+  color: var(--muted); font-size: 1em; margin: 0; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex-shrink: 1; min-width: 0;
 }
 
 .header-score {
   background: var(--primary); color: #fff;
-  padding: 5px 14px; border-radius: 20px;
-  font-size: .82em; font-weight: 800;
+  padding: 7px 18px; border-radius: 20px;
+  font-size: 1.05em; font-weight: 800;
   white-space: nowrap; flex-shrink: 0;
 }
 
@@ -351,7 +391,7 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 }
 .progress-info {
   display: flex; justify-content: space-between;
-  margin-top: 7px; color: var(--muted); font-size: .82em; font-weight: 600;
+  margin-top: 8px; color: var(--muted); font-size: 1em; font-weight: 600;
 }
 .progress-info strong { color: var(--text); }
 
@@ -373,12 +413,14 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 
 /* Left column: prompt + feedback */
 .quiz-col-left {
-  display: flex; flex-direction: column; gap: 10px;
-  overflow-y: auto;
+  display: flex; flex-direction: column; gap: 14px;
+  overflow: hidden;
 }
 
 @media (min-width: 860px) {
-  .two-col .quiz-col-left { flex: 0 0 40%; min-width: 0; }
+  /* Strict 60/40 split — question gets the larger share */
+  .two-col .quiz-col-left  { flex: 0 0 60%; min-width: 0; overflow: hidden; }
+  .two-col .quiz-col-right { flex: 0 0 calc(40% - 14px); min-width: 0; }
   .single-col .quiz-col-left { flex: 0 0 auto; }
 }
 
@@ -387,25 +429,34 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 
 @media (min-width: 860px) {
   .two-col .quiz-col-right {
-    flex: 1; min-width: 0;
     display: flex; flex-direction: column;
   }
   /* Options fill height in right panel */
   .two-col .quiz-col-right .options {
-    flex: 1; display: flex; flex-direction: column; gap: 10px; margin-top: 0;
+    flex: 1; display: flex; flex-direction: column; gap: 14px; margin-top: 0;
   }
   .two-col .quiz-col-right .option {
-    flex: 1; min-height: 62px;
+    flex: 1; min-height: 88px;
   }
-  .two-col .quiz-col-right .tap-hint { margin-top: 8px; flex-shrink: 0; }
+  .two-col .quiz-col-right .tap-hint { margin-top: 10px; flex-shrink: 0; }
 }
 
-/* ── Question Card ── */
+/* ── Question Card — fills full height of left column, content vertically centered ── */
 .question-card {
   background: var(--card); border-radius: var(--r-md);
-  padding: 24px; box-shadow: var(--shadow-sm);
-  flex-shrink: 0;
+  padding: 40px 48px; box-shadow: var(--shadow-sm);
   animation: fadeUp .24s var(--ease) both;
+}
+
+@media (min-width: 860px) {
+  .two-col .quiz-col-left .question-card {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    justify-content: center;   /* vertical centering */
+    overflow: auto;
+  }
+  /* When feedback shows, it sits below the card and the card shrinks gracefully */
+  .two-col .quiz-col-left .feedback.show { flex-shrink: 0; }
 }
 
 @keyframes fadeUp {
@@ -421,13 +472,16 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 }
 
 /* ── Badges ── */
-.badges { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 16px; }
+.badges { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center; }
 
 .badge {
   display: inline-flex; align-items: center;
-  padding: 4px 11px; border-radius: 20px;
-  font-size: .7em; font-weight: 800;
+  padding: 6px 16px; border-radius: 20px;
+  font-size: .85rem; font-weight: 800;
   text-transform: uppercase; letter-spacing: .7px; line-height: 1.4;
+}
+@media (min-width: 860px) {
+  .badge { font-size: 1rem; padding: 8px 20px; }
 }
 
 .badge.b1 { background: #dde4ff; color: #2a46c5; }
@@ -439,21 +493,27 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 .badge.neg { background: var(--danger); color: #fff; }
 .badge.neg::before { content: "−"; margin-right: 2px; font-size: 1.15em; font-weight: 900; }
 
-/* ── Prompt ── */
+/* ── Prompt — LARGE for classroom distance viewing ── */
 .prompt {
-  font-size: 1.35em; line-height: 1.75;
+  font-size: 3.2rem; line-height: 1.45;
   color: var(--text); white-space: pre-wrap; margin: 0;
-  font-weight: 500;
+  font-weight: 700; text-align: center;
+}
+@media (max-width: 1100px) {
+  .prompt { font-size: 2.4rem; }
+}
+@media (max-width: 860px) {
+  .prompt { font-size: 1.7rem; line-height: 1.5; text-align: left; }
 }
 
 /* ── Blank (fill) ── */
 .blank-here {
-  display: inline-block; min-width: 105px;
-  border-bottom: 3px solid var(--primary);
+  display: inline-block; min-width: 180px;
+  border-bottom: 5px solid var(--primary);
   text-align: center; color: var(--muted);
-  font-style: italic; padding: 2px 14px; margin: 0 4px;
+  font-style: italic; padding: 2px 22px; margin: 0 8px;
   font-weight: 700; transition: all .2s var(--ease);
-  border-radius: 5px 5px 0 0; background: transparent;
+  border-radius: 6px 6px 0 0; background: transparent;
 }
 .blank-here.filled  { color: var(--text);  font-style: normal; background: var(--primary-10); }
 .blank-here.correct { color: #0a6b4c; font-style: normal; background: var(--success-10); border-color: var(--success); }
@@ -479,17 +539,20 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 
 .option {
   background: var(--card); border: 2.5px solid var(--border);
-  border-radius: var(--r-md); padding: 16px 22px;
-  cursor: pointer; font: inherit; font-size: 1.1em;
-  font-weight: 600; color: var(--text);
-  text-align: left; transition: all .14s var(--ease);
-  min-height: 62px; display: flex; align-items: center;
-  line-height: 1.4; box-shadow: var(--shadow-xs); width: 100%;
+  border-radius: var(--r-md); padding: 20px 26px;
+  cursor: pointer; font: inherit; font-size: 1.6rem;
+  font-weight: 700; color: var(--text);
+  text-align: center; transition: all .14s var(--ease);
+  min-height: 72px; display: flex; align-items: center; justify-content: center;
+  line-height: 1.3; box-shadow: var(--shadow-xs); width: 100%;
+}
+@media (max-width: 860px) {
+  .option { font-size: 1.25rem; padding: 16px 20px; min-height: 60px; text-align: left; justify-content: flex-start; }
 }
 
 .option:hover:not(:disabled) {
   border-color: var(--primary); background: var(--primary-10);
-  box-shadow: var(--shadow-sm); transform: translateX(4px);
+  box-shadow: var(--shadow-sm); transform: translateY(-2px);
 }
 .option.selected { border-color: var(--primary); background: var(--primary-10); }
 .option.correct  { border-color: var(--success); background: var(--success-10); color: #0a6b4c; }
@@ -499,7 +562,7 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 /* ── Tap hint ── */
 .tap-hint {
   text-align: center; color: var(--muted);
-  font-size: .85em; margin-top: 14px;
+  font-size: 1.05em; margin-top: 14px;
   font-style: italic; font-weight: 600;
 }
 
@@ -522,12 +585,15 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 
 .word-chip {
   background: var(--card); border: 2px solid var(--border);
-  border-radius: var(--r-sm); padding: 10px 18px;
-  cursor: pointer; font: inherit; font-size: 1.05em;
+  border-radius: var(--r-sm); padding: 14px 22px;
+  cursor: pointer; font: inherit; font-size: 1.5em;
   font-weight: 700; color: var(--text);
   user-select: none; transition: all .12s;
-  min-height: 46px; display: inline-flex; align-items: center;
+  min-height: 58px; display: inline-flex; align-items: center;
   box-shadow: var(--shadow-xs);
+}
+@media (max-width: 860px) {
+  .word-chip { font-size: 1.2em; padding: 10px 18px; min-height: 46px; }
 }
 .word-chip:hover:not(.used) { border-color: var(--primary); background: var(--primary-10); transform: translateY(-2px); }
 .word-chip.used { opacity: .3; pointer-events: none; text-decoration: line-through; }
@@ -560,11 +626,11 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 .feedback.correct { border-left: 4px solid var(--success); }
 .feedback.wrong   { border-left: 4px solid var(--danger);  }
 
-.feedback .verdict { font-weight: 800; font-size: 1.08em; margin-bottom: 6px; }
+.feedback .verdict { font-weight: 800; font-size: 1.4em; margin-bottom: 8px; }
 .feedback.correct .verdict { color: #0a6b4c; }
 .feedback.wrong   .verdict { color: #82002a; }
-.feedback .tip { color: var(--text2); font-size: .9em; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-style: italic; font-weight: 500; }
-.feedback .expected { background: #fff0f4; padding: 8px 12px; border-radius: var(--r-xs); font-size: .9em; margin-top: 6px; font-weight: 600; }
+.feedback .tip { color: var(--text2); font-size: 1.1em; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); font-style: italic; font-weight: 500; }
+.feedback .expected { background: #fff0f4; padding: 10px 14px; border-radius: var(--r-xs); font-size: 1.15em; margin-top: 8px; font-weight: 700; }
 
 /* ── Actions bar ── */
 .actions {
@@ -575,7 +641,7 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
   box-shadow: var(--shadow-sm); flex-shrink: 0;
 }
 
-.actions button { flex: 1; max-width: 200px; min-height: 52px; padding: 12px 22px; font-size: 1em; }
+.actions button { flex: 1; max-width: 240px; min-height: 60px; padding: 14px 24px; font-size: 1.2em; }
 .actions .right { display: flex; gap: 10px; }
 
 /* ═══════════════════════════════════════════════════════════
@@ -651,6 +717,13 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 </style>
 </head>
 <body>
+
+<!-- Floating top-right controls -->
+<div class="top-controls">
+  <button id="main-menu-btn" title="Return to Main Menu">🏠 <span class="btn-label">Main Menu</span></button>
+  <button id="fullscreen-btn" class="icon-only" title="Toggle Full Screen" aria-label="Toggle Full Screen">⛶</button>
+</div>
+
 <div class="container">
 
   <!-- ════════════════ BOOKS SCREEN ════════════════ -->
@@ -1266,6 +1339,26 @@ $('restart-btn').addEventListener('click', () => { currentIdx = 0; score = 0; an
 $('new-btn').addEventListener('click', () => { showScreen('units'); });
 $('back-to-books').addEventListener('click', () => { showScreen('books'); });
 $('back-to-units').addEventListener('click', () => { showScreen('units'); });
+
+// ═══════════════════════════════════════════════════════════
+// TOP-RIGHT CONTROLS: Full Screen + Main Menu
+// ═══════════════════════════════════════════════════════════
+$('main-menu-btn').addEventListener('click', () => {
+  window.location.href = '../index.html';
+});
+
+const fsBtn = $('fullscreen-btn');
+fsBtn.addEventListener('click', () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+  } else {
+    document.exitFullscreen();
+  }
+});
+document.addEventListener('fullscreenchange', () => {
+  fsBtn.textContent = document.fullscreenElement ? '⛶' : '⛶';
+  fsBtn.title = document.fullscreenElement ? 'Exit Full Screen' : 'Toggle Full Screen';
+});
 
 renderBooks();
 </script>
