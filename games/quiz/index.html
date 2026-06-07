@@ -566,7 +566,128 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
   font-style: italic; font-weight: 600;
 }
 
-/* ── Word bank / Rearrange ── */
+/* ═══════════════════════════════════════════════════════════
+   REARRANGE MODE — full-width vertical stack, distance-readable
+   Dynamic sizing keyed to sentence length via [data-size]
+═══════════════════════════════════════════════════════════ */
+/* Hide visual clutter when rearranging */
+.rearrange-mode .question-card .badges,
+.rearrange-mode .question-card .prompt {
+  display: none;
+}
+/* Question card becomes a transparent wrapper to maximize space */
+.rearrange-mode .question-card {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  justify-content: center;
+  overflow-y: auto;     /* scroll if a very long sentence wraps past height */
+}
+
+/* Size tiers — single source of truth via CSS vars */
+.rearrange-stack {
+  display: flex; flex-direction: column;
+  gap: 24px; width: 100%;
+  align-items: stretch;
+
+  /* Defaults (lg) */
+  --chip-font: 2.2rem;
+  --chip-pad-y: 18px;
+  --chip-pad-x: 30px;
+  --chip-minh: 78px;
+  --chip-gap: 16px;
+  --zone-pad: 24px;
+  --zone-minh: 130px;
+}
+.rearrange-stack[data-size="xl"] {
+  --chip-font: 2.8rem;  --chip-pad-y: 24px; --chip-pad-x: 40px;
+  --chip-minh: 96px;    --chip-gap: 20px;
+  --zone-pad: 28px;     --zone-minh: 160px;
+}
+.rearrange-stack[data-size="lg"] {
+  --chip-font: 2.2rem;  --chip-pad-y: 18px; --chip-pad-x: 30px;
+  --chip-minh: 78px;    --chip-gap: 16px;
+  --zone-pad: 24px;     --zone-minh: 130px;
+}
+.rearrange-stack[data-size="md"] {
+  --chip-font: 1.75rem; --chip-pad-y: 14px; --chip-pad-x: 22px;
+  --chip-minh: 64px;    --chip-gap: 12px;
+  --zone-pad: 20px;     --zone-minh: 110px;
+}
+.rearrange-stack[data-size="sm"] {
+  --chip-font: 1.4rem;  --chip-pad-y: 11px; --chip-pad-x: 18px;
+  --chip-minh: 54px;    --chip-gap: 10px;
+  --zone-pad: 18px;     --zone-minh: 96px;
+}
+.rearrange-stack[data-size="xs"] {
+  --chip-font: 1.15rem; --chip-pad-y: 9px;  --chip-pad-x: 14px;
+  --chip-minh: 46px;    --chip-gap: 8px;
+  --zone-pad: 14px;     --zone-minh: 82px;
+}
+
+/* Narrow viewports: bump every tier down a step */
+@media (max-width: 1100px) {
+  .rearrange-stack {
+    --chip-font: calc(var(--chip-font) * .85);
+    --chip-pad-x: calc(var(--chip-pad-x) * .85);
+  }
+}
+@media (max-width: 860px) {
+  .rearrange-stack {
+    --chip-font: calc(var(--chip-font) * .72);
+    --chip-pad-y: calc(var(--chip-pad-y) * .8);
+    --chip-pad-x: calc(var(--chip-pad-x) * .75);
+    --chip-minh: calc(var(--chip-minh) * .78);
+    --chip-gap: calc(var(--chip-gap) * .7);
+  }
+}
+
+/* ── Word pool (top) ── */
+.rearrange-stack .word-bank {
+  display: flex; flex-wrap: wrap; gap: var(--chip-gap);
+  padding: var(--zone-pad); background: #f4f5fb;
+  border-radius: var(--r-md);
+  min-height: var(--zone-minh);
+  border: 2px solid var(--border);
+  justify-content: center; align-items: center; align-content: center;
+  margin: 0;
+}
+
+/* ── Drop zone (bottom) — grows with content, never clips ── */
+.rearrange-stack .answer-build {
+  display: flex; flex-wrap: wrap; gap: var(--chip-gap);
+  padding: var(--zone-pad);
+  min-height: var(--zone-minh);
+  height: auto;            /* grow to fit wrapped rows */
+  background: var(--primary-06);
+  border: 4px dashed rgba(67,97,238,.45);
+  border-radius: var(--r-md);
+  transition: border-color .2s, min-height .2s;
+  justify-content: center; align-items: center; align-content: center;
+  margin: 0;
+}
+
+/* Clear button row */
+.rearrange-actions { display: flex; justify-content: center; margin: 0; }
+.rearrange-mode #clear-build {
+  padding: 12px 28px; font-size: 1rem; min-height: 48px;
+}
+
+/* ── Chips inside rearrange — pull sizes from CSS vars ── */
+.rearrange-mode .word-chip {
+  font-size: var(--chip-font);
+  font-weight: 800;
+  padding: var(--chip-pad-y) var(--chip-pad-x);
+  min-height: var(--chip-minh);
+  border-radius: var(--r-md);
+  border-width: 3px;
+  white-space: nowrap;     /* never split a word */
+  line-height: 1.1;
+}
+
+/* ── Default word bank / answer-build for any other contexts (unchanged) ── */
 .word-bank {
   display: flex; flex-wrap: wrap; gap: 10px;
   padding: 16px; background: #f4f5fb;
@@ -595,6 +716,7 @@ button.ghost  { background: transparent; color: var(--primary); border: 2.5px so
 @media (max-width: 860px) {
   .word-chip { font-size: 1.2em; padding: 10px 18px; min-height: 46px; }
 }
+
 .word-chip:hover:not(.used) { border-color: var(--primary); background: var(--primary-10); transform: translateY(-2px); }
 .word-chip.used { opacity: .3; pointer-events: none; text-decoration: line-through; }
 
@@ -1056,19 +1178,32 @@ function renderQuestion() {
   html += `</div>`;
 
   if (q.type === 'rearrange') {
-    // All content in the left panel (single-col layout)
-    quizBody.className = 'quiz-body single-col';
-    html += `<div class="prompt">${esc(q.prompt)}</div>`;
+    // Full-width single-column layout for rearrange
+    quizBody.className = 'quiz-body single-col rearrange-mode';
     const tokens   = q.answer.split(/\s+/);
     const shuffled = tokens.map((t, i) => ({ t, i })).sort(() => Math.random() - 0.5);
-    html += `<div class="word-bank" id="word-bank">`;
+
+    // Dynamic size tier based on word count + longest token length
+    const n = tokens.length;
+    const maxLen = tokens.reduce((m, t) => Math.max(m, t.length), 0);
+    let tier;
+    if (n <= 4 && maxLen <= 8)       tier = 'xl';   // short — biggest
+    else if (n <= 6 && maxLen <= 10) tier = 'lg';
+    else if (n <= 8)                 tier = 'md';
+    else if (n <= 10)                tier = 'sm';
+    else                              tier = 'xs';   // very long sentences
+
+    html += `<div class="rearrange-stack" data-size="${tier}">`;
+    // Top: word pool
+    html +=   `<div class="word-bank" id="word-bank" data-size="${tier}">`;
     shuffled.forEach(({t, i}) => {
       html += `<span class="word-chip" data-id="${i}">${esc(t)}</span>`;
     });
+    html +=   `</div>`;
+    // Bottom: drop zone + clear
+    html +=   `<div class="answer-build" id="answer-build" data-size="${tier}"></div>`;
+    html +=   `<div class="rearrange-actions"><button id="clear-build" class="secondary">↺ Clear</button></div>`;
     html += `</div>`;
-    html += `<div class="answer-build" id="answer-build"></div>`;
-    html += `<button id="clear-build" class="secondary">↺ Clear</button>`;
-    html += `<div class="tap-hint">👆 Tap words to build your sentence</div>`;
     optHtml = '';
 
   } else if (q.type === 'fill' && q.options.length) {
