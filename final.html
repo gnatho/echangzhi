@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Final Exam — Speaking Question Generator</title>
+<style>
+  :root {
+    --bg-1: #0f172a;
+    --bg-2: #1e293b;
+    --panel: rgba(255, 255, 255, 0.06);
+    --panel-border: rgba(255, 255, 255, 0.10);
+    --text: #f1f5f9;
+    --muted: #94a3b8;
+    --accent: #6366f1;
+    --accent-d: #4f46e5;
+    --ok: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+    --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body { height: 100%; }
+
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(1200px 800px at 15% 10%, #1b2540 0%, transparent 55%),
+                radial-gradient(1000px 700px at 90% 90%, #26223b 0%, transparent 55%),
+                linear-gradient(160deg, var(--bg-1), var(--bg-2));
+    color: var(--text);
+    overflow: hidden;
+  }
+
+  .app {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    padding: clamp(14px, 2.2vh, 26px) clamp(20px, 3vw, 44px);
+    gap: clamp(10px, 2vh, 20px);
+  }
+
+  /* ---------- Header ---------- */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand { display: flex; align-items: baseline; gap: 12px; }
+  .brand h1 { font-size: clamp(16px, 1.9vw, 22px); font-weight: 700; margin: 0; letter-spacing: 0.3px; }
+  .brand span { font-size: 13px; color: var(--muted); }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 7px 14px;
+    border-radius: 999px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--muted);
+  }
+  .status-pill .dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted); box-shadow: 0 0 0 0 rgba(148,163,184,0.4);
+  }
+  .status-pill.running { color: var(--ok); }
+  .status-pill.running .dot { background: var(--ok); animation: blink 1.2s infinite; }
+  .status-pill.warn { color: var(--warn); }
+  .status-pill.warn .dot { background: var(--warn); animation: blink 0.8s infinite; }
+  .status-pill.danger { color: var(--danger); }
+  .status-pill.danger .dot { background: var(--danger); animation: blink 0.5s infinite; }
+  .status-pill.up { color: var(--danger); background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
+
+  /* ---------- Main split ---------- */
+  main {
+    display: grid;
+    grid-template-columns: minmax(320px, 1fr) minmax(360px, 1.2fr);
+    gap: clamp(14px, 2vw, 28px);
+    min-height: 0;
+  }
+
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    border-radius: 22px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+
+  /* ---------- Timer panel ---------- */
+  .timer-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(18px, 3vh, 36px);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ring-wrap {
+    position: relative;
+    width: clamp(260px, 34vh, 360px);
+    height: clamp(260px, 34vh, 360px);
+    display: grid;
+    place-items: center;
+  }
+
+  .ring-wrap svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .ring-bg { stroke: rgba(255,255,255,0.08); }
+  .ring-fg {
+    stroke: var(--accent);
+    transition: stroke 0.4s ease;
+  }
+
+  .timer-center {
+    position: relative;
+    text-align: center;
+    z-index: 1;
+  }
+
+  .timer {
+    font-variant-numeric: tabular-nums;
+    font-size: clamp(58px, 10vh, 110px);
+    font-weight: 800;
+    line-height: 1;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+    color: var(--text);
+  }
+  .timer.running { color: var(--ok); }
+  .timer.warn { color: var(--warn); }
+  .timer.danger { color: var(--danger); animation: pulse 0.9s infinite; }
+  .timer.finished { color: var(--danger); animation: pulse 1s infinite; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+
+  .timer-cap {
+    margin-top: 10px;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--muted);
+  }
+
+  .time-up-banner {
+    position: absolute;
+    left: 50%;
+    bottom: 18px;
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+    background: rgba(239,68,68,0.16);
+    border: 1px solid rgba(239,68,68,0.4);
+    color: #fecaca;
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    transition: all 0.35s ease;
+    pointer-events: none;
+  }
+  .time-up-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* ---------- Topic panel ---------- */
+  .topic-panel {
+    display: flex;
+    flex-direction: column;
+    padding: clamp(20px, 3.2vh, 36px) clamp(22px, 3vw, 40px);
+    min-height: 0;
+  }
+
+  .topic-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #c7d2fe;
+    background: rgba(99,102,241,0.16);
+    border: 1px solid rgba(99,102,241,0.35);
+    padding: 5px 12px;
+    border-radius: 999px;
+  }
+
+  .topic-num { font-size: 12px; color: var(--muted); }
+
+  .topic-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 14px;
+  }
+
+  .topic-title {
+    font-size: clamp(24px, 3.4vw, 38px);
+    font-weight: 800;
+    line-height: 1.18;
+    margin: 0;
+    letter-spacing: -0.3px;
+  }
+
+  .topic-desc {
+    font-size: clamp(15px, 1.8vw, 19px);
+    line-height: 1.6;
+    color: #cbd5e1;
+    margin: 0;
+  }
+
+  .placeholder {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    gap: 12px;
+    color: var(--muted);
+  }
+  .placeholder .ph-icon { font-size: 46px; opacity: 0.5; }
+  .placeholder p { margin: 0; font-size: 16px; max-width: 360px; line-height: 1.5; }
+
+  /* ---------- Controls ---------- */
+  footer.controls {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: clamp(10px, 1.6vw, 18px);
+  }
+
+  button {
+    font-family: inherit;
+    font-size: clamp(14px, 1.5vw, 16px);
+    font-weight: 600;
+    padding: clamp(13px, 2vh, 17px) 14px;
+    border-radius: 14px;
+    cursor: pointer;
+    border: 1px solid var(--panel-border);
+    background: rgba(255,255,255,0.05);
+    color: var(--text);
+    transition: transform 0.06s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  button:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+  button:active { transform: translateY(1px); }
+  button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  button.primary {
+    background: linear-gradient(135deg, var(--accent), var(--accent-d));
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(79,70,229,0.35);
+  }
+  button.primary:hover { box-shadow: 0 10px 28px rgba(79,70,229,0.45); }
+
+  button.ghost-reset:hover { background: rgba(245,158,11,0.14); border-color: rgba(245,158,11,0.4); color: #fcd9a4; }
+  button.ghost-next:hover { background: rgba(16,185,129,0.14); border-color: rgba(16,185,129,0.4); color: #a7f3d0; }
+
+  .ico { font-size: 1.05em; line-height: 1; }
+
+  /* ---------- Portrait / small fallback ---------- */
+  @media (max-aspect-ratio: 4/3) {
+    main { grid-template-columns: 1fr; grid-template-rows: auto 1fr; }
+    .ring-wrap { width: clamp(200px, 30vh, 280px); height: clamp(200px, 30vh, 280px); }
+    footer.controls { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="brand">
+        <h1>Final Exam — Speaking</h1>
+        <span>50 topics · 2 minutes each</span>
+      </div>
+      <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Ready</span></div>
+    </header>
+
+    <main>
+      <section class="panel timer-panel">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 200 200">
+            <circle class="ring-bg" cx="100" cy="100" r="92" fill="none" stroke-width="10" />
+            <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="92" fill="none" stroke-width="10"
+                    stroke-linecap="round" />
+          </svg>
+          <div class="timer-center">
+            <div class="timer" id="timer">2:00</div>
+            <div class="timer-cap">Time Remaining</div>
+          </div>
+        </div>
+        <div class="time-up-banner" id="banner">Time is up — please wrap up</div>
+      </section>
+
+      <section class="panel topic-panel" id="topicPanel">
+        <div class="topic-head" id="topicHead" style="display:none;">
+          <span class="badge" id="badge"></span>
+          <span class="topic-num" id="topicNum"></span>
+        </div>
+        <div class="topic-body" id="topicBody">
+          <div class="placeholder">
+            <div class="ph-icon">&#128221;</div>
+            <p>Press <strong>Choose Topic</strong> to draw a speaking prompt, then press <strong>Start</strong>.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="controls">
+      <button id="chooseBtn"><span class="ico">🎲</span> Choose Topic</button>
+      <button id="startBtn" class="primary"><span class="ico">▶</span> Start</button>
+      <button id="resetBtn" class="ghost-reset"><span class="ico">↻</span> Reset Time</button>
+      <button id="nextBtn" class="ghost-next"><span class="ico">⏭</span> Next Question</button>
+    </footer>
+  </div>
+
+<script>
+  const topics = [
+    { cat: "Personal Growth & Mindset", title: "My Dream", desc: "An exploration of personal ambitions and the steps needed to turn those big aspirations into reality." },
+    { cat: "Personal Growth & Mindset", title: "The Beauty of Persistence", desc: "A look at why staying committed to a long-term goal is often more valuable than natural talent." },
+    { cat: "Personal Growth & Mindset", title: "How to Face Failure Bravely", desc: "A speech about changing our perspective on mistakes and viewing failures as essential stepping stones to success." },
+    { cat: "Personal Growth & Mindset", title: "The Power of Small Efforts", desc: "How making microscopic, 1% improvements every day can lead to massive achievements over time." },
+    { cat: "Personal Growth & Mindset", title: "How Small Habits Can Change Life", desc: "An explanation of how minor daily routines, like waking up early or journaling, shape our entire future." },
+    { cat: "Personal Growth & Mindset", title: "Never Give Up", desc: "An inspiring call to action on maintaining resilience and pushing through the darkest moments of a challenge." },
+    { cat: "Personal Growth & Mindset", title: "How to Learn to Grow", desc: "A reflection on moving out of your comfort zone and actively seeking experiences that mature your character." },
+    { cat: "Personal Growth & Mindset", title: "How to Become a Better Version of Oneself", desc: "A focus on self-reflection and competing only with who you were yesterday, rather than competing with others." },
+    { cat: "Personal Growth & Mindset", title: "Why I Stopped Saying \u201CI Don\u2019t Have Time\u201D", desc: "A speech about shifting from making excuses to actively prioritizing the things that truly matter in life." },
+    { cat: "Personal Growth & Mindset", title: "The Best Advice I Never Took", desc: "A personal story about ignoring a piece of advice, making your own choice, and what you learned from the outcome." },
+    { cat: "Personal Growth & Mindset", title: "Would You Refuse Something Good for You Just Because You Dislike It?", desc: "An examination of self-discipline and why doing uncomfortable tasks is often necessary for personal success." },
+    { cat: "Personal Growth & Mindset", title: "The Courage to Be Imperfect", desc: "An argument against perfectionism, encouraging students to accept their flaws while continuing to grow." },
+    { cat: "College Life & Balance", title: "How to Live a Meaningful College Life", desc: "Practical advice on maximizing the brief four years of university through both academic excellence and social activities." },
+    { cat: "College Life & Balance", title: "How to Balance Study, Work, and Social Life", desc: "Strategies for managing a busy schedule without sacrificing your grades, friendships, or personal well-being." },
+    { cat: "College Life & Balance", title: "The Reality of Part-time Jobs", desc: "An analysis of how working a side job during university provides real-world skills beyond the classroom." },
+    { cat: "College Life & Balance", title: "Embracing an Independent Life", desc: "A look at the freedoms and heavy responsibilities that come with living away from parents for the first time." },
+    { cat: "College Life & Balance", title: "The Art of Making Decisions Alone", desc: "How university students can transition from relying on parental guidance to making confident choices for their own futures." },
+    { cat: "College Life & Balance", title: "The Importance of Campus Clubs and Activities", desc: "Why joining student organizations is crucial for building leadership skills and finding a community." },
+    { cat: "Relationships & Kindness", title: "The Power of a Smile", desc: "A speech on how a simple, positive facial expression can break down cultural barriers and brighten someone's day." },
+    { cat: "Relationships & Kindness", title: "A Small Kindness I\u2019ll Never Forget", desc: "A heartfelt reflection on a time a stranger or classmate helped you, and how it changed your outlook." },
+    { cat: "Relationships & Kindness", title: "The True Meaning of Friendship", desc: "An exploration of what makes a bond genuine, focusing on loyalty, mutual support, and shared values." },
+    { cat: "Relationships & Kindness", title: "My Best Friend", desc: "A tribute to a specific person who has significantly influenced your life and stayed by your side." },
+    { cat: "Relationships & Kindness", title: "A Person I Admire", desc: "A speech highlighting the character traits and achievements of a role model who inspires you to do better." },
+    { cat: "Relationships & Kindness", title: "How to Express Gratitude in Daily Life", desc: "The importance of saying \u201Cthank you\u201D to family, teachers, and peers, and how it boosts collective happiness." },
+    { cat: "Health, Wellness & Relaxation", title: "My Favorite Way to Relax", desc: "An introduction to the personal hobbies and quiet spaces that help you unwind after a stressful week." },
+    { cat: "Health, Wellness & Relaxation", title: "How to Beat Inner Anxiety", desc: "Practical tips for university students on managing academic pressure, peer competition, and future uncertainty." },
+    { cat: "Health, Wellness & Relaxation", title: "Music Changes My Mood", desc: "A look at the therapeutic power of melodies and how different genres of music can alter our emotional state." },
+    { cat: "Health, Wellness & Relaxation", title: "How to Keep Healthy in College", desc: "A guide to maintaining proper nutrition, regular sleep, and physical fitness despite a chaotic student schedule." },
+    { cat: "Health, Wellness & Relaxation", title: "The Importance of Regular Exercise", desc: "Why physical movement is not just about staying fit, but also about boosting brain power and mental clarity." },
+    { cat: "Health, Wellness & Relaxation", title: "Why I Love Sports", desc: "A passionate speech about the joy of athletics and the valuable lessons in teamwork and sportsmanship they teach." },
+    { cat: "Health, Wellness & Relaxation", title: "The Power of Saying \u201CNo\u201D", desc: "How setting personal boundaries and declining extra tasks can protect your mental health and energy." },
+    { cat: "Technology & Modern Media", title: "The Deep Influence of Short Videos", desc: "A critical look at how apps like Douyin/TikTok affect our attention spans, focus, and daily time management." },
+    { cat: "Technology & Modern Media", title: "How to Use Your Phone Correctly", desc: "Finding the perfect balance between utilizing smartphones as powerful tools and avoiding digital addiction." },
+    { cat: "Technology & Modern Media", title: "Artificial Intelligence and the Future of Students", desc: "An exploration of how tools like ChatGPT are changing how we learn and what it means for our future careers." },
+    { cat: "Technology & Modern Media", title: "The Trap of Online Comparison", desc: "How social media filters reality and why comparing our lives to others' online profiles damages self-esteem." },
+    { cat: "Technology & Modern Media", title: "The Joy of a Digital Detox", desc: "The surprising mental benefits of disconnecting from the internet and screens for an entire day or weekend." },
+    { cat: "Global Perspectives & Education", title: "The Importance of Learning Foreign Languages", desc: "How mastering a new language opens doors to global cultures, new friendships, and international career opportunities." },
+    { cat: "Global Perspectives & Education", title: "Traveling Broadens Our Horizons", desc: "An explanation of how visiting unfamiliar places challenges our assumptions and makes us more open-minded." },
+    { cat: "Global Perspectives & Education", title: "My Unforgettable Holiday", desc: "A narrative speech about a specific vacation that provided profound relaxation, adventure, or personal insight." },
+    { cat: "Global Perspectives & Education", title: "The Endless Importance of Reading", desc: "Why books remain the ultimate tool for expanding your vocabulary, empathy, and understanding of human history." },
+    { cat: "Global Perspectives & Education", title: "Traditional Culture in the Modern World", desc: "How young people can preserve their cultural heritage while adapting to a rapidly changing global society." },
+    { cat: "Global Perspectives & Education", title: "What We Can Learn from Other Cultures", desc: "The value of studying different global customs to better understand our own values and biases." },
+    { cat: "Social Responsibility & The Environment", title: "Environmental Protection Starts with Us", desc: "Urgent reasons why college students must take the lead in adopting eco-friendly habits to combat climate change." },
+    { cat: "Social Responsibility & The Environment", title: "Animal Protection and Human Duty", desc: "An argument for treating stray animals and wildlife with compassion and respect in an urbanized world." },
+    { cat: "Social Responsibility & The Environment", title: "Why We Must Stop Wasting Resources", desc: "A speech highlighting the critical need to reduce food, water, and electricity waste in school dorms and cafeterias." },
+    { cat: "Social Responsibility & The Environment", title: "The Value of Volunteering", desc: "How giving your time to community service benefits society while teaching you empathy and humility." },
+    { cat: "Social Responsibility & The Environment", title: "Saying No to Plastic", desc: "A practical discussion on the dangers of single-use plastics and how to transition to sustainable alternatives." },
+    { cat: "Future & Imagination", title: "Where Do I See Myself in Ten Years?", desc: "A forward-looking speech detailing career goals, lifestyle aspirations, and the impact you hope to make." },
+    { cat: "Future & Imagination", title: "If I Had One Million Yuan to Donate", desc: "An imaginative scenario exploring which global or local causes you would choose to fund and why." },
+    { cat: "Future & Imagination", title: "The Most Important Invention of My Lifetime", desc: "A perspective on which modern piece of technology has fundamentally altered how humans live and interact." }
+  ];
+
+  const DURATION = 120;
+  const RING_R = 92;
+  const RING_C = 2 * Math.PI * RING_R;
+
+  const timerEl = document.getElementById("timer");
+  const ringFg = document.getElementById("ringFg");
+  const statusPill = document.getElementById("statusPill");
+  const statusText = document.getElementById("statusText");
+  const topicHead = document.getElementById("topicHead");
+  const badge = document.getElementById("badge");
+  const topicNum = document.getElementById("topicNum");
+  const topicBody = document.getElementById("topicBody");
+  const banner = document.getElementById("banner");
+  const chooseBtn = document.getElementById("chooseBtn");
+  const startBtn = document.getElementById("startBtn");
+  const resetBtn = document.getElementById("resetBtn");
+  const nextBtn = document.getElementById("nextBtn");
+
+  ringFg.style.strokeDasharray = RING_C;
+  ringFg.style.strokeDashoffset = 0;
+
+  let currentIndex = -1;
+  let timeLeft = DURATION;
+  let timerId = null;
+  let state = "idle";
+  let audioCtx = null;
+
+  function fmt(s) {
+    s = Math.max(0, s);
+    const m = Math.floor(s / 60);
+    const ss = s % 60;
+    return m + ":" + (ss < 10 ? "0" + ss : ss);
+  }
+
+  function renderTimer() {
+    timerEl.textContent = fmt(timeLeft);
+    const pct = DURATION > 0 ? timeLeft / DURATION : 0;
+    ringFg.style.strokeDashoffset = RING_C * (1 - pct);
+  }
+
+  function applyUrgency() {
+    timerEl.classList.remove("running", "warn", "danger", "finished");
+    statusPill.classList.remove("running", "warn", "danger", "up");
+    let color = "var(--accent)";
+
+    if (state === "finished") {
+      timerEl.classList.add("finished");
+      statusPill.classList.add("up");
+      statusText.textContent = "Time is up";
+      color = "var(--danger)";
+    } else if (state === "running") {
+      if (timeLeft <= 10) {
+        timerEl.classList.add("danger");
+        statusPill.classList.add("danger");
+        statusText.textContent = "Final seconds";
+        color = "var(--danger)";
+      } else if (timeLeft <= 30) {
+        timerEl.classList.add("warn");
+        statusPill.classList.add("warn");
+        statusText.textContent = "Wrap up soon";
+        color = "var(--warn)";
+      } else {
+        timerEl.classList.add("running");
+        statusPill.classList.add("running");
+        statusText.textContent = "Running";
+        color = "var(--ok)";
+      }
+    } else {
+      statusText.textContent = "Ready";
+      color = "var(--accent)";
+    }
+    ringFg.style.stroke = color;
+  }
+
+  function clearTimer() {
+    if (timerId) { clearInterval(timerId); timerId = null; }
+  }
+
+  function setRunning() {
+    clearTimer();
+    state = "running";
+    startBtn.disabled = true;
+    hideBanner();
+    applyUrgency();
+    timerId = setInterval(function () {
+      timeLeft--;
+      renderTimer();
+      applyUrgency();
+      if (timeLeft <= 0) { finish(); }
+    }, 1000);
+  }
+
+  function start() {
+    ensureAudio();
+    if (state === "running") return;
+    timeLeft = DURATION;
+    renderTimer();
+    setRunning();
+  }
+
+  function resetTime() {
+    ensureAudio();
+    timeLeft = DURATION;
+    renderTimer();
+    setRunning();
+  }
+
+  function finish() {
+    clearTimer();
+    state = "finished";
+    timeLeft = 0;
+    renderTimer();
+    startBtn.disabled = false;
+    showBanner();
+    applyUrgency();
+    beep();
+  }
+
+  function stopToIdle() {
+    clearTimer();
+    state = "idle";
+    timeLeft = DURATION;
+    renderTimer();
+    startBtn.disabled = false;
+    hideBanner();
+    applyUrgency();
+  }
+
+  function pickTopic(avoidCurrent) {
+    let idx;
+    do {
+      idx = Math.floor(Math.random() * topics.length);
+    } while (avoidCurrent && idx === currentIndex && topics.length > 1);
+    currentIndex = idx;
+    renderTopic();
+    stopToIdle();
+  }
+
+  function renderTopic() {
+    if (currentIndex < 0) return;
+    const t = topics[currentIndex];
+    badge.textContent = t.cat;
+    topicNum.textContent = "Topic " + (currentIndex + 1) + " of 50";
+    topicHead.style.display = "flex";
+    topicBody.innerHTML =
+      '<h2 class="topic-title">' + t.title + "</h2>" +
+      '<p class="topic-desc">' + t.desc + "</p>";
+  }
+
+  function showBanner() { banner.classList.add("show"); }
+  function hideBanner() { banner.classList.remove("show"); }
+
+  function ensureAudio() {
+    if (!audioCtx) {
+      try { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+      catch (e) { audioCtx = null; }
+    }
+    if (audioCtx && audioCtx.state === "suspended") { audioCtx.resume(); }
+  }
+
+  function beep() {
+    if (!audioCtx) return;
+    const ctx = audioCtx;
+    const now = ctx.currentTime;
+    for (let i = 0; i < 3; i++) {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = "sine";
+      o.frequency.value = 880;
+      o.connect(g);
+      g.connect(ctx.destination);
+      const t = now + i * 0.45;
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.linearRampToValueAtTime(0.3, t + 0.05);
+      g.gain.linearRampToValueAtTime(0.0001, t + 0.35);
+      o.start(t);
+      o.stop(t + 0.4);
+    }
+  }
+
+  chooseBtn.addEventListener("click", function () { pickTopic(false); });
+  startBtn.addEventListener("click", start);
+  resetBtn.addEventListener("click", resetTime);
+  nextBtn.addEventListener("click", function () { pickTopic(true); });
+
+  renderTimer();
+  applyUrgency();
+</script>
+</body>
+</html>
