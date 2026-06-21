@@ -1,0 +1,52 @@
+{
+  "name": "Phonics Game Hub",
+  "short_name": "Phonics",
+  "description": "Educational phonics, vocabulary, spelling and grammar games for kids.",
+  "id": "/?source=pwa",
+  "start_url": "./index.html?source=pwa",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#1a1a2e",
+  "theme_color": "#1a1a2e",
+  "lang": "en",
+  "dir": "ltr",
+  "categories": ["education", "kids", "games"],
+  "icons": [
+    {
+      "src": "static/imgs/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "static/imgs/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Phonics",
+      "short_name": "Phonics",
+      "description": "Open the Word Grid phonics game",
+      "url": "./phonics.html?source=pwa",
+      "icons": [{ "src": "static/imgs/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Spin the Wheel",
+      "short_name": "Wheel",
+      "description": "Spin the reward wheel",
+      "url": "./wheel.html?source=pwa",
+      "icons": [{ "src": "static/imgs/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    },
+    {
+      "name": "Mini Games",
+      "short_name": "Games",
+      "description": "Browse the mini games",
+      "url": "./games/index.html?source=pwa",
+      "icons": [{ "src": "static/imgs/icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Phonics Game">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#667eea"/>
+      <stop offset="1" stop-color="#764ba2"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#bg)"/>
+  <g fill="#ffffff">
+    <path d="M256 150 C214 124 168 122 124 140 C120 142 116 146 116 152 L116 360 C116 368 124 372 132 369 C172 353 214 355 256 380 C298 355 340 353 380 369 C388 372 396 368 396 360 L396 152 C396 146 392 142 388 140 C344 122 298 124 256 150 Z"/>
+  </g>
+  <path d="M256 150 L256 380" stroke="#667eea" stroke-width="6" stroke-linecap="round" opacity="0.55"/>
+  <text x="256" y="300" text-anchor="middle" font-family="'Segoe UI',Tahoma,Geneva,Verdana,sans-serif" font-size="138" font-weight="800" fill="#5b4b8a">Aa</text>
+</svg>

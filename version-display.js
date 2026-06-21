@@ -46,3 +46,13 @@
     init();
   }
 })();
+
+/* PWA: register the service worker for offline support */
+(function () {
+  if (!('serviceWorker' in navigator)) return;
+  var tag = document.querySelector('script[src*="version-display.js"]');
+  var swUrl = tag ? tag.src.replace(/version-display\.js(?:[?#].*)?$/, 'sw.js') : 'sw.js';
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register(swUrl).catch(function () {});
+  });
+})();
