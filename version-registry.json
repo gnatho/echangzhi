@@ -41,6 +41,14 @@
       "sounds.html"
     ]
   },
+  "audio-player": {
+    "name": "Audio Player",
+    "version": "1.0.0",
+    "date": "2026-06-22",
+    "files": [
+      "audio.html"
+    ]
+  },
   "key-tester": {
     "name": "Key Tester",
     "version": "1.0.0",

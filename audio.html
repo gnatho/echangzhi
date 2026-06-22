@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en" data-component="audio-player">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#1a1a2e">
+    <meta name="description" content="Standalone audio player for phonics listening practice.">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="static/imgs/icon.svg">
+    <link rel="apple-touch-icon" href="static/imgs/icon.svg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Phonics">
+    <title>Audio Player — Phonics</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            color-scheme: light !important;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            width: 100vw;
+            height: 100vh;
+            touch-action: manipulation;
+            position: relative;
+        }
+
+        .fullscreen-btn {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 12px;
+            padding: 10px 16px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            z-index: 100;
+            color: white;
+            font-family: inherit;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            z-index: 100;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            font-weight: 600;
+            border: none;
+            border-radius: 12px;
+            padding: 10px 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+            cursor: pointer;
+            font-size: 1.15rem;
+            font-family: inherit;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255,255,255,0.35);
+        }
+
+        .back-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Layout: default = single column (portrait / small screens) */
+        .app-layout {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            padding: 70px 16px 16px 16px;
+            gap: 16px;
+        }
+
+        .player-panel {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+        }
+
+        .selection-panel {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: clamp(1.1rem, 3vw, 1.8rem);
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.4);
+            flex-shrink: 0;
+        }
+
+        /* Audio Player Container — increased dimensions */
+        .audio-player-container {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: 30px;
+            padding: 36px 32px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 26px;
+            width: 100%;
+            max-width: 660px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+
+        .player-track-info {
+            font-size: clamp(1.4rem, 3.5vw, 2rem);
+            font-weight: 600;
+            opacity: 0.85;
+            text-align: center;
+        }
+
+        .player-track-number {
+            font-size: clamp(4rem, 10vmin, 6.5rem);
+            font-weight: 800;
+            line-height: 1;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Seek bar */
+        .seek-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            width: 100%;
+        }
+
+        .seek-time {
+            font-size: clamp(1.1rem, 2.4vw, 1.5rem);
+            opacity: 0.8;
+            font-variant-numeric: tabular-nums;
+            min-width: 92px;
+            text-align: center;
+        }
+
+        .seek-bar {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 14px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .seek-bar::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 3px solid #fff;
+        }
+
+        .seek-bar::-moz-range-thumb {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            border: 3px solid #fff;
+        }
+
+        /* Main controls */
+        .player-controls-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(18px, 4vw, 32px);
+        }
+
+        .player-btn {
+            width: clamp(70px, 9vmin, 88px);
+            height: clamp(70px, 9vmin, 88px);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(1.8rem, 3vw, 2.2rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, box-shadow 0.15s;
+            font-family: inherit;
+            color: white;
+        }
+
+        .player-btn:active {
+            transform: scale(0.9);
+        }
+
+        .player-btn-play {
+            width: clamp(96px, 13vmin, 120px);
+            height: clamp(96px, 13vmin, 120px);
+            font-size: clamp(2.4rem, 4vw, 3rem);
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 0 8px 25px rgba(243,156,18,0.45);
+        }
+
+        .player-btn-play:hover {
+            box-shadow: 0 12px 35px rgba(243,156,18,0.65);
+        }
+
+        .player-btn-skip {
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .player-btn-skip:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        /* Speed controls */
+        .speed-row {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .speed-label {
+            font-size: clamp(1.1rem, 2.4vw, 1.4rem);
+            opacity: 0.75;
+            font-weight: 600;
+        }
+
+        .speed-controls {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .speed-btn {
+            width: clamp(60px, 8vmin, 72px);
+            height: clamp(60px, 8vmin, 72px);
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(1.6rem, 3vw, 2rem);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s, opacity 0.2s;
+            font-family: inherit;
+            color: white;
+            background: rgba(255,255,255,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .speed-btn:active {
+            transform: scale(0.9);
+        }
+
+        .speed-btn:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .speed-btn:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+        }
+
+        .speed-display {
+            font-size: clamp(1.6rem, 3.4vw, 2rem);
+            font-weight: 800;
+            min-width: 100px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+            color: #f39c12;
+        }
+
+        /* Volume */
+        .player-volume-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            width: 100%;
+            max-width: 380px;
+        }
+
+        .player-volume-row span {
+            font-size: 1.6rem;
+        }
+
+        .volume-slider {
+            flex: 1;
+            -webkit-appearance: none;
+            appearance: none;
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.2);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: white;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: none;
+        }
+
+        /* Level grid */
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: clamp(8px, 1.6vmin, 14px);
+            width: 100%;
+            flex-shrink: 0;
+            margin-bottom: 4px;
+        }
+
+        .level-tile {
+            border: none;
+            border-radius: 18px;
+            padding: 14px 6px;
+            font-size: clamp(1rem, 2.2vw, 1.5rem);
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            text-align: center;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+        }
+
+        .level-tile:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.4);
+        }
+
+        .level-tile:active {
+            transform: scale(0.93);
+        }
+
+        .level-tile.selected {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            box-shadow: 0 0 0 4px rgba(243,156,18,0.4), 0 8px 25px rgba(0,0,0,0.3);
+        }
+
+        /* Track grid */
+        .tracks-scroll {
+            width: 100%;
+            flex: 1;
+            min-height: 0;
+            overflow-y: auto;
+            padding: 6px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+        }
+
+        .track-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: clamp(4px, 1vmin, 10px);
+            width: 100%;
+            max-width: 100%;
+        }
+
+        .track-tile {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 4px;
+            font-size: clamp(0.8rem, 1.6vw, 1.1rem);
+            font-weight: 600;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s, background 0.2s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            text-align: center;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: inherit;
+            min-width: 0;
+        }
+
+        .track-tile:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(243,156,18,0.4);
+        }
+
+        .track-tile:active {
+            transform: scale(0.9);
+        }
+
+        .track-tile.selected {
+            box-shadow: 0 0 0 4px rgba(255,255,255,0.55), 0 3px 10px rgba(0,0,0,0.25);
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+        }
+
+        /* Scrollbar */
+        .tracks-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .tracks-scroll::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        .tracks-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        /* === Tablet landscape optimization === */
+        @media (orientation: landscape) and (min-width: 900px) {
+            .app-layout {
+                flex-direction: row;
+                padding: 72px 24px 24px 24px;
+                gap: 24px;
+                align-items: stretch;
+            }
+
+            .player-panel {
+                flex: 0 0 44%;
+                max-width: 660px;
+            }
+
+            .audio-player-container {
+                max-width: 100%;
+                padding: 44px 38px;
+                gap: 28px;
+            }
+
+            .selection-panel {
+                flex: 1;
+                min-width: 0;
+            }
+
+            .level-grid {
+                gap: 14px;
+            }
+
+            .track-grid {
+                gap: 10px;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .track-grid {
+                grid-template-columns: repeat(15, 1fr);
+            }
+            .audio-player-container {
+                padding: 50px 44px;
+            }
+        }
+
+        /* Narrow screens: fewer columns */
+        @media (max-width: 700px) {
+            .track-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+        }
+
+        @media (max-width: 499px) {
+            .level-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            .track-grid {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            .audio-player-container {
+                padding: 28px 20px;
+                gap: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <button class="fullscreen-btn" id="fullscreen-btn">⛶</button>
+    <a class="back-btn" href="index.html">← Back</a>
+
+    <div class="app-layout">
+        <!-- Player Panel -->
+        <section class="player-panel">
+            <div class="audio-player-container">
+                <div class="player-track-info" id="player-label">Level 0 — Track 1</div>
+                <div class="player-track-number" id="player-track-num">#001</div>
+
+                <div class="seek-row">
+                    <span class="seek-time" id="time-current">00:00</span>
+                    <input type="range" class="seek-bar" id="seek-bar" min="0" max="100" value="0" step="0.01" aria-label="Seek through track">
+                    <span class="seek-time" id="time-duration">00:00</span>
+                </div>
+
+                <div class="player-controls-row">
+                    <button class="player-btn player-btn-skip" id="btn-rewind" title="Rewind 5s">⏪</button>
+                    <button class="player-btn player-btn-play" id="btn-play" title="Play / Pause">▶️</button>
+                    <button class="player-btn player-btn-skip" id="btn-forward" title="Forward 5s">⏩</button>
+                </div>
+
+                <div class="speed-row">
+                    <span class="speed-label">Speed</span>
+                    <div class="speed-controls">
+                        <button class="speed-btn" id="btn-speed-down" title="Slower">−</button>
+                        <div class="speed-display" id="speed-display">1.0×</div>
+                        <button class="speed-btn" id="btn-speed-up" title="Faster">+</button>
+                    </div>
+                </div>
+
+                <div class="player-volume-row">
+                    <span>🔈</span>
+                    <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" aria-label="Volume">
+                    <span>🔊</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Selection Panel -->
+        <section class="selection-panel">
+            <div class="section-title">🎧 Select Level</div>
+            <div class="level-grid" id="level-grid"></div>
+            <div class="section-title" id="tracks-title">Select Track (1–120)</div>
+            <div class="tracks-scroll">
+                <div class="track-grid" id="track-grid"></div>
+            </div>
+        </section>
+    </div>
+
+    <audio id="audio-element" preload="auto"></audio>
+
+    <script>
+        (function () {
+            var audio = document.getElementById('audio-element');
+            var playBtn = document.getElementById('btn-play');
+            var rewindBtn = document.getElementById('btn-rewind');
+            var forwardBtn = document.getElementById('btn-forward');
+            var seekBar = document.getElementById('seek-bar');
+            var timeCurrent = document.getElementById('time-current');
+            var timeDuration = document.getElementById('time-duration');
+            var volumeSlider = document.getElementById('volume-slider');
+            var speedDisplay = document.getElementById('speed-display');
+            var speedUpBtn = document.getElementById('btn-speed-up');
+            var speedDownBtn = document.getElementById('btn-speed-down');
+            var playerLabel = document.getElementById('player-label');
+            var playerTrackNum = document.getElementById('player-track-num');
+            var levelGrid = document.getElementById('level-grid');
+            var trackGrid = document.getElementById('track-grid');
+            var tracksTitle = document.getElementById('tracks-title');
+            var fullscreenBtn = document.getElementById('fullscreen-btn');
+
+            var LEVELS = 7;     // 0..6
+            var TRACKS = 120;   // 1..120
+            var AUDIO_BASE = 'https://pub-21546641f8b64e6b8428ff1edc5b0f9a.r2.dev/';
+            var SPEEDS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
+            var speedIndex = 2;
+
+            var state = { level: 0, track: 1 };
+            var isSeeking = false;
+
+            function pad3(n) { return String(n).padStart(3, '0'); }
+
+            function formatTime(sec) {
+                if (isNaN(sec) || !isFinite(sec)) return '00:00';
+                var m = Math.floor(sec / 60);
+                var s = Math.floor(sec % 60);
+                return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
+            }
+
+            function formatSpeed(s) {
+                return (Number.isInteger(s) ? s.toFixed(1) : String(s)) + '×';
+            }
+
+            function trackUrl(level, track) {
+                return AUDIO_BASE + 'LEVEL%20' + level + '/AUDIO/Track%20' + pad3(track) + '.mp3';
+            }
+
+            function buildLevels() {
+                levelGrid.innerHTML = '';
+                for (var lv = 0; lv < LEVELS; lv++) {
+                    (function (level) {
+                        var btn = document.createElement('button');
+                        btn.className = 'level-tile';
+                        btn.textContent = 'L' + level;
+                        btn.addEventListener('click', function () { selectLevel(level); });
+                        levelGrid.appendChild(btn);
+                    })(lv);
+                }
+            }
+
+            function buildTracks() {
+                trackGrid.innerHTML = '';
+                for (var t = 1; t <= TRACKS; t++) {
+                    (function (track) {
+                        var btn = document.createElement('button');
+                        btn.className = 'track-tile';
+                        btn.textContent = track;
+                        btn.addEventListener('click', function () { selectTrack(track); });
+                        trackGrid.appendChild(btn);
+                    })(t);
+                }
+            }
+
+            function highlightSelection() {
+                var lvTiles = levelGrid.querySelectorAll('.level-tile');
+                lvTiles.forEach(function (el, i) {
+                    el.classList.toggle('selected', i === state.level);
+                });
+                var trTiles = trackGrid.querySelectorAll('.track-tile');
+                trTiles.forEach(function (el, i) {
+                    el.classList.toggle('selected', (i + 1) === state.track);
+                });
+            }
+
+            function selectLevel(level) {
+                state.level = level;
+                tracksTitle.textContent = 'Level ' + level + ' — Select Track (1–120)';
+                loadTrack(level, 1);
+            }
+
+            function selectTrack(track) {
+                loadTrack(state.level, track);
+            }
+
+            function loadTrack(level, track) {
+                state.level = level;
+                state.track = track;
+                playerLabel.textContent = 'Level ' + level + ' — Track ' + track;
+                playerTrackNum.textContent = '#' + pad3(track);
+
+                audio.src = trackUrl(level, track);
+                audio.load();
+                audio.currentTime = 0;
+                audio.playbackRate = SPEEDS[speedIndex];
+                audio.volume = volumeSlider.value / 100;
+
+                playBtn.textContent = '▶️';
+                timeCurrent.textContent = '00:00';
+                timeDuration.textContent = '00:00';
+                seekBar.value = 0;
+                updateSeekFill(0);
+
+                highlightSelection();
+            }
+
+            function togglePlay() {
+                if (audio.paused) {
+                    audio.play().catch(function () {});
+                } else {
+                    audio.pause();
+                }
+            }
+
+            function skip(seconds) {
+                var dur = audio.duration || 0;
+                audio.currentTime = Math.max(0, Math.min(dur, audio.currentTime + seconds));
+            }
+
+            function updateSeekFill(pct) {
+                seekBar.style.background =
+                    'linear-gradient(to right, #f39c12 0%, #e67e22 ' + pct + '%, rgba(255,255,255,0.2) ' + pct + '%)';
+            }
+
+            function applySpeed() {
+                audio.playbackRate = SPEEDS[speedIndex];
+                speedDisplay.textContent = formatSpeed(SPEEDS[speedIndex]);
+                speedDownBtn.disabled = (speedIndex === 0);
+                speedUpBtn.disabled = (speedIndex === SPEEDS.length - 1);
+            }
+
+            // Seek bar interactions
+            seekBar.addEventListener('input', function () {
+                isSeeking = true;
+                var dur = audio.duration || 0;
+                var pct = parseFloat(seekBar.value);
+                if (isFinite(dur) && dur > 0) {
+                    audio.currentTime = (pct / 100) * dur;
+                }
+                timeCurrent.textContent = formatTime(audio.currentTime);
+                updateSeekFill(pct);
+            });
+            seekBar.addEventListener('pointerdown', function () { isSeeking = true; });
+            seekBar.addEventListener('pointerup', function () { isSeeking = false; });
+            seekBar.addEventListener('pointercancel', function () { isSeeking = false; });
+            seekBar.addEventListener('change', function () { isSeeking = false; });
+
+            // Speed controls
+            speedUpBtn.addEventListener('click', function () {
+                if (speedIndex < SPEEDS.length - 1) { speedIndex++; applySpeed(); }
+            });
+            speedDownBtn.addEventListener('click', function () {
+                if (speedIndex > 0) { speedIndex--; applySpeed(); }
+            });
+
+            // Volume
+            volumeSlider.addEventListener('input', function () {
+                audio.volume = volumeSlider.value / 100;
+            });
+
+            // Main buttons
+            playBtn.addEventListener('click', togglePlay);
+            rewindBtn.addEventListener('click', function () { skip(-5); });
+            forwardBtn.addEventListener('click', function () { skip(5); });
+
+            // Audio element events
+            audio.addEventListener('loadedmetadata', function () {
+                timeDuration.textContent = formatTime(audio.duration);
+            });
+            audio.addEventListener('timeupdate', function () {
+                var dur = audio.duration || 0;
+                timeCurrent.textContent = formatTime(audio.currentTime);
+                if (!isSeeking) {
+                    if (isFinite(dur) && dur > 0) {
+                        var pct = (audio.currentTime / dur) * 100;
+                        seekBar.value = pct;
+                        updateSeekFill(pct);
+                    } else {
+                        seekBar.value = 0;
+                        updateSeekFill(0);
+                    }
+                }
+            });
+            audio.addEventListener('ended', function () { playBtn.textContent = '▶️'; });
+            audio.addEventListener('play', function () { playBtn.textContent = '⏸️'; });
+            audio.addEventListener('pause', function () { playBtn.textContent = '▶️'; });
+
+            // Fullscreen
+            fullscreenBtn.addEventListener('click', function () {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(function () {});
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+
+            // Init
+            buildLevels();
+            buildTracks();
+            applySpeed();
+            loadTrack(0, 1);
+        })();
+    </script>
+<script src="version-display.js"></script>
+</body>
+</html>

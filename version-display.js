@@ -5,6 +5,7 @@
     "spin-wheel":{"n":"Spin Wheel","v":"1.0.0","d":"2026-05-07"},
     "spin-pen":{"n":"Spin the Pen","v":"1.0.0","d":"2026-05-07"},
     "soundboard":{"n":"Soundboard","v":"1.0.0","d":"2026-05-07"},
+    "audio-player":{"n":"Audio Player","v":"1.0.0","d":"2026-06-22"},
     "key-tester":{"n":"Key Tester","v":"1.0.0","d":"2026-05-07"},
     "pair-selector-uni":{"n":"Student Pair Selector (Uni)","v":"1.0.0","d":"2026-05-07"},
     "pair-selector-mid":{"n":"Student Pair Selector (Mid)","v":"1.0.0","d":"2026-05-07"},

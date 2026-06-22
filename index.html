@@ -248,67 +248,6 @@
             transform: scale(0.93);
         }
 
-        /* Track Selection */
-        .tracks-scroll {
-            width: 100%;
-            flex: 1;
-            min-height: 0;
-            overflow-y: auto;
-            padding: 5px;
-            display: flex;
-            align-items: flex-start;
-            justify-content: center;
-        }
-
-        .track-grid {
-            display: grid;
-            grid-template-columns: repeat(12, 1fr);
-            gap: clamp(3px, 1vmin, 8px);
-            width: 100%;
-            max-width: 100%;
-        }
-
-        @media (max-width: 700px) {
-            .track-grid {
-                grid-template-columns: repeat(10, 1fr);
-            }
-        }
-
-        @media (max-width: 499px) {
-            .track-grid {
-                grid-template-columns: repeat(8, 1fr);
-            }
-        }
-
-        .track-tile {
-            border: none;
-            border-radius: 10px;
-            padding: 8px 4px;
-            font-size: clamp(0.7rem, 1.5vw, 1rem);
-            font-weight: 600;
-            color: white;
-            cursor: pointer;
-            transition: transform 0.15s, box-shadow 0.15s;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            text-align: center;
-            aspect-ratio: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: inherit;
-            min-width: 0;
-        }
-
-        .track-tile:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-        }
-
-        .track-tile:active {
-            transform: scale(0.9);
-        }
-
         /* Unit Selection */
         .unit-grid {
             display: grid;
@@ -413,134 +352,6 @@
         .cat-grammar2 { background: linear-gradient(135deg, #e67e22 0%, #d35400 100%); }
         .cat-documentary { background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%); }
         .cat-story { background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%); }
-
-        /* Audio Player */
-        .audio-player-container {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(15px);
-            border-radius: 25px;
-            padding: 40px 30px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 25px;
-            width: 100%;
-            max-width: 550px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-
-        .player-track-info {
-            font-size: 1.4rem;
-            font-weight: 600;
-            opacity: 0.8;
-            text-align: center;
-        }
-
-        .player-track-number {
-            font-size: 4rem;
-            font-weight: 800;
-            line-height: 1;
-        }
-
-        .player-controls-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .player-btn {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            font-size: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: transform 0.15s, box-shadow 0.15s;
-            font-family: inherit;
-            color: white;
-        }
-
-        .player-btn:active {
-            transform: scale(0.9);
-        }
-
-        .player-btn-play {
-            width: 80px;
-            height: 80px;
-            font-size: 2rem;
-            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-            box-shadow: 0 8px 25px rgba(243, 156, 18, 0.4);
-        }
-
-        .player-btn-play:hover {
-            box-shadow: 0 12px 35px rgba(243, 156, 18, 0.6);
-        }
-
-        .player-btn-skip {
-            background: rgba(255,255,255,0.15);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-
-        .player-btn-skip:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
-        .player-volume-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 100%;
-            max-width: 300px;
-        }
-
-        .player-volume-row span {
-            font-size: 1.3rem;
-        }
-
-        .volume-slider {
-            flex: 1;
-            height: 6px;
-            -webkit-appearance: none;
-            appearance: none;
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .volume-slider::-moz-range-thumb {
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: white;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-            border: none;
-        }
-
-        .player-time {
-            font-size: 1.1rem;
-            opacity: 0.7;
-            font-variant-numeric: tabular-nums;
-            min-width: 120px;
-            text-align: center;
-        }
 
         /* Video Player Mockup */
         .video-player-container {
@@ -707,18 +518,6 @@
             }
         }
 
-        /* Scrollbar Styling */
-        .tracks-scroll::-webkit-scrollbar {
-            width: 6px;
-        }
-        .tracks-scroll::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .tracks-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
-            border-radius: 3px;
-        }
-
         /* Tablet & Desktop enhancements */
         @media (min-width: 768px) {
             .screen {
@@ -744,12 +543,6 @@
             }
             .category-grid {
                 gap: 22px;
-            }
-            .track-grid {
-                gap: 7px;
-            }
-            .track-tile {
-                padding: 10px 5px;
             }
             .fullscreen-btn {
                 top: 12px;
@@ -787,12 +580,6 @@
             .category-grid {
                 gap: 28px;
             }
-            .track-grid {
-                gap: 8px;
-            }
-            .track-tile {
-                padding: 12px 6px;
-            }
         }
     </style>
 </head>
@@ -823,52 +610,15 @@
                 <span>Bottle Spin</span>
             </a>
 
-            <button class="gateway-btn btn-audio" onclick="showScreen('audio-levels')">
+            <a class="gateway-btn btn-audio" href="audio.html">
                 🔊 Audio
                 <span>Listen &amp; Learn</span>
-            </button>
+            </a>
 
             <button class="gateway-btn btn-video" onclick="showScreen('video-levels')">
                 🎬 Video
                 <span>Watch &amp; Learn</span>
             </button>
-        </div>
-    </div>
-
-    <!-- ==================== AUDIO: LEVELS ==================== -->
-    <div id="audio-levels" class="screen">
-        <button class="back-btn" onclick="showScreen('main-hub')">← Back</button>
-        <div class="section-title">🎧 Select Audio Level</div>
-        <div class="level-grid seven-col" id="audio-level-grid"></div>
-    </div>
-
-    <!-- ==================== AUDIO: TRACKS ==================== -->
-    <div id="audio-tracks" class="screen">
-        <button class="back-btn" onclick="showScreen('audio-levels')">← Back</button>
-        <div class="section-title" id="audio-tracks-title">Select Track</div>
-        <div class="tracks-scroll">
-            <div class="track-grid" id="audio-track-grid"></div>
-        </div>
-    </div>
-
-    <!-- ==================== AUDIO: PLAYER ==================== -->
-    <div id="audio-player" class="screen">
-        <button class="back-btn" onclick="showScreen('audio-tracks')">← Back</button>
-        <div class="audio-player-container">
-            <div class="player-track-info" id="player-label">Level 0 — Track 1</div>
-            <div class="player-track-number" id="player-track-num">#001</div>
-            <div class="player-controls-row">
-                <button class="player-btn player-btn-skip" onclick="audioSkip(-5)" title="Rewind 5s">⏪</button>
-                <button class="player-btn player-btn-play" id="audio-play-btn" onclick="audioTogglePlay()">▶️</button>
-                <button class="player-btn player-btn-skip" onclick="audioSkip(5)" title="Forward 5s">⏩</button>
-            </div>
-            <div class="player-time" id="player-time">00:00 / 00:00</div>
-            <div class="player-volume-row">
-                <span>🔈</span>
-                <input type="range" class="volume-slider" id="volume-slider" min="0" max="100" value="70" oninput="audioSetVolume(this.value)">
-                <span>🔊</span>
-            </div>
-            <audio id="audio-element" preload="auto"></audio>
         </div>
     </div>
 
@@ -941,21 +691,6 @@
             }
         }
 
-        var audioState = { level: null, track: null };
-
-        (function() {
-            var grid = document.getElementById('audio-level-grid');
-            for (var i = 0; i < 7; i++) {
-                var btn = document.createElement('button');
-                btn.className = 'level-tile';
-                btn.textContent = 'Level ' + i;
-                (function(level) {
-                    btn.onclick = function() { openAudioTracks(level); };
-                })(i);
-                grid.appendChild(btn);
-            }
-        })();
-
         (function() {
             var grid = document.getElementById('video-level-grid');
             for (var i = 0; i < 7; i++) {
@@ -997,85 +732,6 @@
                 'Level ' + window._videoLevel + ' / Unit ' + window._videoUnit + ' — ' + category;
             showScreen('video-player');
         }
-
-        function openAudioTracks(level) {
-            audioState.level = level;
-            document.getElementById('audio-tracks-title').textContent = 'Level ' + level + ' — Select Track (1–120)';
-            var grid = document.getElementById('audio-track-grid');
-            grid.innerHTML = '';
-            for (var i = 1; i <= 120; i++) {
-                var btn = document.createElement('button');
-                btn.className = 'track-tile';
-                btn.textContent = i;
-                (function(l, track) {
-                    btn.onclick = function() { openAudioPlayer(l, track); };
-                })(level, i);
-                grid.appendChild(btn);
-            }
-            showScreen('audio-tracks');
-        }
-
-        function openAudioPlayer(level, track) {
-            audioState.level = level;
-            audioState.track = track;
-            document.getElementById('player-label').textContent = 'Level ' + level + ' — Track ' + track;
-            document.getElementById('player-track-num').textContent = '#' + String(track).padStart(3, '0');
-
-            var audio = document.getElementById('audio-element');
-            audio.src = 'https://pub-21546641f8b64e6b8428ff1edc5b0f9a.r2.dev/LEVEL%20' + level + '/AUDIO/Track%20' + String(track).padStart(3, '0') + '.mp3';
-            audio.load();
-            audio.currentTime = 0;
-            document.getElementById('audio-play-btn').textContent = '▶️';
-            document.getElementById('player-time').textContent = '00:00 / 00:00';
-            audio.volume = document.getElementById('volume-slider').value / 100;
-
-            showScreen('audio-player');
-        }
-
-        function audioTogglePlay() {
-            var audio = document.getElementById('audio-element');
-            var btn = document.getElementById('audio-play-btn');
-            if (audio.paused) {
-                audio.play().catch(function() {});
-                btn.textContent = '⏸️';
-            } else {
-                audio.pause();
-                btn.textContent = '▶️';
-            }
-        }
-
-        function audioSkip(seconds) {
-            var audio = document.getElementById('audio-element');
-            audio.currentTime = Math.max(0, Math.min(audio.duration || 0, audio.currentTime + seconds));
-        }
-
-        function audioSetVolume(val) {
-            document.getElementById('audio-element').volume = val / 100;
-        }
-
-        function formatTime(sec) {
-            if (isNaN(sec) || !isFinite(sec)) { return '00:00'; }
-            var m = Math.floor(sec / 60);
-            var s = Math.floor(sec % 60);
-            return String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0');
-        }
-
-        (function() {
-            var audioEl = document.getElementById('audio-element');
-            audioEl.addEventListener('timeupdate', function() {
-                document.getElementById('player-time').textContent =
-                    formatTime(audioEl.currentTime) + ' / ' + formatTime(audioEl.duration);
-            });
-            audioEl.addEventListener('ended', function() {
-                document.getElementById('audio-play-btn').textContent = '▶️';
-            });
-            audioEl.addEventListener('play', function() {
-                document.getElementById('audio-play-btn').textContent = '⏸️';
-            });
-            audioEl.addEventListener('pause', function() {
-                document.getElementById('audio-play-btn').textContent = '▶️';
-            });
-        })();
 
         function toggleFullscreen() {
             if (!document.fullscreenElement) {

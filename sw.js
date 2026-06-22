@@ -11,6 +11,7 @@ const PRECACHE_URLS = [
   'phonics.html',
   'wheel.html',
   'bottle.html',
+  'audio.html',
   'styles.css',
   'script.js',
   'data.js',
