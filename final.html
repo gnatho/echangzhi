@@ -77,6 +77,30 @@
   .status-pill.danger .dot { background: var(--danger); animation: blink 0.5s infinite; }
   .status-pill.up { color: var(--danger); background: rgba(239,68,68,0.12); border-color: rgba(239,68,68,0.35); }
 
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .fs-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 12px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.06s ease;
+  }
+  .fs-btn:hover { background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.22); }
+  .fs-btn:active { transform: translateY(1px); }
+  .fs-btn svg { width: 18px; height: 18px; display: block; }
+
   @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.35; }
@@ -305,7 +329,56 @@
         <h1>Final Exam — Speaking</h1>
         <span>50 topics · 2 minutes each</span>
       </div>
-      <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Ready</span></div>
+      <div class="header-right">
+        <div class="header-right">
+        <div class="header-right">
+        <div class="header-right">
+        <div class="header-right">
+        <div class="status-pill" id="statusPill"><span class="dot"></span><span id="statusText">Ready</span></div>
+        <button class="fs-btn" id="fsBtn" title="Fullscreen" aria-label="Toggle fullscreen">
+          <svg id="fsIconEnter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9V5a1 1 0 0 1 1-1h4"/><path d="M20 9V5a1 1 0 0 0-1-1h-4"/>
+            <path d="M4 15v4a1 1 0 0 0 1 1h4"/><path d="M20 15v4a1 1 0 0 1-1 1h-4"/>
+          </svg>
+          <svg id="fsIconExit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M9 4v4a1 1 0 0 1-1 1H4"/><path d="M15 4v4a1 1 0 0 0 1 1h4"/>
+            <path d="M9 20v-4a1 1 0 0 0-1-1H4"/><path d="M15 20v-4a1 1 0 0 1 1-1h4"/>
+          </svg>
+        </button>
+      </div>
+        <button class="fs-btn" id="fsBtn" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+          <svg id="fsIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>
+          </svg>
+        </button>
+      </div>
+        <button class="fs-btn" id="fsBtn" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+          <svg id="fsIconEnter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+          <svg id="fsIconExit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+          </svg>
+        </button>
+      </div>
+        <button class="fs-btn" id="fsBtn" type="button" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+          <svg id="fsIconEnter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
+          </svg>
+          <svg id="fsIconExit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" />
+          </svg>
+        </button>
+      </div>
+        <button class="fs-btn" id="fsBtn" type="button" title="Toggle fullscreen" aria-label="Toggle fullscreen">
+          <svg id="fsIconEnter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3"/>
+          </svg>
+          <svg id="fsIconExit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M3 8V5a2 2 0 0 1 2-2h3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M21 16v3a2 2 0 0 1-2 2h-3"/>
+          </svg>
+        </button>
+      </div>
     </header>
 
     <main>
@@ -584,6 +657,34 @@
   startBtn.addEventListener("click", start);
   resetBtn.addEventListener("click", resetTime);
   nextBtn.addEventListener("click", function () { pickTopic(true); });
+
+  const fsBtn = document.getElementById("fsBtn");
+  const fsIconEnter = document.getElementById("fsIconEnter");
+  const fsIconExit = document.getElementById("fsIconExit");
+
+  function updateFsIcon() {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    fsIconEnter.style.display = isFs ? "none" : "block";
+    fsIconExit.style.display = isFs ? "block" : "none";
+    fsBtn.title = isFs ? "Exit fullscreen" : "Fullscreen";
+  }
+
+  function toggleFullscreen() {
+    const el = document.documentElement;
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (!isFs) {
+      const req = el.requestFullscreen || el.webkitRequestFullscreen;
+      if (req) req.call(el);
+    } else {
+      const exit = document.exitFullscreen || document.webkitExitFullscreen;
+      if (exit) exit.call(document);
+    }
+  }
+
+  fsBtn.addEventListener("click", toggleFullscreen);
+  document.addEventListener("fullscreenchange", updateFsIcon);
+  document.addEventListener("webkitfullscreenchange", updateFsIcon);
+  updateFsIcon();
 
   renderTimer();
   applyUrgency();
