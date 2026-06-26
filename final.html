@@ -208,6 +208,37 @@
   }
   .time-up-banner.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
+  /* ---------- Boost (speed-up) button ---------- */
+  .boost-btn {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    gap: 0;
+    border-radius: 12px;
+    background: var(--panel);
+    border: 1px solid var(--panel-border);
+    color: var(--warn);
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.06s ease, box-shadow 0.18s ease;
+  }
+  .boost-btn:hover:not(:disabled) { background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.45); box-shadow: 0 0 0 3px rgba(245,158,11,0.12); }
+  .boost-btn:active:not(:disabled) { transform: translateY(1px); }
+  .boost-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .boost-btn svg { width: 18px; height: 18px; display: block; }
+  .boost-btn.boosted { animation: boostPulse 0.4s ease; }
+  @keyframes boostPulse {
+    0% { transform: scale(1); box-shadow: inset 0 0 0 0 rgba(245,158,11,0); }
+    45% { transform: scale(1.2); box-shadow: inset 0 0 12px 2px rgba(245,158,11,0.6); }
+    100% { transform: scale(1); box-shadow: inset 0 0 0 0 rgba(245,158,11,0); }
+  }
+
   /* ---------- Topic panel ---------- */
   .topic-panel {
     display: flex;
@@ -358,6 +389,11 @@
 
     <main>
       <section class="panel timer-panel">
+        <button class="boost-btn" id="boostBtn" title="Speed up timer by 20%" aria-label="Speed up timer by 20 percent" disabled>
+          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M11.983 1.907a.75.75 0 00-1.292-.657l-8.5 9.5A.75.75 0 002.75 12h6.572l-1.305 9.093a.75.75 0 001.292.657l8.5-9.5A.75.75 0 0017.25 11h-6.572l1.305-9.093z"/>
+          </svg>
+        </button>
         <div class="ring-wrap">
           <svg viewBox="0 0 200 200">
             <circle class="ring-bg" cx="100" cy="100" r="92" fill="none" stroke-width="10" />
@@ -465,6 +501,7 @@
   const startBtn = document.getElementById("startBtn");
   const resetBtn = document.getElementById("resetBtn");
   const nextBtn = document.getElementById("nextBtn");
+  const boostBtn = document.getElementById("boostBtn");
 
   ringFg.style.strokeDasharray = RING_C;
   ringFg.style.strokeDashoffset = 0;
@@ -474,6 +511,8 @@
   let timerId = null;
   let state = "idle";
   let audioCtx = null;
+  let tickInterval = 1000;
+  let used = new Set();
 
   function fmt(s) {
     s = Math.max(0, s);
@@ -526,24 +565,38 @@
     if (timerId) { clearInterval(timerId); timerId = null; }
   }
 
+  function tick() {
+    timeLeft--;
+    renderTimer();
+    applyUrgency();
+    if (timeLeft <= 0) { finish(); }
+  }
+
   function setRunning() {
     clearTimer();
     state = "running";
     startBtn.disabled = true;
+    boostBtn.disabled = false;
     hideBanner();
     applyUrgency();
-    timerId = setInterval(function () {
-      timeLeft--;
-      renderTimer();
-      applyUrgency();
-      if (timeLeft <= 0) { finish(); }
-    }, 1000);
+    timerId = setInterval(tick, tickInterval);
+  }
+
+  function boostSpeed() {
+    if (state !== "running") return;
+    tickInterval = tickInterval / 1.1;
+    clearTimer();
+    timerId = setInterval(tick, tickInterval);
+    boostBtn.classList.remove("boosted");
+    void boostBtn.offsetWidth;
+    boostBtn.classList.add("boosted");
   }
 
   function start() {
     ensureAudio();
     if (state === "running") return;
     timeLeft = DURATION;
+    tickInterval = 1000;
     renderTimer();
     setRunning();
   }
@@ -551,6 +604,7 @@
   function resetTime() {
     ensureAudio();
     timeLeft = DURATION;
+    tickInterval = 1000;
     renderTimer();
     setRunning();
   }
@@ -561,6 +615,7 @@
     timeLeft = 0;
     renderTimer();
     startBtn.disabled = false;
+    boostBtn.disabled = true;
     showBanner();
     applyUrgency();
     beep();
@@ -570,18 +625,28 @@
     clearTimer();
     state = "idle";
     timeLeft = DURATION;
+    tickInterval = 1000;
     renderTimer();
     startBtn.disabled = false;
+    boostBtn.disabled = true;
     hideBanner();
     applyUrgency();
   }
 
-  function pickTopic(avoidCurrent) {
-    let idx;
-    do {
-      idx = Math.floor(Math.random() * topics.length);
-    } while (avoidCurrent && idx === currentIndex && topics.length > 1);
+  function pickTopic() {
+    let available = [];
+    for (let i = 0; i < topics.length; i++) {
+      if (!used.has(i)) available.push(i);
+    }
+    if (available.length === 0) {
+      used.clear();
+      for (let i = 0; i < topics.length; i++) {
+        if (i !== currentIndex || topics.length === 1) available.push(i);
+      }
+    }
+    const idx = available[Math.floor(Math.random() * available.length)];
     currentIndex = idx;
+    used.add(idx);
     renderTopic();
     stopToIdle();
   }
@@ -628,10 +693,11 @@
     }
   }
 
-  chooseBtn.addEventListener("click", function () { pickTopic(false); });
+  chooseBtn.addEventListener("click", function () { pickTopic(); });
   startBtn.addEventListener("click", start);
   resetBtn.addEventListener("click", resetTime);
-  nextBtn.addEventListener("click", function () { pickTopic(true); });
+  nextBtn.addEventListener("click", function () { pickTopic(); });
+  boostBtn.addEventListener("click", boostSpeed);
 
   const fsBtn = document.getElementById("fsBtn");
   const fsIconEnter = document.getElementById("fsIconEnter");
