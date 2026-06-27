@@ -710,21 +710,50 @@
     fsBtn.title = isFs ? "Exit fullscreen" : "Fullscreen";
   }
 
+  let wakeLock = null;
+
+  async function requestWakeLock() {
+    if (!('wakeLock' in navigator)) return;
+    try {
+      if (wakeLock) return;
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', function () { wakeLock = null; });
+    } catch (e) {
+      wakeLock = null;
+    }
+  }
+
+  function releaseWakeLock() {
+    if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; }
+  }
+
+  function syncWakeLock() {
+    const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+    if (isFs) { requestWakeLock(); } else { releaseWakeLock(); }
+  }
+
   function toggleFullscreen() {
     const el = document.documentElement;
     const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
     if (!isFs) {
       const req = el.requestFullscreen || el.webkitRequestFullscreen;
       if (req) req.call(el);
+      requestWakeLock();
     } else {
       const exit = document.exitFullscreen || document.webkitExitFullscreen;
       if (exit) exit.call(document);
+      releaseWakeLock();
     }
   }
 
   fsBtn.addEventListener("click", toggleFullscreen);
   document.addEventListener("fullscreenchange", updateFsIcon);
   document.addEventListener("webkitfullscreenchange", updateFsIcon);
+  document.addEventListener("fullscreenchange", syncWakeLock);
+  document.addEventListener("webkitfullscreenchange", syncWakeLock);
+  document.addEventListener("visibilitychange", function () {
+    if (document.visibilityState === 'visible') syncWakeLock();
+  });
   updateFsIcon();
 
   renderTimer();
