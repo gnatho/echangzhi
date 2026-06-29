@@ -1,129 +1,125 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-component="snakes-game">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Snakes &amp; Ladders</title>
-  <link rel="stylesheet" href="snakes.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Snakes &amp; Ladders</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <div class="portrait-warning" aria-hidden="true">
-    <div class="rotate-phone">📱</div>
-    <p>Please rotate your device to landscape mode</p>
-  </div>
+    <!-- ── Configuration / Menu Screen ──────────────────────────────────── -->
+    <div id="menu-screen" class="screen active">
+        <div class="menu-card glass-panel">
+            <h1>🐍 Snakes &amp; Ladders</h1>
+            <p class="subtitle">Climb the ladders, dodge the snakes, find the pictures!</p>
 
-  <div id="start-screen" class="screen-overlay" style="display:flex">
-    <div class="card">
-      <div class="settings-title">🐍 Snakes &amp; Ladders 🪜</div>
-      <div class="settings-grid">
-        <div class="setting-group">
-          <label for="setting-players">Players</label>
-          <select id="setting-players">
-            <option value="2" selected>2 Players</option>
-            <option value="3">3 Players</option>
-            <option value="4">4 Players</option>
-          </select>
+            <div class="config-group">
+                <h2>Number of Players</h2>
+                <div class="option-row" id="player-options">
+                    <button class="opt-btn" data-players="2">2 👥</button>
+                    <button class="opt-btn" data-players="3">3 👥</button>
+                    <button class="opt-btn" data-players="4">4 👥</button>
+                </div>
+            </div>
+
+            <div class="config-group">
+                <h2>Board Size</h2>
+                <div class="option-row" id="size-options">
+                    <button class="opt-btn" data-size="5">5×5</button>
+                    <button class="opt-btn" data-size="6">6×6</button>
+                    <button class="opt-btn" data-size="7">7×7</button>
+                    <button class="opt-btn" data-size="8">8×8</button>
+                    <button class="opt-btn" data-size="9">9×9</button>
+                    <button class="opt-btn" data-size="10">10×10</button>
+                </div>
+            </div>
+
+            <button class="btn primary start-btn" id="start-btn">▶ Start Game</button>
+
+            <div class="legend">
+                <span><span class="lg-ic">🪜</span> Ladder up</span>
+                <span><span class="lg-ic">🐍</span> Snake down</span>
+                <span><span class="lg-ic">🖼️</span> Picture</span>
+            </div>
         </div>
-        <div class="setting-group">
-          <label for="setting-grid">Board Size</label>
-          <select id="setting-grid">
-            <option value="6">6 &times; 6</option>
-            <option value="8">8 &times; 8</option>
-            <option value="10">10 &times; 10</option>
-          </select>
+    </div>
+
+    <!-- ── Game Screen ──────────────────────────────────────────────────── -->
+    <div id="game-screen" class="screen">
+        <div id="hud" class="glass-panel">
+            <div class="hud-left">
+                <button class="btn icon-btn" onclick="SnakesGame.returnToMenu()" title="Main Menu">🏠<span class="btn-label">Menu</span></button>
+                <button class="btn icon-btn" onclick="window.location.href='../../index.html'" title="Games">🎮<span class="btn-label">Games</span></button>
+            </div>
+            <div class="hud-title">🐍 Snakes &amp; Ladders</div>
+            <div class="hud-right">
+                <button class="btn icon-btn" onclick="SnakesGame.restart()" title="New Board">🔄<span class="btn-label">Restart</span></button>
+                <button class="btn icon-btn" onclick="SnakesGame.toggleFullscreen()" title="Fullscreen">⛶</button>
+            </div>
         </div>
-        <div class="setting-group">
-          <label for="setting-difficulty">Difficulty Level</label>
-          <select id="setting-difficulty">
-            <option value="1">1 &ndash; Easy</option>
-            <option value="2">2 &ndash; Basic</option>
-            <option value="3">3 &ndash; Intermediate</option>
-            <option value="4">4 &ndash; Challenging</option>
-            <option value="5">5 &ndash; Hard</option>
-            <option value="6" selected>6 &ndash; Expert</option>
-            <option value="7">7 &ndash; Master</option>
-          </select>
+
+        <div id="play-area">
+            <div id="board-wrap">
+                <div id="board"></div>
+                <svg id="board-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+                <div id="token-layer"></div>
+            </div>
+
+            <div id="panel" class="glass-panel">
+                <div id="turn-indicator">
+                    <div id="turn-token">🐶</div>
+                    <div class="turn-text">
+                        <div class="turn-label">Current Turn</div>
+                        <div id="turn-name">Player 1</div>
+                    </div>
+                </div>
+
+                <div id="dice-area">
+                    <div id="dice" class="dice"></div>
+                    <button class="btn primary" id="roll-btn">🎲 Roll Dice</button>
+                </div>
+
+                <div id="player-list"></div>
+
+                <div id="message">Roll the dice to begin!</div>
+
+                <div class="legend">
+                    <span><span class="lg-ic">🪜</span> Ladder up</span>
+                    <span><span class="lg-ic">🐍</span> Snake down</span>
+                    <span><span class="lg-ic">🖼️</span> Picture</span>
+                </div>
+            </div>
         </div>
-        <div class="setting-group">
-          <label>Options</label>
-          <div class="checkbox-wrap">
-            <input type="checkbox" id="setting-miss-turn" checked>
-            <span>Miss turn if wrong</span>
-          </div>
-          <div class="checkbox-wrap">
-            <input type="checkbox" id="setting-sound" checked>
-            <span>Sound effects</span>
-          </div>
+    </div>
+
+    <!-- ── Image Field Overlay ──────────────────────────────────────────── -->
+    <div id="field-overlay">
+        <div id="field-content" class="glass-panel">
+            <div class="field-cell">Cell 1</div>
+            <div class="field-media"></div>
+            <h3 class="field-title">Surprise!</h3>
+            <p class="field-caption"></p>
+            <button class="btn primary" id="field-close-btn">Continue ▶</button>
         </div>
-      </div>
-      <div class="token-pickers-title">Choose Tokens</div>
-      <div id="token-pickers" class="token-pickers"></div>
-      <div class="start-buttons">
-        <button class="btn btn-secondary" onclick="goToStart()">&#8592; Back</button>
-        <button class="btn btn-primary" onclick="startGame()">&#9654; Start Game</button>
-      </div>
     </div>
-  </div>
 
-  <div id="game-screen" class="screen-overlay">
-    <div class="game-header">
-      <div id="turn-indicator" class="turn-indicator" aria-live="polite">Player 1's turn</div>
-      <div class="header-right">
-        <div class="header-dice-wrap">
-          <div id="header-dice" role="button" tabindex="0" aria-label="Click to roll dice">🎲</div>
-          <span id="header-dice-value" aria-live="polite">-</span>
+    <!-- ── Win Overlay ──────────────────────────────────────────────────── -->
+    <div id="win-overlay">
+        <div id="win-content" class="glass-panel">
+            <div id="win-token">🎉</div>
+            <h2 id="win-title">Player Wins!</h2>
+            <p class="win-sub">Congratulations on reaching the finish!</p>
+            <div class="win-actions">
+                <button class="btn primary" onclick="SnakesGame.restart()">🔄 Play Again</button>
+                <button class="btn secondary" onclick="SnakesGame.returnToMenu()">🏠 Menu</button>
+            </div>
         </div>
-        <button class="btn-icon" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">⛶</button>
-      </div>
     </div>
-    <div class="game-center">
-      <div id="board-wrapper">
-        <div id="board"></div>
-        <svg id="board-svg" aria-hidden="true"></svg>
-        <div id="game-message"></div>
-      </div>
-    </div>
-    <div class="game-footer">
-      <div id="player-cards" class="player-cards"></div>
-    </div>
-  </div>
 
-  <div id="dice-overlay" aria-hidden="true">
-    <div id="dice-3d-container"></div>
-    <div id="dice-display">⚀</div>
-    <div id="dice-result"></div>
-    <div id="dice-emoji" style="display:none"></div>
-  </div>
-
-  <div id="question-modal" aria-labelledby="question-level">
-    <div class="question-card">
-      <div id="question-level" class="question-level">Level 1</div>
-      <div id="question-text" class="question-text">Question goes here</div>
-      <div class="question-buttons">
-        <button class="btn-correct" onclick="answerCorrect()">&#10003; Correct</button>
-        <button class="btn-wrong" onclick="answerWrong()">&#10007; Wrong</button>
-      </div>
-      <div id="question-result" class="question-result" aria-live="assertive"></div>
-    </div>
-  </div>
-
-  <div id="win-screen" class="screen-overlay">
-    <div class="card">
-      <span class="trophy">🏆</span>
-      <h2 id="win-heading" class="win-heading">Player 1 Wins!</h2>
-      <ul id="win-list" class="win-list"></ul>
-      <div class="win-buttons">
-        <button class="btn btn-primary" onclick="startGame()">Play Again</button>
-        <button class="btn btn-secondary" onclick="goToStart()">Main Menu</button>
-      </div>
-    </div>
-  </div>
-
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script src="dice-controller.js"></script>
-  <script src="questions.js"></script>
-  <script src="snakes.js"></script>
-  <script src="../../version-display.js"></script>
+    <script src="fields.js"></script>
+    <script src="script.js"></script>
+    <script src="../../version-display.js"></script>
 </body>
 </html>
