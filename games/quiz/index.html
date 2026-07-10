@@ -1214,7 +1214,8 @@ function renderQuestion() {
     html += `<div class="prompt">${p}</div>`;
 
     optHtml += `<div class="options" id="opts">`;
-    q.options.forEach((opt, i) => {
+    const fillOpts = shuffleArray(q.options);
+    fillOpts.forEach((opt, i) => {
       optHtml += `<button class="option" data-idx="${i}">${esc(opt)}</button>`;
     });
     optHtml += `</div>`;
@@ -1226,7 +1227,8 @@ function renderQuestion() {
     html += `<div class="prompt">${esc(q.prompt)}</div>`;
 
     optHtml += `<div class="options" id="opts">`;
-    q.options.forEach((opt, i) => {
+    const mcOpts = shuffleArray(q.options);
+    mcOpts.forEach((opt, i) => {
       optHtml += `<button class="option" data-idx="${i}">${esc(opt)}</button>`;
     });
     optHtml += `</div>`;

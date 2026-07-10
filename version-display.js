@@ -19,6 +19,7 @@
     "scrambler-game":{"n":"Sentence Scrambler","v":"1.0.0","d":"2026-05-07"},
     "baamboozle-game":{"n":"ESL Baamboozle","v":"1.0.0","d":"2026-05-07"},
     "quiz-game":{"n":"Grammar Quiz","v":"1.1.0","d":"2026-05-30"},
+    "table-game":{"n":"Table Generator","v":"1.0.0","d":"2026-07-10"},
     "data-phonems":{"n":"Phoneme Data","v":"1.0.0","d":"2026-05-07"},
     "data-level-words":{"n":"Level Words Data","v":"1.0.0","d":"2026-05-07"},
     "data-grammar-ex":{"n":"Grammar Exercises Data","v":"1.0.0","d":"2026-05-07"},
