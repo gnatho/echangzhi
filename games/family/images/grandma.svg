@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="26" fill="#F3EAF9"/>
+  <text x="100" y="32" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3a3a3a">Grandma</text>
+  <circle cx="100" cy="40" r="16" fill="#D8D8D8"/>
+  <rect x="54" y="150" width="92" height="50" rx="20" fill="#8E6BB0"/>
+  <rect x="89" y="132" width="22" height="20" fill="#E8B48C"/>
+  <circle cx="100" cy="90" r="46" fill="#F5C6A0"/>
+  <path d="M55 94 Q50 44 100 44 Q150 44 145 94 Q140 62 100 60 Q60 62 55 94 Z" fill="#D8D8D8"/>
+  <rect x="75" y="73" width="18" height="5" rx="2.5" fill="#D8D8D8"/>
+  <rect x="107" y="73" width="18" height="5" rx="2.5" fill="#D8D8D8"/>
+  <circle cx="83" cy="89" r="12" fill="none" stroke="#5a5a5a" stroke-width="3.5"/>
+  <circle cx="117" cy="89" r="12" fill="none" stroke="#5a5a5a" stroke-width="3.5"/>
+  <line x1="95" y1="88" x2="105" y2="88" stroke="#5a5a5a" stroke-width="3.5"/>
+  <circle cx="84" cy="88" r="5.5" fill="#2d2a26"/>
+  <circle cx="116" cy="88" r="5.5" fill="#2d2a26"/>
+  <circle cx="68" cy="104" r="8" fill="#F4A5A5" opacity="0.6"/>
+  <circle cx="132" cy="104" r="8" fill="#F4A5A5" opacity="0.6"/>
+  <path d="M86 108 Q100 120 114 108" stroke="#B35B3F" stroke-width="5" fill="none" stroke-linecap="round"/>
+</svg>

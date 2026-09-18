@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" rx="26" fill="#ECEFF7"/>
+  <text x="100" y="32" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3a3a3a">Grandpa</text>
+  <rect x="54" y="150" width="92" height="50" rx="20" fill="#4E8D5B"/>
+  <rect x="89" y="132" width="22" height="20" fill="#E8B48C"/>
+  <circle cx="100" cy="90" r="46" fill="#F5C6A0"/>
+  <path d="M56 92 Q52 62 70 54 Q60 76 64 98 Z" fill="#CFCFCF"/>
+  <path d="M144 92 Q148 62 130 54 Q140 76 136 98 Z" fill="#CFCFCF"/>
+  <rect x="75" y="72" width="18" height="5.5" rx="2.75" fill="#CFCFCF"/>
+  <rect x="107" y="72" width="18" height="5.5" rx="2.75" fill="#CFCFCF"/>
+  <circle cx="83" cy="89" r="12" fill="none" stroke="#5a5a5a" stroke-width="3.5"/>
+  <circle cx="117" cy="89" r="12" fill="none" stroke="#5a5a5a" stroke-width="3.5"/>
+  <line x1="95" y1="88" x2="105" y2="88" stroke="#5a5a5a" stroke-width="3.5"/>
+  <circle cx="84" cy="88" r="5.5" fill="#2d2a26"/>
+  <circle cx="116" cy="88" r="5.5" fill="#2d2a26"/>
+  <path d="M80 105 Q100 95 120 105 Q100 114 80 105 Z" fill="#CFCFCF"/>
+  <path d="M88 117 Q100 125 112 117" stroke="#B35B3F" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+</svg>
