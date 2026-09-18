@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <rect width="200" height="200" rx="26" fill="#F3EAF9"/>
   <text x="100" y="32" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3a3a3a">Grandma</text>
   <circle cx="100" cy="40" r="16" fill="#D8D8D8"/>

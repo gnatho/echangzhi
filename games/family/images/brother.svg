@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <rect width="200" height="200" rx="26" fill="#E3F2FD"/>
   <text x="100" y="32" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3a3a3a">Brother</text>
   <path d="M68 58 L76 38 L86 52 L98 32 L110 52 L120 38 L130 58 Z" fill="#8B5A2B"/>

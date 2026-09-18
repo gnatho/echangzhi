@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
   <rect width="200" height="200" rx="26" fill="#FFE4F1"/>
   <text x="100" y="32" text-anchor="middle" font-family="Segoe UI, Arial, sans-serif" font-size="21" font-weight="700" fill="#3a3a3a">Mother</text>
   <path d="M100 40 Q44 42 46 116 Q47 156 72 162 Q58 120 66 92 Q76 60 100 58 Q124 60 134 92 Q142 120 128 162 Q153 156 154 116 Q156 42 100 40 Z" fill="#6B4423"/>

@@ -19,6 +19,7 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(160deg, #36d1dc 0%, #5b86e5 100%);
     color: #fff;
+    height: 100vh;
     height: 100dvh;
     width: 100vw;
     display: flex;
@@ -73,18 +74,15 @@ body {
     border-radius: clamp(16px, 3vmin, 28px);
     padding: clamp(10px, 2vmin, 18px);
     box-shadow: 0 16px 44px rgba(0,0,0,0.35);
-    max-width: 100%;
-    max-height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 #pic-img {
     display: block;
-    max-width: min(44vw, calc(100dvh - 170px));
-    max-height: calc(100dvh - 170px);
-    width: auto;
-    height: auto;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
     border-radius: clamp(10px, 2vmin, 18px);
 }
 .pic-emoji { font-size: clamp(6rem, 32vmin, 15rem); line-height: 1; }
@@ -216,6 +214,7 @@ body {
     padding: clamp(22px, 4.5vmin, 44px) clamp(24px, 5vmin, 52px);
     text-align: center;
     width: min(640px, 96vw);
+    max-height: 94vh;
     max-height: 94dvh;
     overflow: auto;
     box-shadow: 0 26px 80px rgba(0,0,0,0.45);
@@ -270,21 +269,23 @@ body {
 /* ═══ Portrait fallback (game is designed for landscape) ═══ */
 @media (orientation: portrait) {
     #stage { flex-direction: column; }
-    .pic-side { flex: 0 0 auto; }
-    #pic-img { max-width: 52vw; max-height: 32dvh; }
+    .pic-side { flex: 0 0 auto; height: 36vh; height: 36dvh; }
     .answers { width: 100%; }
-    .ans { min-height: clamp(64px, 9dvh, 96px); }
+    .ans { min-height: clamp(64px, 9vh, 96px); min-height: clamp(64px, 9dvh, 96px); }
 }
 </style>
 </head>
 <body>
 
 <div class="top-left"><a class="top-btn" href="../index.html">← Back</a></div>
-<div class="top-right"><button class="top-btn" onclick="toggleFullscreen()">⛶</button></div>
+<div class="top-right">
+    <button class="top-btn" id="voice-btn" onclick="toggleVoice()" title="Voice off (tap to enable)">🔇</button>
+    <button class="top-btn" onclick="toggleFullscreen()">⛶</button>
+</div>
 
 <!-- ═══ GAME STAGE ═══ -->
 <div id="stage">
-    <div class="pic-side">
+    <div class="pic-side" id="pic-side">
         <div id="pic-card">
             <img id="pic-img" alt="Family member" draggable="false">
             <span id="pic-emoji" class="pic-emoji" style="display:none"></span>
@@ -352,7 +353,7 @@ var FAMILY = [
 
 var quiz = [], idx = 0, score = 0, locked = true, nextTimer = null;
 
-var picImg, picEmoji, verdictEl, questionEl, counterEl, yesBtn, noBtn;
+var picImg, picEmoji, verdictEl, questionEl, counterEl, yesBtn, noBtn, picCard, picSide;
 var startScreen, endScreen, endText, endStars, numSel;
 
 function $(id) { return document.getElementById(id); }
@@ -389,8 +390,22 @@ function buildQuiz(total) {
     return qs;
 }
 
-/* ═══ Speech ═══ */
-function speak(text) {
+/* ═══ Voice – question TTS is OFF by default (🔇 top-right to enable) ═══ */
+var voiceOn = false;
+var voiceBtn;
+try { voiceOn = localStorage.getItem('familyVoice') === 'on'; } catch (e) {}
+function updateVoiceBtn() {
+    voiceBtn.textContent = voiceOn ? '🔊' : '🔇';
+    voiceBtn.title = voiceOn ? 'Voice on (tap to disable)' : 'Voice off (tap to enable)';
+}
+function toggleVoice() {
+    voiceOn = !voiceOn;
+    try { localStorage.setItem('familyVoice', voiceOn ? 'on' : 'off'); } catch (e) {}
+    updateVoiceBtn();
+}
+
+function speak(text, force) {
+    if (!voiceOn && !force) return;
     if (!('speechSynthesis' in window)) return;
     try {
         window.speechSynthesis.cancel();
@@ -455,12 +470,13 @@ function showQuestion() {
     verdictEl.textContent = '';
     verdictEl.classList.remove('show');
     updateCounter();
+    sizePicture();
     speak(questionEl.textContent);
 }
 
 function repeatQuestion() {
     ensureAudio();
-    speak('Is this your ' + FAMILY[quiz[idx].asked].name + '?');
+    speak('Is this your ' + FAMILY[quiz[idx].asked].name + '?', true);
 }
 
 /* ═══ Answering ═══ */
@@ -534,6 +550,25 @@ function showStart() {
     startScreen.classList.remove('hidden');
 }
 
+/* ═══ Picture box sizing (robust across browsers and orientations) ═══ */
+function sizePicture() {
+    var rect = picSide.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    var side = Math.max(140, Math.min(rect.width, rect.height) * 0.94);
+    picCard.style.width = side.toFixed(0) + 'px';
+    picCard.style.height = side.toFixed(0) + 'px';
+    picEmoji.style.fontSize = (side * 0.55).toFixed(0) + 'px';
+}
+
+var rzT;
+window.addEventListener('resize', function () {
+    clearTimeout(rzT);
+    rzT = setTimeout(sizePicture, 150);
+});
+window.addEventListener('orientationchange', function () {
+    setTimeout(sizePicture, 250);
+});
+
 /* Preload the placeholder artwork */
 (function preload() {
     for (var i = 0; i < FAMILY.length; i++) {
@@ -554,6 +589,11 @@ endScreen = $('end-screen');
 endText = $('end-text');
 endStars = $('end-stars');
 numSel = $('num-questions');
+picCard = $('pic-card');
+picSide = $('pic-side');
+voiceBtn = $('voice-btn');
+updateVoiceBtn();
+sizePicture();
 </script>
 
 <script src="../../version-display.js"></script>
