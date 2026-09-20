@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en" data-component="numbers-game">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Numbers - 1 to 100</title>
+<style>
+*, *::before, *::after {
+    margin: 0; padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html { color-scheme: light !important; }
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #141e30 0%, #243b55 100%);
+    color: #fff;
+    height: 100dvh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    touch-action: manipulation;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.top-left {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 100;
+}
+.top-right {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+.top-btn {
+    background: rgba(255,255,255,0.15);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-size: 1.1rem;
+    color: white;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.2s, transform 0.15s, opacity 0.2s;
+    backdrop-filter: blur(8px);
+    font-family: inherit;
+}
+.top-btn:hover { background: rgba(255,255,255,0.28); }
+.top-btn:active { transform: scale(0.94); }
+
+#numbers-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100dvh;
+    padding: 64px 20px 46px;
+    gap: clamp(4px, 1.4vh, 14px);
+}
+
+#number-display {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-family: inherit;
+    font-weight: 800;
+    font-size: min(56vh, 38vw);
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    text-shadow: 0 10px 40px rgba(0,0,0,0.45);
+    transition: transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#number-display:active { transform: scale(0.96); }
+
+.number-word {
+    font-size: min(9vh, 5.5vw);
+    font-weight: 800;
+    text-align: center;
+    color: #ffd966;
+    text-shadow: 0 4px 18px rgba(0,0,0,0.35);
+    line-height: 1.15;
+    flex-shrink: 0;
+}
+
+.tap-hint {
+    font-size: clamp(0.9rem, 2.2vw, 1.2rem);
+    opacity: 0.5;
+    text-align: center;
+    font-style: italic;
+    font-weight: 500;
+    flex-shrink: 0;
+}
+
+.pop { animation: numberPop 0.35s ease-out; }
+@keyframes numberPop {
+    0%   { opacity: 0; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+#timer-track {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    background: rgba(255,255,255,0.08);
+    z-index: 50;
+}
+#timer-track.off { background: transparent; }
+#timer-bar {
+    height: 100%;
+    width: 100%;
+    background: linear-gradient(90deg, #34d399, #4ade80);
+    border-radius: 0 3px 3px 0;
+    transition: none;
+}
+#timer-bar.low { background: linear-gradient(90deg, #fb923c, #ef4444); }
+#timer-track.off #timer-bar { display: none; }
+
+#settings-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    backdrop-filter: blur(3px);
+    z-index: 190;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+}
+#settings-backdrop.show { opacity: 1; pointer-events: auto; }
+
+#settings-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100dvh;
+    width: min(430px, 92vw);
+    background: #1b2a41;
+    border-left: 1px solid rgba(255,255,255,0.12);
+    box-shadow: -14px 0 40px rgba(0,0,0,0.45);
+    z-index: 200;
+    transform: translateX(105%);
+    transition: transform 0.28s ease-out;
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+    gap: 22px;
+}
+#settings-panel.show { transform: translateX(0); }
+
+#settings-panel h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+}
+
+.setting-group label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 600;
+    opacity: 0.75;
+    margin-bottom: 10px;
+}
+
+.timer-options {
+    display: flex;
+    gap: 10px;
+}
+.timer-opt {
+    flex: 1;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+    padding: 16px 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.timer-opt:hover { background: rgba(255,255,255,0.16); }
+.timer-opt:active { transform: scale(0.95); }
+.timer-opt.selected {
+    background: linear-gradient(135deg, #4b6cb7, #182848);
+    border-color: #4b6cb7;
+    box-shadow: 0 6px 18px rgba(75,108,183,0.4);
+}
+
+.settings-note {
+    font-size: 0.95rem;
+    opacity: 0.6;
+    line-height: 1.5;
+}
+
+.done-btn {
+    margin-top: auto;
+    background: rgba(255,255,255,0.14);
+    border: 2px solid rgba(255,255,255,0.22);
+    border-radius: 16px;
+    padding: 16px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background 0.2s, transform 0.15s;
+}
+.done-btn:hover { background: rgba(255,255,255,0.24); }
+.done-btn:active { transform: scale(0.96); }
+
+@media (orientation: portrait) {
+    #number-display { font-size: min(38vh, 42vw); }
+    .number-word { font-size: min(6vh, 8vw); }
+}
+</style>
+</head>
+<body>
+
+<div class="top-left">
+    <a class="top-btn back-btn" href="../index.html">← Back</a>
+</div>
+<div class="top-right">
+    <button class="top-btn" id="settings-btn" onclick="openSettings()" title="Game Settings">⚙️</button>
+    <button class="top-btn fullscreen-btn" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+</div>
+
+<div id="numbers-screen">
+    <button id="number-display" onclick="nextNumber(true)" aria-label="Generate a new number">1</button>
+    <div class="number-word" id="number-word">one</div>
+    <div class="tap-hint">👆 Tap the number for a new one</div>
+</div>
+
+<div id="timer-track"><div id="timer-bar"></div></div>
+
+<div id="settings-backdrop" onclick="closeSettings()"></div>
+<div id="settings-panel">
+    <h3>⚙️ Game Settings</h3>
+    <div class="setting-group">
+        <label>⏱️ Time to read each number</label>
+        <div class="timer-options">
+            <button class="timer-opt" data-secs="0" onclick="setTimer(0)">Off</button>
+            <button class="timer-opt" data-secs="5" onclick="setTimer(5)">5s</button>
+            <button class="timer-opt" data-secs="7" onclick="setTimer(7)">7s</button>
+            <button class="timer-opt" data-secs="10" onclick="setTimer(10)">10s</button>
+        </div>
+    </div>
+    <p class="settings-note">When the timer runs out, a new number appears automatically. Tap the number to generate a new one at any time.</p>
+    <button class="done-btn" onclick="closeSettings()">Done</button>
+</div>
+
+<script>
+var ONES = ['zero','one','two','three','four','five','six','seven','eight','nine','ten',
+    'eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+var TENS = ['','','twenty','thirty','forty','fifty','sixty','seventy','eighty','ninety'];
+
+var current = 0;
+var timerSeconds = 5;
+var totalMs = 5000;
+var remainingMs = 0;
+var rafId = null;
+var lastTs = 0;
+var paused = false;
+
+function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(function(){});
+    } else {
+        document.exitFullscreen();
+    }
+}
+
+function numberToWords(n) {
+    if (n === 100) return 'one hundred';
+    if (n < 20) return ONES[n];
+    var t = Math.floor(n / 10);
+    var o = n % 10;
+    return o === 0 ? TENS[t] : TENS[t] + '-' + ONES[o];
+}
+
+function popEl(el) {
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+}
+
+function nextNumber(fromTap) {
+    var n;
+    do {
+        n = Math.floor(Math.random() * 100) + 1;
+    } while (n === current);
+    current = n;
+
+    var display = document.getElementById('number-display');
+    var word = document.getElementById('number-word');
+    display.textContent = n;
+    word.textContent = numberToWords(n);
+    popEl(display);
+    popEl(word);
+
+    restartTimer();
+}
+
+function restartTimer() {
+    if (rafId) cancelAnimationFrame(rafId);
+    rafId = null;
+    var track = document.getElementById('timer-track');
+    var bar = document.getElementById('timer-bar');
+    bar.classList.remove('low');
+
+    if (timerSeconds <= 0) {
+        track.classList.add('off');
+        return;
+    }
+    track.classList.remove('off');
+    totalMs = timerSeconds * 1000;
+    remainingMs = totalMs;
+    lastTs = performance.now();
+    rafId = requestAnimationFrame(tickTimer);
+}
+
+function tickTimer(ts) {
+    var dt = ts - lastTs;
+    lastTs = ts;
+    if (!paused) remainingMs -= dt;
+
+    if (remainingMs <= 0) {
+        rafId = null;
+        nextNumber(false);
+        return;
+    }
+
+    var bar = document.getElementById('timer-bar');
+    bar.style.width = (remainingMs / totalMs * 100) + '%';
+    if (remainingMs / totalMs < 0.3) bar.classList.add('low');
+    rafId = requestAnimationFrame(tickTimer);
+}
+
+function openSettings() {
+    paused = true;
+    document.getElementById('settings-backdrop').classList.add('show');
+    document.getElementById('settings-panel').classList.add('show');
+}
+
+function closeSettings() {
+    paused = false;
+    document.getElementById('settings-backdrop').classList.remove('show');
+    document.getElementById('settings-panel').classList.remove('show');
+    restartTimer();
+}
+
+function setTimer(secs) {
+    timerSeconds = secs;
+    try { localStorage.setItem('numbers-timer', String(secs)); } catch (e) {}
+    var opts = document.querySelectorAll('.timer-opt');
+    for (var i = 0; i < opts.length; i++) {
+        opts[i].classList.toggle('selected', Number(opts[i].getAttribute('data-secs')) === secs);
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' || e.code === 'Enter' || e.code === 'ArrowRight') {
+        e.preventDefault();
+        nextNumber(true);
+    }
+    if (e.code === 'Escape' && document.getElementById('settings-panel').classList.contains('show')) {
+        closeSettings();
+    }
+});
+
+try {
+    var saved = localStorage.getItem('numbers-timer');
+    if (saved !== null && ['0','5','7','10'].indexOf(saved) !== -1) {
+        timerSeconds = Number(saved);
+    }
+} catch (e) {}
+setTimer(timerSeconds);
+nextNumber(false);
+</script>
+
+<script src="../../version-display.js"></script>
+</body>
+</html>
