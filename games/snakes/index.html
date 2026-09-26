@@ -9,23 +9,28 @@
 </head>
 <body>
 
-    <!-- ── Configuration / Menu Screen ──────────────────────────────────── -->
+    <div class="bg-blobs" aria-hidden="true">
+        <div class="blob b1"></div>
+        <div class="blob b2"></div>
+        <div class="blob b3"></div>
+        <div class="blob b4"></div>
+    </div>
+
     <div id="menu-screen" class="screen active">
         <div class="menu-card glass-panel">
-            <h1>🐍 Snakes &amp; Ladders</h1>
-            <p class="subtitle">Climb the ladders, dodge the snakes, find the pictures!</p>
-
-            <div class="config-group">
-                <h2>Number of Players</h2>
-                <div class="option-row" id="player-options">
-                    <button class="opt-btn" data-players="2">2 👥</button>
-                    <button class="opt-btn" data-players="3">3 👥</button>
-                    <button class="opt-btn" data-players="4">4 👥</button>
-                </div>
+            <div class="hero">
+                <div class="hero-badge">2026 Edition</div>
+                <h1 class="hero-title"><span class="hero-emoji">🐍</span> Snakes <span class="amp">&amp;</span> Ladders</h1>
+                <p class="subtitle">Pick your class, choose your heroes, climb to the top!</p>
             </div>
 
             <div class="config-group">
-                <h2>Board Size</h2>
+                <h2><span class="cg-ic">🎓</span> Class</h2>
+                <div class="chip-scroll" id="class-options"></div>
+            </div>
+
+            <div class="config-group">
+                <h2><span class="cg-ic">🧩</span> Board Size</h2>
                 <div class="option-row" id="size-options">
                     <button class="opt-btn" data-size="5">5×5</button>
                     <button class="opt-btn" data-size="6">6×6</button>
@@ -36,17 +41,29 @@
                 </div>
             </div>
 
+            <div class="config-group">
+                <div class="group-head">
+                    <h2><span class="cg-ic">🧑‍🤝‍🧑</span> Players &amp; Order</h2>
+                    <button class="btn ghost tiny" id="shuffle-order-btn" type="button">🔀 Shuffle</button>
+                </div>
+                <div class="option-row" id="player-options">
+                    <button class="opt-btn" data-players="2">2 Players</button>
+                    <button class="opt-btn" data-players="3">3 Players</button>
+                    <button class="opt-btn" data-players="4">4 Players</button>
+                </div>
+                <div id="player-cards"></div>
+            </div>
+
             <button class="btn primary start-btn" id="start-btn">▶ Start Game</button>
 
             <div class="legend">
                 <span><span class="lg-ic">🪜</span> Ladder up</span>
                 <span><span class="lg-ic">🐍</span> Snake down</span>
-                <span><span class="lg-ic">🖼️</span> Picture</span>
+                <span><span class="lg-ic">✨</span> Picture</span>
             </div>
         </div>
     </div>
 
-    <!-- ── Game Screen ──────────────────────────────────────────────────── -->
     <div id="game-screen" class="screen">
         <div id="hud" class="glass-panel">
             <div class="hud-left">
@@ -62,14 +79,16 @@
 
         <div id="play-area">
             <div id="board-wrap">
-                <div id="board"></div>
-                <svg id="board-svg" xmlns="http://www.w3.org/2000/svg"></svg>
-                <div id="token-layer"></div>
+                <div id="board-frame">
+                    <div id="board"></div>
+                    <svg id="board-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+                    <div id="token-layer"></div>
+                </div>
             </div>
 
             <div id="panel" class="glass-panel">
                 <div id="turn-indicator">
-                    <div id="turn-token">🐶</div>
+                    <div id="turn-avatar"><div id="turn-token">🐶</div></div>
                     <div class="turn-text">
                         <div class="turn-label">Current Turn</div>
                         <div id="turn-name">Player 1</div>
@@ -77,24 +96,26 @@
                 </div>
 
                 <div id="dice-area">
-                    <div id="dice" class="dice"></div>
-                    <button class="btn primary" id="roll-btn">🎲 Roll Dice</button>
+                    <div id="dice-stage">
+                        <div id="dice-shadow"></div>
+                        <div id="dice" class="dice"></div>
+                    </div>
+                    <button class="btn primary roll-btn" id="roll-btn">🎲 Roll Dice</button>
                 </div>
 
                 <div id="player-list"></div>
 
-                <div id="message">Roll the dice to begin!</div>
+                <div id="message" aria-live="polite"><span class="msg-inner">Roll the dice to begin!</span></div>
 
                 <div class="legend">
                     <span><span class="lg-ic">🪜</span> Ladder up</span>
                     <span><span class="lg-ic">🐍</span> Snake down</span>
-                    <span><span class="lg-ic">🖼️</span> Picture</span>
+                    <span><span class="lg-ic">✨</span> Picture</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- ── Image Field Overlay ──────────────────────────────────────────── -->
     <div id="field-overlay">
         <div id="field-content" class="glass-panel">
             <div class="field-cell">Cell 1</div>
@@ -105,12 +126,12 @@
         </div>
     </div>
 
-    <!-- ── Win Overlay ──────────────────────────────────────────────────── -->
     <div id="win-overlay">
         <div id="win-content" class="glass-panel">
             <div id="win-token">🎉</div>
             <h2 id="win-title">Player Wins!</h2>
             <p class="win-sub">Congratulations on reaching the finish!</p>
+            <div id="win-standings"></div>
             <div class="win-actions">
                 <button class="btn primary" onclick="SnakesGame.restart()">🔄 Play Again</button>
                 <button class="btn secondary" onclick="SnakesGame.returnToMenu()">🏠 Menu</button>
@@ -118,7 +139,10 @@
         </div>
     </div>
 
+    <canvas id="fx-canvas" aria-hidden="true"></canvas>
+
     <script src="fields.js"></script>
+    <script src="../../data/students.js"></script>
     <script src="script.js"></script>
     <script src="../../version-display.js"></script>
 </body>

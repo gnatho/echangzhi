@@ -123,8 +123,8 @@
   },
   "snakes-game": {
     "name": "Snakes & Ladders",
-    "version": "1.0.0",
-    "date": "2026-05-07",
+    "version": "1.1.0",
+    "date": "2026-09-26",
     "files": [
       "games/snakes/index.html",
       "games/snakes/snakes.js",

@@ -14,12 +14,11 @@
     "chooser-game":{"n":"Word Chooser","v":"1.0.0","d":"2026-05-07"},
     "memory-game":{"n":"Memory Game","v":"1.0.0","d":"2026-05-07"},
     "shooter-game":{"n":"Crosshair Assault","v":"1.0.0","d":"2026-05-07"},
-    "snakes-game":{"n":"Snakes & Ladders","v":"1.0.0","d":"2026-05-07"},
+    "snakes-game":{"n":"Snakes & Ladders","v":"1.1.0","d":"2026-09-26"},
     "bomberman-game":{"n":"Bomber Battle","v":"1.0.0","d":"2026-05-07"},
     "scrambler-game":{"n":"Sentence Scrambler","v":"1.0.0","d":"2026-05-07"},
     "baamboozle-game":{"n":"ESL Baamboozle","v":"1.0.0","d":"2026-05-07"},
     "quiz-game":{"n":"Grammar Quiz","v":"1.1.0","d":"2026-05-30"},
-    "table-game":{"n":"Table Generator","v":"1.0.0","d":"2026-07-10"},
     "data-phonems":{"n":"Phoneme Data","v":"1.0.0","d":"2026-05-07"},
     "data-level-words":{"n":"Level Words Data","v":"1.0.0","d":"2026-05-07"},
     "data-grammar-ex":{"n":"Grammar Exercises Data","v":"1.0.0","d":"2026-05-07"},
@@ -47,14 +46,4 @@
   } else {
     init();
   }
-})();
-
-/* PWA: register the service worker for offline support */
-(function () {
-  if (!('serviceWorker' in navigator)) return;
-  var tag = document.querySelector('script[src*="version-display.js"]');
-  var swUrl = tag ? tag.src.replace(/version-display\.js(?:[?#].*)?$/, 'sw.js') : 'sw.js';
-  window.addEventListener('load', function () {
-    navigator.serviceWorker.register(swUrl).catch(function () {});
-  });
 })();
