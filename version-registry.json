@@ -178,6 +178,17 @@
       "games/quiz/data/present-perfect.js"
     ]
   },
+  "grammar-quiz": {
+    "name": "Grammar Quiz",
+    "version": "1.0.0",
+    "date": "2026-09-27",
+    "files": [
+      "games/grammar/index.html",
+      "games/grammar/grammar.js",
+      "games/grammar/grammar.css",
+      "games/grammar/data/since-vs-for.js"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",

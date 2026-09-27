@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" data-component="grammar-quiz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <title>Grammar Quiz</title>
+    <link rel="stylesheet" href="grammar.css">
+</head>
+<body>
+
+    <div class="top-left">
+        <a class="top-btn" href="../index.html">← Games</a>
+    </div>
+    <div class="top-right">
+        <button class="top-btn" onclick="toggleFullscreen()">⛶</button>
+    </div>
+
+    <div id="topics-screen" class="screen active">
+        <h1 class="screen-title">📝 Grammar</h1>
+        <p class="screen-sub">Choose a grammar topic</p>
+        <div id="topics-grid" class="topics-grid"></div>
+    </div>
+
+    <div id="length-screen" class="screen">
+        <h1 class="screen-title" id="length-topic-name">Topic</h1>
+        <div class="rule-box" id="length-rule"></div>
+        <p class="screen-sub">How many questions?</p>
+        <div class="length-grid">
+            <button class="length-btn" onclick="startQuiz(10)">
+                <span class="length-num">10</span>
+                <span class="length-label">Quick</span>
+            </button>
+            <button class="length-btn" onclick="startQuiz(20)">
+                <span class="length-num">20</span>
+                <span class="length-label">Standard</span>
+            </button>
+            <button class="length-btn" onclick="startQuiz(30)">
+                <span class="length-num">30</span>
+                <span class="length-label">Challenge</span>
+            </button>
+        </div>
+        <button class="ghost-btn" onclick="showScreen('topics-screen')">← All Topics</button>
+    </div>
+
+    <div id="quiz-screen" class="screen">
+        <div class="quiz-top">
+            <div class="quiz-meta">
+                <span id="quiz-topic-name"></span>
+                <span id="quiz-counter">1 / 10</span>
+                <span id="quiz-score">Score: 0</span>
+            </div>
+            <div class="progress-track"><div id="progress-bar" class="progress-fill"></div></div>
+        </div>
+
+        <div class="question-card">
+            <p class="question-prompt" id="question-prompt"></p>
+            <div class="options-grid" id="options-grid"></div>
+            <div class="feedback" id="feedback"></div>
+            <button class="primary-btn hidden" id="next-btn" onclick="nextQuestion()">Next →</button>
+        </div>
+    </div>
+
+    <div id="results-screen" class="screen">
+        <h1 class="screen-title">Results</h1>
+        <div class="score-ring" id="score-ring">
+            <span id="score-big">0/10</span>
+            <span id="score-pct">0%</span>
+        </div>
+        <p class="result-msg" id="result-msg"></p>
+        <div class="review-list" id="review-list"></div>
+        <div class="results-actions">
+            <button class="primary-btn" onclick="playAgain()">Play Again</button>
+            <button class="ghost-btn" onclick="showScreen('length-screen')">Change Length</button>
+            <button class="ghost-btn" onclick="showScreen('topics-screen')">All Topics</button>
+            <a class="ghost-btn" href="../index.html">Games</a>
+        </div>
+    </div>
+
+    <script src="data/since-vs-for.js"></script>
+    <script src="grammar.js"></script>
+    <script src="../../version-display.js"></script>
+</body>
+</html>
