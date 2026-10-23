@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" data-component="likes-game">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Likes &amp; Dislikes</title>
+    <link rel="stylesheet" href="likes.css">
+</head>
+<body>
+
+    <!-- ═══ Setup: choose class once ═══ -->
+    <div class="screen active" id="setup-screen">
+        <div class="top-left">
+            <a class="top-btn ghostly" href="../index.html">← Games</a>
+        </div>
+        <div class="top-right">
+            <button class="top-btn ghostly" id="fs-btn-setup" type="button" title="Fullscreen">⛶</button>
+        </div>
+
+        <header class="hero">
+            <h1 class="hero-title"><span class="hero-emoji">😃</span> Likes &amp; Dislikes</h1>
+            <p class="subtitle">Choose your class to start</p>
+        </header>
+
+        <main class="setup-main">
+            <div class="class-grid" id="class-grid"></div>
+
+            <div class="setup-animals">
+                <h2 class="control-title"><span class="ct-ic">🦁</span> Animals per round</h2>
+                <div class="chip-row" id="count-chips">
+                    <button class="chip" type="button" data-count="3">3</button>
+                    <button class="chip selected" type="button" data-count="4">4</button>
+                    <button class="chip" type="button" data-count="5">5</button>
+                    <button class="chip" type="button" data-count="6">6</button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══ Game: table stage ═══ -->
+    <div class="screen" id="game-screen">
+        <div class="top-left">
+            <button class="top-btn ghostly" id="menu-btn" type="button" title="Main Menu">🏠 Menu</button>
+        </div>
+        <div class="top-right">
+            <button class="top-btn ghostly" id="fs-btn-game" type="button" title="Fullscreen">⛶</button>
+        </div>
+
+        <main class="stage">
+            <div class="table-wrap visible" id="table-wrap"></div>
+        </main>
+
+        <footer class="game-bar">
+            <button class="randomize-btn" id="randomize-btn" type="button">
+                <span class="rnd-ic">🎲</span> RANDOMIZE!
+            </button>
+            <div class="legend">
+                <span class="lg-item"><span class="lg-face">😄</span> likes</span>
+                <span class="lg-item"><span class="lg-face">😞</span> doesn&rsquo;t like</span>
+                <span class="lg-hint">Tap a face to change it</span>
+            </div>
+        </footer>
+    </div>
+
+    <script src="../../data/students.js"></script>
+    <script src="likes.js"></script>
+    <script src="../../version-display.js"></script>
+</body>
+</html>

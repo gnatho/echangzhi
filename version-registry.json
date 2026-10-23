@@ -189,6 +189,16 @@
       "games/grammar/data/since-vs-for.js"
     ]
   },
+  "likes-game": {
+    "name": "Likes & Dislikes",
+    "version": "1.0.0",
+    "date": "2026-10-23",
+    "files": [
+      "games/likes/index.html",
+      "games/likes/likes.js",
+      "games/likes/likes.css"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",
