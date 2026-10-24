@@ -199,6 +199,16 @@
       "games/likes/likes.css"
     ]
   },
+  "routines-game": {
+    "name": "Daily Routines",
+    "version": "1.0.0",
+    "date": "2026-10-24",
+    "files": [
+      "games/routines/index.html",
+      "games/routines/routines.js",
+      "games/routines/routines.css"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",
