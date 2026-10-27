@@ -13,3 +13,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Speech model archive is larger than GitHub's 100 MB per-file limit
+games/speak/models/vosk-model-en-us-0.22-lgraph.tar.gz
