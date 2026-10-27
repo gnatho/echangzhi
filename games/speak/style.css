@@ -62,13 +62,12 @@ button {
     height: clamp(42px, 5.6vmin, 58px);
     flex: 0 0 auto;
     border-radius: clamp(12px, 1.7vmin, 18px);
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.24);
     border: 1px solid rgba(255, 255, 255, 0.28);
     color: #fff;
     font-size: clamp(1.1rem, 2.4vmin, 1.5rem);
     line-height: 1;
     text-decoration: none;
-    backdrop-filter: blur(10px);
     transition: background 0.2s, transform 0.15s, opacity 0.2s;
 }
 
@@ -167,10 +166,9 @@ button {
     flex: 0 0 auto;
     padding: clamp(8px, 1.4vmin, 16px) clamp(12px, 2vmin, 20px);
     border-radius: clamp(14px, 2vmin, 22px);
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(74, 58, 150, 0.72);
     border: 1px solid rgba(255, 255, 255, 0.28);
-    backdrop-filter: blur(14px);
-    box-shadow: 0 10px 30px rgba(23, 12, 70, 0.16);
+    box-shadow: 0 8px 20px rgba(23, 12, 70, 0.18);
 }
 
 .mic-orb {
@@ -206,7 +204,7 @@ button {
 
 .status-panel[data-mode="detected"] .mic-orb {
     background: #5ee39a;
-    box-shadow: 0 0 0 4px rgba(94, 227, 154, 0.35), 0 0 30px rgba(94, 227, 154, 0.6);
+    box-shadow: 0 0 0 4px rgba(94, 227, 154, 0.35);
 }
 
 .status-panel[data-mode="miss"] .mic-orb {
@@ -308,15 +306,12 @@ button {
     border-radius: clamp(10px, 1.8vmin, 20px);
     background: linear-gradient(180deg, #ffffff 0%, #fbfaff 100%);
     border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow:
-        0 4px 0 rgba(44, 32, 120, 0.22),
-        0 10px 22px rgba(24, 12, 70, 0.18);
+    box-shadow: 0 4px 10px rgba(24, 12, 70, 0.16);
     overflow: hidden;
     transform-origin: center;
     transition:
         opacity 0.45s ease,
-        transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1),
-        box-shadow 0.3s ease;
+        transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
 .word-card::after {
@@ -397,8 +392,7 @@ button {
     display: grid;
     place-items: center;
     padding: clamp(14px, 3vmin, 32px);
-    background: rgba(30, 18, 76, 0.58);
-    backdrop-filter: blur(9px);
+    background: rgba(30, 18, 76, 0.84);
     transition: opacity 0.35s ease, visibility 0.35s ease;
 }
 
@@ -636,7 +630,7 @@ button {
 
 @keyframes cardMatch {
     0% { transform: scale(1); }
-    40% { transform: scale(1.06); box-shadow: 0 0 0 5px rgba(94, 227, 154, 0.65), 0 12px 28px rgba(24, 12, 70, 0.2); }
+    45% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 

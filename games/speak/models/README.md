@@ -1,56 +1,66 @@
-# Speak & Disappear — speech model
+# Speak & Disappear — speech models
 
-The game uses **vosk-model-en-us-0.22-lgraph**, the dynamic-graph model required for grammar mode.
+The game supports two English Vosk models:
 
-## How the game finds the model
+| Mode | Model | Size | Use |
+| --- | --- | --- | --- |
+| Fast (default) | `vosk-model-small-en-us-0.15` | ~40 MB | Tablets and low-end CPUs |
+| Accurate | `vosk-model-en-us-0.22-lgraph` | ~130 MB archive / 214 MB extracted | Desktop and strong CPUs |
 
-On Start, the game checks these sources in order:
+The fast model is the default because speech recognition runs in WebAssembly on the tablet CPU, not on the GPU. The larger `-lgraph` model is much heavier and can cause long recognition delays on low-end tablets. Grammar mode still restricts recognition to the 20 target words, so the small model works well for this game.
 
-1. An already cached model in the browser's `Vosklet` Cache Storage.
-2. `games/speak/models/vosk-model-en-us-0.22-lgraph.tar.gz` if it exists on the server.
-3. Otherwise, it builds the archive in the browser from the extracted model folder at
-   `games/speak/models/vosk-model-en-us-0.22-lgraph/`.
+To force the accurate model, open:
 
-Source 3 is what makes the game work on GitHub Pages: the 130 MB `.tar.gz` is larger than GitHub's 100 MB per-file limit, but the extracted model files are individual files and can be deployed normally. The browser downloads them once, builds a USTAR `.tar.gz` in memory, and hands it to Vosklet. Vosklet then caches the model in Cache Storage.
+```text
+games/speak/index.html?model=accurate
+```
 
-## Local development
+## Model files
 
-You can use either form:
+```text
+games/speak/models/
+├── vosk-model-small-en-us-0.15.tar.gz      committed, ~40 MB
+├── vosk-model-en-us-0.22-lgraph/           committed, extracted files
+└── vosk-model-en-us-0.22-lgraph.tar.gz     local only, ignored, ~130 MB
+```
 
-- Keep the extracted folder:
-  `games/speak/models/vosk-model-en-us-0.22-lgraph/`
-- Or keep the prepared archive:
-  `games/speak/models/vosk-model-en-us-0.22-lgraph.tar.gz`
+The small model archive is under GitHub's 100 MB per-file limit and is served directly.
 
-The archive is faster on first start. It is listed in `.gitignore` because it is too large for GitHub.
+The large model archive is over the limit, so it is listed in `.gitignore`. For remote/accurate mode, the game builds the archive in the browser from the committed extracted folder.
 
-If the archive is absent, the browser builds it from the extracted folder. The first start is slower, then the model is cached.
+## How the game selects a model
+
+1. If `?model=accurate` is present, the game uses the lgraph model.
+   - It uses the archive if present.
+   - Otherwise it builds the archive from the extracted folder.
+2. Otherwise it uses the small model if its archive is cached or exists on the server.
+3. If the small model is unavailable, it falls back to the lgraph model.
+
+After a model is loaded, Vosklet stores it in the browser's `Vosklet` Cache Storage. Later starts do not download it again.
 
 ## Remote / GitHub Pages
 
-Commit the extracted folder, **not** the 130 MB archive:
+Deploy the small model archive and, if you want accurate mode remotely, the extracted lgraph folder.
 
-```text
-games/speak/models/vosk-model-en-us-0.22-lgraph/
-├── am/
-├── conf/
-├── graph/
-└── ivector/
-```
+First start with the fast model downloads about 40 MB. First start in accurate mode downloads about 214 MB of extracted files, builds a ~130 MB archive in the browser, then caches it. Accurate mode can take a minute on classroom Wi-Fi.
 
-The deployed page must be served over HTTPS or from `localhost`; microphone access and service workers are unavailable on plain HTTP LAN URLs.
+The page must be served over HTTPS or from `localhost`; microphone access and service workers are unavailable on plain HTTP LAN URLs.
 
-First start on a new tablet downloads the extracted model files (about 214 MB), builds a ~130 MB gzip archive, and caches it. Later starts load from the cache and work offline. The first start can take a minute on a classroom Wi-Fi network.
+## Performance notes
 
-## Preparing the archive manually
+- The fast model is the main fix for tablet latency. The lgraph model is CPU-heavy in WebAssembly.
+- Recognition results are handled on partial results, so a card can disappear without waiting for Vosk to finalize the utterance.
+- The audio context requests 16 kHz, which is Vosk's native rate and avoids extra resampling.
+- The UI avoids `backdrop-filter` and shadow animations, which are expensive on weak tablet GPUs.
 
-Download `vosk-model-en-us-0.22-lgraph.zip` from:
+## Updating a model
 
-https://alphacephei.com/vosk/models
+- Replace the relevant `.tar.gz` and update `SMALL_MODEL_ID` or `MODEL_ID` in `script.js` so Vosklet invalidates its old cache.
+- If you change the game shell (`index.html`, `style.css`, `script.js`), bump `VERSION` in `coi-sw.js` so the service worker refreshes its cached copy.
 
-Extract it, then repack with USTAR:
+## Preparing the large archive manually
 
-### Windows (PowerShell)
+Download `vosk-model-en-us-0.22-lgraph.zip` from https://alphacephei.com/vosk/models, extract it, then repack with USTAR:
 
 ```powershell
 $src = "$env:USERPROFILE\Downloads"
@@ -59,20 +69,7 @@ tar --format=ustar -czf "games\speak\models\vosk-model-en-us-0.22-lgraph.tar.gz"
   -C $src "vosk-model-en-us-0.22-lgraph"
 ```
 
-### macOS / Linux
-
 ```bash
 tar --format=ustar -czf games/speak/models/vosk-model-en-us-0.22-lgraph.tar.gz \
   -C /path/to/extracted vosk-model-en-us-0.22-lgraph
 ```
-
-Verify:
-
-```bash
-tar -tzf games/speak/models/vosk-model-en-us-0.22-lgraph.tar.gz
-```
-
-## Updating the model
-
-- If you replace the model, update `MODEL_ID` in `script.js` so Vosklet invalidates its old cache.
-- If you change the game shell (`index.html`, `style.css`, `script.js`), bump `VERSION` in `coi-sw.js` so the service worker refreshes its cached copy.

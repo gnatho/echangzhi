@@ -1,5 +1,5 @@
 if (typeof window === 'undefined') {
-    const VERSION = '1.0.4';
+    const VERSION = '1.0.5';
     const CACHE = `speak-shell-${VERSION}`;
     const BASE = new URL('./', self.location.href).href;
     const SHELL = [
