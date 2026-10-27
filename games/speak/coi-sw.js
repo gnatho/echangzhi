@@ -1,5 +1,5 @@
 if (typeof window === 'undefined') {
-    const VERSION = '1.0.3';
+    const VERSION = '1.0.4';
     const CACHE = `speak-shell-${VERSION}`;
     const BASE = new URL('./', self.location.href).href;
     const SHELL = [
@@ -123,23 +123,29 @@ if (typeof window === 'undefined') {
         ? document.currentScript.src
         : new URL('coi-sw.js', window.location.href).href;
 
-    if (!window.crossOriginIsolated && 'serviceWorker' in navigator) {
-        let reloading = false;
+    if ('serviceWorker' in navigator) {
+        if (!window.crossOriginIsolated) {
+            let reloading = false;
 
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-            if (reloading) return;
-            reloading = true;
-            window.location.reload();
-        });
-
-        navigator.serviceWorker.register(scriptUrl)
-            .then((registration) => {
-                if (registration.active && !navigator.serviceWorker.controller) {
-                    window.location.reload();
-                }
-            })
-            .catch((error) => {
-                console.error('Could not enable cross-origin isolation for speech recognition:', error);
+            navigator.serviceWorker.addEventListener('controllerchange', () => {
+                if (reloading) return;
+                reloading = true;
+                window.location.reload();
             });
+
+            navigator.serviceWorker.register(scriptUrl)
+                .then((registration) => {
+                    if (registration.active && !navigator.serviceWorker.controller) {
+                        window.location.reload();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Could not enable cross-origin isolation for speech recognition:', error);
+                });
+        } else {
+            navigator.serviceWorker.getRegistration()
+                .then((registration) => registration && registration.update())
+                .catch(() => {});
+        }
     }
 }

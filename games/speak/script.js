@@ -24,6 +24,28 @@ const WORDS = [
 const MODEL_FILE = 'models/vosk-model-en-us-0.22-lgraph.tar.gz';
 const MODEL_ID = 'vosk-model-en-us-0.22-lgraph';
 const MODEL_PATH = new URL(MODEL_FILE, document.baseURI).href;
+const MODEL_ARCHIVE_ROOT = 'vosk-model-en-us-0.22-lgraph';
+const MODEL_SOURCE_DIR = 'models/vosk-model-en-us-0.22-lgraph/';
+const MODEL_ARCHIVE_DIRS = ['am', 'conf', 'graph', 'graph/phones', 'ivector'];
+const MODEL_ARCHIVE_FILES = [
+    'am/final.mdl',
+    'am/tree',
+    'conf/mfcc.conf',
+    'conf/model.conf',
+    'graph/Gr.fst',
+    'graph/HCLr.fst',
+    'graph/disambig_tid.int',
+    'graph/phones.txt',
+    'graph/phones/word_boundary.int',
+    'graph/words.txt',
+    'ivector/final.dubm',
+    'ivector/final.ie',
+    'ivector/final.mat',
+    'ivector/global_cmvn.stats',
+    'ivector/online_cmvn.conf',
+    'ivector/splice.conf'
+];
+const utf8Encoder = new TextEncoder();
 const AUDIO_BUFFER_SIZE = 128 * 100;
 const DETECT_LOCK_MS = 1300;
 
@@ -163,7 +185,7 @@ function friendlyError(error) {
         return 'No microphone was found. Connect a microphone, then tap Try again.';
     }
     if (/Unable to fetch model|status: 404|Failed to fetch/i.test(text)) {
-        return 'The speech model was not found. Put vosk-model-en-us-0.22-lgraph.tar.gz inside games/speak/models/, then try again.';
+        return 'The speech model files were not found. Put the extracted vosk-model-en-us-0.22-lgraph folder or its .tar.gz inside games/speak/models/, then try again.';
     }
     if (/SharedArrayBuffer|crossOriginIsolated|shared memory/i.test(text)) {
         return 'The speech engine needs cross-origin isolation. Open the game over HTTPS or localhost and reload the page.';
@@ -184,6 +206,90 @@ async function modelIsCached() {
         return keys.length > 0;
     } catch (error) {
         return false;
+    }
+}
+
+async function modelArchiveExists() {
+    try {
+        const response = await fetch(MODEL_PATH, { method: 'HEAD', cache: 'no-store' });
+        return response.ok;
+    } catch (error) {
+        return false;
+    }
+}
+
+function tarWriteString(header, offset, length, value) {
+    const bytes = utf8Encoder.encode(value);
+    header.set(bytes.subarray(0, length), offset);
+}
+
+function createTarHeader(name, size, typeFlag) {
+    if (utf8Encoder.encode(name).length > 100) {
+        throw new Error(`Tar path is too long: ${name}`);
+    }
+
+    const header = new Uint8Array(512);
+    tarWriteString(header, 0, 100, name);
+    tarWriteString(header, 100, 8, '0000644\0');
+    tarWriteString(header, 108, 8, '0000000\0');
+    tarWriteString(header, 116, 8, '0000000\0');
+    tarWriteString(header, 124, 12, `${size.toString(8).padStart(11, '0')}\0`);
+    tarWriteString(header, 136, 12, '00000000000\0');
+    header.fill(32, 148, 156);
+    header[156] = typeFlag.charCodeAt(0);
+    tarWriteString(header, 257, 6, 'ustar\0');
+    tarWriteString(header, 263, 2, '00');
+    tarWriteString(header, 265, 32, 'root');
+    tarWriteString(header, 297, 32, 'root');
+
+    let checksum = 0;
+    for (let i = 0; i < header.length; i += 1) checksum += header[i];
+    tarWriteString(header, 148, 8, `${checksum.toString(8).padStart(6, '0')}\0 `);
+
+    return header;
+}
+
+async function buildModelArchive() {
+    const gzip = new CompressionStream('gzip');
+    const writer = gzip.writable.getWriter();
+    const blobPromise = new Response(gzip.readable).blob();
+    const root = `${MODEL_ARCHIVE_ROOT}/`;
+
+    try {
+        await writer.write(createTarHeader(root, 0, '5'));
+
+        for (const dir of MODEL_ARCHIVE_DIRS) {
+            await writer.write(createTarHeader(`${root}${dir}/`, 0, '5'));
+        }
+
+        for (let i = 0; i < MODEL_ARCHIVE_FILES.length; i += 1) {
+            const relative = MODEL_ARCHIVE_FILES[i];
+            setStartStatus(`Downloading the speech model (${i + 1}/${MODEL_ARCHIVE_FILES.length})...`, 'loading');
+
+            const response = await fetch(
+                new URL(`${MODEL_SOURCE_DIR}${relative}`, document.baseURI),
+                { cache: 'no-store' }
+            );
+
+            if (!response.ok) {
+                throw new Error(`Unable to fetch model file ${relative}, status: ${response.status}`);
+            }
+
+            const data = new Uint8Array(await response.arrayBuffer());
+            await writer.write(createTarHeader(`${root}${relative}`, data.byteLength, '0'));
+            await writer.write(data);
+
+            const padding = (512 - (data.byteLength % 512)) % 512;
+            if (padding) await writer.write(new Uint8Array(padding));
+        }
+
+        await writer.write(new Uint8Array(1024));
+        await writer.close();
+        setStartStatus('Preparing the speech model...', 'loading');
+        return await blobPromise;
+    } catch (error) {
+        try { await writer.abort(error); } catch (abortError) {}
+        throw error;
     }
 }
 
@@ -212,13 +318,25 @@ async function ensureEngine() {
 
     if (!model) {
         const cached = await modelIsCached();
-        setStartStatus(
-            cached
-                ? 'Loading the English speech model...'
-                : 'Downloading the English speech model (first time only, about 128 MB)...',
-            'loading'
-        );
-        model = await vosklet.createModel(MODEL_PATH, MODEL_PATH, MODEL_ID);
+        let source = MODEL_PATH;
+        let blobUrl = '';
+
+        if (cached) {
+            setStartStatus('Loading the English speech model...', 'loading');
+        } else if (await modelArchiveExists()) {
+            setStartStatus('Downloading the English speech model (first time only, about 128 MB)...', 'loading');
+        } else {
+            setStartStatus('Preparing the speech model for this browser (first time only)...', 'loading');
+            const archive = await buildModelArchive();
+            blobUrl = URL.createObjectURL(archive);
+            source = blobUrl;
+        }
+
+        try {
+            model = await vosklet.createModel(source, MODEL_PATH, MODEL_ID);
+        } finally {
+            if (blobUrl) window.setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+        }
     }
 
     const missing = [...new Set(
