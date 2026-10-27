@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" data-component="speak-disappear">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Speak &amp; Disappear</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="game-shell">
+        <header class="hud">
+            <a class="hud-btn back-btn" href="../index.html" aria-label="Back to games">←</a>
+
+            <div class="brand">
+                <span class="brand-icon" aria-hidden="true">🗣️</span>
+                <div class="brand-copy">
+                    <h1>Speak &amp; Disappear</h1>
+                    <p>Say it. Clear it.</p>
+                </div>
+            </div>
+
+            <div class="hud-actions">
+                <div class="counter" aria-live="polite">
+                    <span class="counter-number" id="remaining-count">20</span>
+                    <span class="counter-label" id="remaining-label">words left</span>
+                </div>
+                <button class="hud-btn" id="listen-btn" type="button" aria-label="Pause listening" disabled>⏸</button>
+                <button class="hud-btn" id="fullscreen-btn" type="button" aria-label="Toggle fullscreen">⛶</button>
+            </div>
+        </header>
+
+        <section class="status-panel" id="status-panel" data-mode="idle">
+            <div class="mic-orb" aria-hidden="true">
+                <span class="mic-pulse"></span>
+                <span class="mic-emoji">🎙️</span>
+            </div>
+            <div class="status-body">
+                <p class="status-text" id="status-text" aria-live="polite">Tap Start to play</p>
+                <div class="progress-track" aria-hidden="true">
+                    <div class="progress-fill" id="progress-fill"></div>
+                </div>
+            </div>
+            <div class="cleared-pill" aria-label="Cleared words">
+                <span id="cleared-count">0</span><span class="cleared-slash">/</span><span id="total-count">20</span>
+            </div>
+        </section>
+
+        <main class="board-wrap">
+            <div class="board" id="board" aria-label="Vocabulary word cards"></div>
+        </main>
+
+        <footer class="hint-bar">
+            Say a word clearly. When Vosk hears it, the card disappears.
+        </footer>
+    </div>
+
+    <div class="start-overlay" id="start-overlay">
+        <div class="start-card" role="dialog" aria-modal="true" aria-labelledby="start-title">
+            <div class="start-badge" aria-hidden="true">🗣️</div>
+            <h2 id="start-title">Speak &amp; Disappear</h2>
+            <p class="start-lead">Say each word out loud. When the game hears it, the card disappears!</p>
+
+            <ol class="start-steps">
+                <li><span>1</span> Tap Start and allow the microphone</li>
+                <li><span>2</span> Say a word from the board</li>
+                <li><span>3</span> Clear all 20 cards to win</li>
+            </ol>
+
+            <p class="start-status" id="start-status" data-mode="idle">The speech model downloads once, then works offline.</p>
+
+            <button class="start-btn" id="start-btn" type="button">Start speaking</button>
+
+            <p class="privacy-note">🔒 Audio is processed on this device. Nothing is uploaded.</p>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration" aria-hidden="true">
+        <div class="confetti" id="confetti" aria-hidden="true"></div>
+        <div class="celebrate-card" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
+            <div class="celebrate-emoji" aria-hidden="true">🎉</div>
+            <h2 id="celebrate-title">Great job!</h2>
+            <p>You cleared all <span id="celebrate-total">20</span> words!</p>
+            <div class="celebrate-actions">
+                <button class="btn-primary" id="play-again-btn" type="button">Play again</button>
+                <a class="btn-secondary" href="../index.html">Games</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="coi-sw.js"></script>
+    <script src="vendor/Vosklet.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
