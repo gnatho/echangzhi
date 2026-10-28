@@ -71,8 +71,9 @@ The page must be served over HTTPS or from `localhost`; microphone access and se
 
 ## Updating a model
 
-- Replace the relevant `.tar.gz` or extracted folder and update the matching model `key` in `script.js` so Vosklet invalidates its old cache.
-- If you change the game shell (`index.html`, `style.css`, `script.js`), bump `VERSION` in `coi-sw.js` so the service worker refreshes its cached copy.
+- Replace the relevant `.tar.gz` or extracted folder and update the matching model `key` in `script.v2.js` so Vosklet invalidates its old cache.
+- If you change the game shell (`index.html`, `style.v2.css`, `script.v2.js`), bump `VERSION` in `coi-sw.js` so the service worker refreshes its cached copy.
+- `style.css` and `script.js` are tiny compatibility shims for pages cached by older service-worker versions; keep them in place when changing the shell.
 
 ## Preparing an archive manually
 

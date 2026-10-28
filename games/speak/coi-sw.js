@@ -1,9 +1,11 @@
 if (typeof window === 'undefined') {
-    const VERSION = '1.1.0';
+    const VERSION = '1.1.1';
     const CACHE = `speak-shell-${VERSION}`;
     const BASE = new URL('./', self.location.href).href;
     const SHELL = [
         'index.html',
+        'style.v2.css',
+        'script.v2.js',
         'style.css',
         'script.js',
         'coi-sw.js',
@@ -12,24 +14,35 @@ if (typeof window === 'undefined') {
     ].map((path) => new URL(path, BASE).href);
     const INDEX_URL = new URL('index.html', BASE).href;
 
+    async function precache() {
+        const cache = await caches.open(CACHE);
+        await Promise.allSettled(SHELL.map(async (url) => {
+            const response = await fetch(url, { cache: 'reload' });
+            if (response && response.ok) await cache.put(url, response);
+        }));
+    }
+
     self.addEventListener('install', (event) => {
-        event.waitUntil(
-            caches.open(CACHE)
-                .then((cache) => Promise.allSettled(SHELL.map((url) => cache.add(url))))
-                .then(() => self.skipWaiting())
-        );
+        event.waitUntil(precache().then(() => self.skipWaiting()));
     });
 
     self.addEventListener('activate', (event) => {
-        event.waitUntil(
-            caches.keys()
-                .then((keys) => Promise.all(
-                    keys
-                        .filter((key) => key.startsWith('speak-shell-') && key !== CACHE)
-                        .map((key) => caches.delete(key))
-                ))
-                .then(() => self.clients.claim())
-        );
+        event.waitUntil((async () => {
+            const keys = await caches.keys();
+            await Promise.all(
+                keys
+                    .filter((key) => key.startsWith('speak-shell-') && key !== CACHE)
+                    .map((key) => caches.delete(key))
+            );
+            await self.clients.claim();
+            const clients = await self.clients.matchAll({ type: 'window' });
+            clients.forEach((client) => {
+                try {
+                    const result = client.navigate(client.url);
+                    if (result && typeof result.catch === 'function') result.catch(() => {});
+                } catch (error) {}
+            });
+        })());
     });
 
     function withIsolation(response) {
@@ -49,7 +62,7 @@ if (typeof window === 'undefined') {
 
     async function handleNavigation(request) {
         try {
-            const response = await fetch(request);
+            const response = await fetch(request, { cache: 'reload' });
             if (response && response.ok) {
                 const copy = response.clone();
                 caches.open(CACHE).then((cache) => cache.put(request, copy)).catch(() => {});
@@ -124,15 +137,15 @@ if (typeof window === 'undefined') {
         : new URL('coi-sw.js', window.location.href).href;
 
     if ('serviceWorker' in navigator) {
+        let reloading = false;
+
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            if (reloading) return;
+            reloading = true;
+            window.location.reload();
+        });
+
         if (!window.crossOriginIsolated) {
-            let reloading = false;
-
-            navigator.serviceWorker.addEventListener('controllerchange', () => {
-                if (reloading) return;
-                reloading = true;
-                window.location.reload();
-            });
-
             navigator.serviceWorker.register(scriptUrl)
                 .then((registration) => {
                     if (registration.active && !navigator.serviceWorker.controller) {
