@@ -66,7 +66,7 @@ const LANGUAGES = {
         ui: {
             title: 'Speak & Disappear',
             tagline: 'Say it. Clear it.',
-            hint: 'Tap a card to hear it. Say it clearly to clear it!',
+            hint: 'Say a word clearly. When the game hears it, the card disappears!',
             tapStart: 'Tap Start to play',
             listening: 'Listening...',
             pausedStatus: 'Paused — tap ▶ to listen again.',
@@ -74,7 +74,6 @@ const LANGUAGES = {
             hearing: 'Hearing: {text}',
             heard: 'Heard: {text} — try again!',
             tryAgain: 'Try again! You can do it!',
-            hearWord: 'Listen: {word}',
             startLead: 'Say each word out loud. When the game hears it, the card disappears!',
             steps: ['Tap Start and allow the microphone', 'Say a word from the board', 'Clear all 20 cards to win'],
             startButton: 'Start speaking',
@@ -102,15 +101,12 @@ const LANGUAGES = {
             exitFullscreenAria: 'Exit fullscreen',
             scoreAria: 'Score: {score}',
             clearedAria: 'Cleared {done} of {total} words',
-            tapToHear: '{word}. Tap to hear.',
             greatJob: 'Great job!',
             clearedAll: 'You cleared all {total} words!',
             points: 'points',
             playAgain: 'Play again',
             backToGames: 'Back to games',
             winStatus: 'You did it!',
-            winSpeech: 'Great job! You got {score} points!',
-            cheers: ['Great job!', 'Well done!', 'Awesome!', 'You did it!'],
             burstEmojis: ['⭐', '✨', '🎉', '💫', '🌟'],
             errorPermission: 'Microphone permission was denied. Allow the microphone in your browser settings, then tap Try again.',
             errorNoMic: 'No microphone was found. Connect a microphone, then try again.',
@@ -177,7 +173,7 @@ const LANGUAGES = {
         ui: {
             title: 'Mów i znikaj',
             tagline: 'Powiedz słowo. Zniknie.',
-            hint: 'Dotknij karty, aby ją usłyszeć. Powiedz słowo wyraźnie, aby je zebrać!',
+            hint: 'Powiedz słowo wyraźnie. Kiedy gra je usłyszy, karta zniknie!',
             tapStart: 'Dotknij przycisku, aby zagrać',
             listening: 'Słucham...',
             pausedStatus: 'Pauza — dotknij ▶, aby słuchać dalej.',
@@ -185,7 +181,6 @@ const LANGUAGES = {
             hearing: 'Słyszę: {text}',
             heard: 'Słyszałem: {text} — spróbuj jeszcze raz!',
             tryAgain: 'Spróbuj jeszcze raz! Dasz radę!',
-            hearWord: 'Posłuchaj: {word}',
             startLead: 'Powiedz każde słowo na głos. Kiedy gra je usłyszy, karta zniknie!',
             steps: ['Dotknij przycisku i pozwól na mikrofon', 'Powiedz słowo z planszy', 'Zbierz wszystkie 20 kart'],
             startButton: 'Zaczynamy!',
@@ -213,15 +208,12 @@ const LANGUAGES = {
             exitFullscreenAria: 'Wyjdź z pełnego ekranu',
             scoreAria: 'Punkty: {score}',
             clearedAria: 'Zebrano {done} z {total} słów',
-            tapToHear: '{word}. Dotknij, aby usłyszeć.',
             greatJob: 'Brawo!',
             clearedAll: 'Wszystkie {total} kart zebrane!',
             points: 'punktów',
             playAgain: 'Zagraj jeszcze raz',
             backToGames: 'Wróć do gier',
             winStatus: 'Udało się!',
-            winSpeech: 'Brawo! Masz {score} punktów!',
-            cheers: ['Brawo!', 'Świetnie!', 'Super!', 'Doskonale!'],
             burstEmojis: ['⭐', '✨', '🎉', '💫', '🌟'],
             errorPermission: 'Brak dostępu do mikrofonu. Zezwól na mikrofon w ustawieniach przeglądarki i dotknij Spróbuj ponownie.',
             errorNoMic: 'Nie znaleziono mikrofonu. Podłącz mikrofon i spróbuj ponownie.',
@@ -239,7 +231,6 @@ const paramLanguage = LANGUAGES[params.get('lang')] ? params.get('lang') : '';
 const FORCE_ACCURATE_MODEL = params.get('model') === 'accurate';
 const POINTS_PER_WORD = 10;
 const FEEDBACK_LOCK_MS = 1900;
-const CARD_SPEAK_LOCK_MS = 1700;
 const AUDIO_BUFFER_SIZE = 128 * 32;
 const utf8Encoder = new TextEncoder();
 
@@ -323,7 +314,6 @@ let resumeAfterLang = false;
 let score = 0;
 let fxCtx = null;
 let applauseBuffer = null;
-let cachedVoices = [];
 
 function format(text, vars) {
     return String(text).replace(/\{(\w+)\}/g, (match, key) => (
@@ -419,9 +409,6 @@ function renderBoard() {
         card.className = 'word-card';
         card.dataset.index = String(index);
         card.dataset.word = item.word;
-        card.tabIndex = 0;
-        card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', format(t('tapToHear'), { word: item.word }));
 
         const art = document.createElement('div');
         art.className = 'card-art';
@@ -432,19 +419,7 @@ function renderBoard() {
         word.className = 'card-word';
         word.textContent = item.word;
 
-        const speaker = document.createElement('span');
-        speaker.className = 'card-speaker';
-        speaker.textContent = '🔊';
-        speaker.setAttribute('aria-hidden', 'true');
-
-        card.append(art, word, speaker);
-        card.addEventListener('click', () => speakWord(index));
-        card.addEventListener('keydown', (event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-                event.preventDefault();
-                speakWord(index);
-            }
-        });
+        card.append(art, word);
         boardEl.appendChild(card);
         cardEls.push(card);
     });
@@ -1099,13 +1074,24 @@ function tone(ctx, frequency, start, duration, volume, type) {
     oscillator.stop(start + duration + 0.02);
 }
 
-function playSparkle(delay) {
+function playBeep() {
     const ctx = ensureFxContext();
     if (!ctx) return;
-    const start = ctx.currentTime + (delay || 0);
-    [1046.5, 1318.51, 1567.98].forEach((frequency, index) => {
-        tone(ctx, frequency, start + index * 0.055, 0.22, 0.055, 'triangle');
-    });
+    try {
+        const now = ctx.currentTime;
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(740, now);
+        oscillator.frequency.exponentialRampToValueAtTime(988, now + 0.16);
+        gain.gain.setValueAtTime(0.0001, now);
+        gain.gain.exponentialRampToValueAtTime(0.22, now + 0.02);
+        gain.gain.setValueAtTime(0.22, now + 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.24);
+        oscillator.connect(gain).connect(ctx.destination);
+        oscillator.start(now);
+        oscillator.stop(now + 0.26);
+    } catch (error) {}
 }
 
 function playPop() {
@@ -1139,54 +1125,6 @@ function playFanfare() {
     [1046.5, 1318.51, 1567.98].forEach((frequency) => {
         tone(ctx, frequency, start + notes.length * 0.13, 0.7, 0.09, 'triangle');
     });
-}
-
-function refreshVoices() {
-    if (!('speechSynthesis' in window)) return;
-    try {
-        cachedVoices = window.speechSynthesis.getVoices();
-    } catch (error) {
-        cachedVoices = [];
-    }
-}
-
-function speechVoice() {
-    const prefix = LANGUAGES[selectedLanguage].code.split('-')[0].toLowerCase();
-    return cachedVoices.find((voice) => voice.lang && voice.lang.toLowerCase().startsWith(prefix)) || null;
-}
-
-function speakText(text, options) {
-    if (!('speechSynthesis' in window) || !text) return;
-    try {
-        const settings = options || {};
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = LANGUAGES[selectedLanguage].code;
-        utterance.rate = settings.rate === undefined ? 0.9 : settings.rate;
-        utterance.pitch = settings.pitch === undefined ? 1.1 : settings.pitch;
-        const voice = speechVoice();
-        if (voice) utterance.voice = voice;
-        window.speechSynthesis.speak(utterance);
-    } catch (error) {}
-}
-
-function speakWord(index) {
-    const item = WORDS[index];
-    const card = cardEls[index];
-    if (!item || !card || card.classList.contains('cleared')) return;
-
-    ensureFxContext();
-    card.classList.remove('tap');
-    void card.offsetWidth;
-    card.classList.add('tap');
-    window.setTimeout(() => card.classList.remove('tap'), 380);
-
-    feedbackLockUntil = performance.now() + CARD_SPEAK_LOCK_MS;
-    if (started && !paused && !gameWon) {
-        setStatus(format(t('hearWord'), { word: item.word }), 'hearing');
-        resetStatusLater(CARD_SPEAK_LOCK_MS);
-    }
-    speakText(item.word, { rate: 0.78, pitch: 1.12 });
 }
 
 function burstAt(x, y) {
@@ -1246,11 +1184,9 @@ function flashScreen() {
 function playCorrectFeedback(count) {
     ensureFxContext();
     playApplause(1.1 + Math.min(count, 3) * 0.2);
-    playSparkle();
+    playBeep();
     flashScreen();
     if (navigator.vibrate) navigator.vibrate([18, 30, 22]);
-    const phrases = t('cheers');
-    speakText(phrases[Math.floor(Math.random() * phrases.length)], { rate: 1.02, pitch: 1.15 });
 }
 
 function showCelebration() {
@@ -1291,7 +1227,6 @@ function finishGame() {
     playApplause(2.4);
     playFanfare();
     if (navigator.vibrate) navigator.vibrate([30, 40, 30, 40, 80]);
-    speakText(format(t('winSpeech'), { score }), { rate: 0.95, pitch: 1.1 });
 
     window.setTimeout(showCelebration, 550);
     window.setTimeout(() => {
@@ -1303,7 +1238,6 @@ function finishGame() {
 async function beginSession() {
     if (busy) return;
     ensureFxContext();
-    refreshVoices();
     busy = true;
     startBtn.disabled = true;
 
@@ -1385,9 +1319,6 @@ async function resumeListening() {
 
 async function resetRound() {
     window.clearTimeout(statusTimer);
-    if ('speechSynthesis' in window) {
-        try { window.speechSynthesis.cancel(); } catch (error) {}
-    }
     finishing = false;
     gameWon = false;
     paused = false;
@@ -1551,11 +1482,6 @@ window.addEventListener('pagehide', () => {
         updateListenButton();
     }
 });
-
-refreshVoices();
-if ('speechSynthesis' in window) {
-    window.speechSynthesis.addEventListener('voiceschanged', refreshVoices);
-}
 
 pending = new Set(WORDS.map((item, index) => index));
 renderBoard();
