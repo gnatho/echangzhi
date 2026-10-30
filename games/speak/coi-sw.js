@@ -1,5 +1,5 @@
 if (typeof window === 'undefined') {
-    const VERSION = '1.2.0';
+    const VERSION = '1.3.0';
     const CACHE = `speak-shell-${VERSION}`;
     const BASE = new URL('./', self.location.href).href;
     const SHELL = [
@@ -9,6 +9,8 @@ if (typeof window === 'undefined') {
         'style.css',
         'script.js',
         'coi-sw.js',
+        '../../data/level_words.js',
+        '../../data/word_icons.js',
         'vendor/Vosklet.js',
         'vendor/Vosklet.wasm'
     ].map((path) => new URL(path, BASE).href);

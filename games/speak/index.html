@@ -31,12 +31,10 @@
                     <span id="score-value">0</span>
                 </div>
                 <div class="counter" aria-live="polite">
-                    <span class="counter-number" id="remaining-count">20</span>
+                    <span class="counter-number" id="remaining-count">0</span>
                     <span class="counter-label" id="remaining-label">words left</span>
                 </div>
-                <button class="hud-btn lang-btn" id="lang-btn" type="button" aria-label="Change language">
-                    <span id="lang-flag" class="flag flag-en" aria-hidden="true"></span>
-                </button>
+                <button class="hud-btn" id="menu-btn" type="button" aria-label="Change words">☰</button>
                 <button class="hud-btn" id="listen-btn" type="button" aria-label="Pause listening" disabled>⏸</button>
                 <button class="hud-btn" id="fullscreen-btn" type="button" aria-label="Toggle fullscreen">⛶</button>
             </div>
@@ -54,7 +52,7 @@
                 </div>
             </div>
             <div class="cleared-pill" aria-label="Cleared words">
-                <span id="cleared-count">0</span><span class="cleared-slash">/</span><span id="total-count">20</span>
+                <span id="cleared-count">0</span><span class="cleared-slash">/</span><span id="total-count">0</span>
             </div>
         </section>
 
@@ -70,44 +68,46 @@
     <div class="screen-flash" id="screen-flash" aria-hidden="true"></div>
     <div class="fx-layer" id="fx-layer" aria-hidden="true"></div>
 
-    <div class="start-overlay lang-overlay" id="lang-overlay">
-        <div class="start-card lang-card" role="dialog" aria-modal="true" aria-labelledby="lang-title">
-            <button class="lang-close" id="lang-close" type="button" aria-label="Close" hidden>✕</button>
-            <div class="start-badge" aria-hidden="true">🌍</div>
-            <h2 id="lang-title">Choose your language</h2>
-            <p class="start-lead" id="lang-lead">Wybierz język, aby zacząć · Choose a language to start</p>
-
-            <div class="lang-options">
-                <button class="lang-choice" data-lang="en" type="button">
-                    <span class="lang-flag flag flag-en" aria-hidden="true"></span>
-                    <span class="lang-name">English</span>
-                    <span class="lang-hint">Speak &amp; Disappear</span>
-                </button>
-                <button class="lang-choice" data-lang="pl" type="button">
-                    <span class="lang-flag flag flag-pl" aria-hidden="true"></span>
-                    <span class="lang-name">Polski</span>
-                    <span class="lang-hint">Mów i znikaj</span>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <div class="start-overlay closed" id="start-overlay" aria-hidden="true">
-        <div class="start-card" role="dialog" aria-modal="true" aria-labelledby="start-title">
+        <div class="start-card menu-card" role="dialog" aria-modal="true" aria-labelledby="start-title">
+            <button class="lang-close" id="menu-close" type="button" aria-label="Close menu" hidden>✕</button>
             <div class="start-badge" aria-hidden="true">🗣️</div>
-            <div class="chosen-lang">
-                <span id="start-flag" class="flag flag-en" aria-hidden="true"></span>
-                <span id="start-lang-name">English</span>
-                <button class="link-btn" id="change-lang-start" type="button">Change</button>
-            </div>
             <h2 id="start-title">Speak &amp; Disappear</h2>
-            <p class="start-lead" id="start-lead">Say each word out loud. When the game hears it, the card disappears!</p>
+            <p class="start-lead" id="start-lead">Pick a book and a unit. Then choose how the words are shown, and say each word to make it disappear!</p>
 
-            <ol class="start-steps" id="start-steps">
-                <li><span>1</span> Tap Start and allow the microphone</li>
-                <li><span>2</span> Say a word from the board</li>
-                <li><span>3</span> Clear all 20 cards to win</li>
-            </ol>
+            <div class="menu-fields">
+                <label class="menu-field">
+                    <span class="menu-field-label">Book</span>
+                    <select id="level-select" class="menu-select"></select>
+                </label>
+                <label class="menu-field">
+                    <span class="menu-field-label">Unit</span>
+                    <select id="unit-select" class="menu-select"></select>
+                </label>
+            </div>
+
+            <div class="menu-field menu-field--modes">
+                <span class="menu-field-label">Show words as</span>
+                <div class="mode-options" id="mode-options" role="radiogroup" aria-label="Word display mode">
+                    <button class="mode-choice" data-mode="icon" type="button" role="radio" aria-checked="false">
+                        <span class="mode-swatch mode-swatch--icon" aria-hidden="true">🖼️</span>
+                        <span class="mode-name">Pictures</span>
+                        <span class="mode-hint">Easiest</span>
+                    </button>
+                    <button class="mode-choice" data-mode="text" type="button" role="radio" aria-checked="false">
+                        <span class="mode-swatch mode-swatch--text" aria-hidden="true">🔤</span>
+                        <span class="mode-name">Text</span>
+                        <span class="mode-hint">Medium</span>
+                    </button>
+                    <button class="mode-choice" data-mode="blank" type="button" role="radio" aria-checked="false">
+                        <span class="mode-swatch mode-swatch--blank" aria-hidden="true">⬜</span>
+                        <span class="mode-name">Blank</span>
+                        <span class="mode-hint">Hardest</span>
+                    </button>
+                </div>
+            </div>
+
+            <p class="menu-summary" id="menu-summary" aria-live="polite"></p>
 
             <p class="start-status" id="start-status" data-mode="idle">The speech model downloads once, then works offline.</p>
 
@@ -122,7 +122,7 @@
         <div class="celebrate-card" role="dialog" aria-modal="true" aria-labelledby="celebrate-title">
             <div class="celebrate-emoji" aria-hidden="true">🎉</div>
             <h2 id="celebrate-title">Great job!</h2>
-            <p id="celebrate-lead">You cleared all 20 words!</p>
+            <p id="celebrate-lead">You cleared all the words!</p>
             <div class="celebrate-score">
                 <span class="celebrate-star" aria-hidden="true">⭐</span>
                 <span id="celebrate-score-value">0</span>
@@ -130,13 +130,15 @@
             </div>
             <div class="celebrate-actions">
                 <button class="btn-primary" id="play-again-btn" type="button">Play again</button>
-                <button class="btn-secondary" id="change-lang-celebrate" type="button">Change language</button>
+                <button class="btn-secondary" id="change-words-celebrate" type="button">Change words</button>
             </div>
             <a class="celebrate-games" id="celebrate-games" href="../index.html">Back to games</a>
         </div>
     </div>
 
     <script src="coi-sw.js"></script>
+    <script src="../../data/level_words.js"></script>
+    <script src="../../data/word_icons.js"></script>
     <script src="vendor/Vosklet.js"></script>
     <script src="script.v2.js"></script>
 </body>

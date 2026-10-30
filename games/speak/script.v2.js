@@ -1,249 +1,152 @@
-const LANGUAGES = {
-    en: {
-        code: 'en-US',
-        name: 'English',
-        models: {
-            fast: {
-                key: 'vosk-model-small-en-us-0.15',
-                file: 'models/vosk-model-small-en-us-0.15.tar.gz',
-                kind: 'archive',
-                fast: true,
-                grammar: true,
-                size: '40 MB'
-            },
-            accurate: {
-                key: 'vosk-model-en-us-0.22-lgraph',
-                file: 'models/vosk-model-en-us-0.22-lgraph.tar.gz',
-                kind: 'archive',
-                fast: false,
-                grammar: true,
-                size: '128 MB',
-                sourceDir: 'models/vosk-model-en-us-0.22-lgraph/',
-                root: 'vosk-model-en-us-0.22-lgraph',
-                dirs: ['am', 'conf', 'graph', 'graph/phones', 'ivector'],
-                files: [
-                    'am/final.mdl',
-                    'am/tree',
-                    'conf/mfcc.conf',
-                    'conf/model.conf',
-                    'graph/Gr.fst',
-                    'graph/HCLr.fst',
-                    'graph/disambig_tid.int',
-                    'graph/phones.txt',
-                    'graph/phones/word_boundary.int',
-                    'graph/words.txt',
-                    'ivector/final.dubm',
-                    'ivector/final.ie',
-                    'ivector/final.mat',
-                    'ivector/global_cmvn.stats',
-                    'ivector/online_cmvn.conf',
-                    'ivector/splice.conf'
-                ]
-            }
-        },
-        words: [
-            { word: 'apple', emoji: '🍎' },
-            { word: 'banana', emoji: '🍌' },
-            { word: 'cat', emoji: '🐱' },
-            { word: 'dog', emoji: '🐶' },
-            { word: 'elephant', emoji: '🐘' },
-            { word: 'fish', emoji: '🐟' },
-            { word: 'giraffe', emoji: '🦒' },
-            { word: 'house', emoji: '🏠' },
-            { word: 'juice', emoji: '🧃' },
-            { word: 'kite', emoji: '🪁' },
-            { word: 'lion', emoji: '🦁' },
-            { word: 'monkey', emoji: '🐵' },
-            { word: 'orange', emoji: '🍊' },
-            { word: 'pencil', emoji: '✏️' },
-            { word: 'rabbit', emoji: '🐰' },
-            { word: 'rainbow', emoji: '🌈' },
-            { word: 'school', emoji: '🏫' },
-            { word: 'tiger', emoji: '🐯' },
-            { word: 'umbrella', emoji: '☂️' },
-            { word: 'zebra', emoji: '🦓' }
-        ],
-        ui: {
-            title: 'Speak & Disappear',
-            tagline: 'Say it. Clear it.',
-            hint: 'Say a word clearly. When the game hears it, the card disappears!',
-            tapStart: 'Tap Start to play',
-            listening: 'Listening...',
-            pausedStatus: 'Paused — tap ▶ to listen again.',
-            detected: 'Detected: {word}!',
-            hearing: 'Hearing: {text}',
-            heard: 'Heard: {text} — try again!',
-            tryAgain: 'Try again! You can do it!',
-            startLead: 'Say each word out loud. When the game hears it, the card disappears!',
-            steps: ['Tap Start and allow the microphone', 'Say a word from the board', 'Clear all 20 cards to win'],
-            startButton: 'Start speaking',
-            starting: 'Starting...',
-            listeningButton: 'Listening...',
-            tryAgainButton: 'Try again',
-            modelNote: 'The speech model downloads once, then works offline.',
-            privacy: '🔒 Audio is processed on this device. Nothing is uploaded.',
-            prepareEngine: 'Preparing the microphone and speech model...',
-            turnOnMic: 'Turning on the microphone...',
-            engineReload: 'Preparing the speech engine... The page will reload once. Then tap Start again.',
-            engineFail: 'This browser could not enable the speech engine. Serve the game over HTTPS or localhost, and make sure service workers are allowed.',
-            modelCached: 'Loading the speech model...',
-            modelDownloading: 'Downloading the speech model (first time only, about {size})...',
-            modelBuilding: 'Preparing the speech model (first time only)...',
-            modelFile: 'Preparing the speech model ({current}/{total})...',
-            modelPreparing: 'Preparing the speech model...',
-            recognizer: 'Starting the word recognizer...',
-            change: 'Change',
-            changeLanguage: 'Change language',
-            changeLanguageAria: 'Change language',
-            pauseAria: 'Pause listening',
-            resumeAria: 'Resume listening',
-            fullscreenAria: 'Toggle fullscreen',
-            exitFullscreenAria: 'Exit fullscreen',
-            scoreAria: 'Score: {score}',
-            clearedAria: 'Cleared {done} of {total} words',
-            greatJob: 'Great job!',
-            clearedAll: 'You cleared all {total} words!',
-            points: 'points',
-            playAgain: 'Play again',
-            backToGames: 'Back to games',
-            winStatus: 'You did it!',
-            burstEmojis: ['⭐', '✨', '🎉', '💫', '🌟'],
-            errorPermission: 'Microphone permission was denied. Allow the microphone in your browser settings, then tap Try again.',
-            errorNoMic: 'No microphone was found. Connect a microphone, then try again.',
-            errorModelMissing: 'The speech model files were not found. Put the model inside games/speak/models/, then try again.',
-            errorModelFetch: 'The speech model could not be downloaded. Check the connection and try again.',
-            errorIsolation: 'The speech engine needs cross-origin isolation. Open the game over HTTPS or localhost and reload the page.',
-            errorFile: 'Open the game through a local web server, not by double-clicking the HTML file.',
-            errorGeneric: 'Could not start speech recognition: {text}'
-        }
+const MODEL_CONFIG = {
+    fast: {
+        key: 'vosk-model-small-en-us-0.15',
+        file: 'models/vosk-model-small-en-us-0.15.tar.gz',
+        kind: 'archive',
+        fast: true,
+        grammar: true,
+        size: '40 MB'
     },
-    pl: {
-        code: 'pl-PL',
-        name: 'Polski',
-        models: {
-            fast: {
-                key: 'vosk-model-small-pl-0.22',
-                file: 'models/vosk-model-small-pl-0.22.tar.gz',
-                kind: 'archive',
-                fast: true,
-                grammar: false,
-                size: '54 MB',
-                sourceDir: 'models/vosk-model-small-pl-0.22/',
-                root: 'vosk-model-small-pl-0.22',
-                dirs: ['am', 'conf', 'graph', 'graph/phones', 'ivector'],
-                files: [
-                    'am/final.mdl',
-                    'conf/mfcc.conf',
-                    'conf/model.conf',
-                    'graph/Gr.fst',
-                    'graph/HCLr.fst',
-                    'graph/disambig_tid.int',
-                    'graph/phones/word_boundary.int',
-                    'ivector/final.dubm',
-                    'ivector/final.ie',
-                    'ivector/final.mat',
-                    'ivector/global_cmvn.stats',
-                    'ivector/online_cmvn.conf',
-                    'ivector/splice.conf'
-                ]
-            }
-        },
-        words: [
-            { word: 'kot', emoji: '🐱', aliases: ['kotek', 'kota', 'kotki'] },
-            { word: 'pies', emoji: '🐶', aliases: ['piesek', 'psa', 'pieska'] },
-            { word: 'ryba', emoji: '🐟', aliases: ['rybka', 'rybę', 'ryby'] },
-            { word: 'dom', emoji: '🏠', aliases: ['domek', 'domu', 'domki'] },
-            { word: 'jabłko', emoji: '🍎', aliases: ['jabłuszko', 'jabłka', 'jabłkiem'] },
-            { word: 'banan', emoji: '🍌', aliases: ['bananek', 'banana', 'banany'] },
-            { word: 'mleko', emoji: '🥛', aliases: ['mleczko', 'mleka', 'mlekiem'] },
-            { word: 'piłka', emoji: '⚽', aliases: ['piłkę', 'piłeczka', 'piłki'] },
-            { word: 'auto', emoji: '🚗', aliases: ['autko', 'auta', 'autem'] },
-            { word: 'słońce', emoji: '☀️', aliases: ['słoneczko', 'słońca', 'słońcem'] },
-            { word: 'księżyc', emoji: '🌙', aliases: ['księżyca', 'księżycem'] },
-            { word: 'gwiazda', emoji: '⭐', aliases: ['gwiazdka', 'gwiazdę', 'gwiazdy'] },
-            { word: 'kwiat', emoji: '🌸', aliases: ['kwiatek', 'kwiatka', 'kwiaty'] },
-            { word: 'drzewo', emoji: '🌳', aliases: ['drzewko', 'drzewa', 'drzewem'] },
-            { word: 'miś', emoji: '🧸', aliases: ['misio', 'misia', 'misie'] },
-            { word: 'kaczka', emoji: '🦆', aliases: ['kaczuszka', 'kaczkę', 'kaczki'] },
-            { word: 'krowa', emoji: '🐮', aliases: ['krówka', 'krowę', 'krowy'] },
-            { word: 'koń', emoji: '🐴', aliases: ['konik', 'konia', 'konie'] },
-            { word: 'mysz', emoji: '🐭', aliases: ['myszka', 'myszkę', 'myszy'] },
-            { word: 'ptak', emoji: '🐦', aliases: ['ptaszek', 'ptaka', 'ptaki'] }
-        ],
-        ui: {
-            title: 'Mów i znikaj',
-            tagline: 'Powiedz słowo. Zniknie.',
-            hint: 'Powiedz słowo wyraźnie. Kiedy gra je usłyszy, karta zniknie!',
-            tapStart: 'Dotknij przycisku, aby zagrać',
-            listening: 'Słucham...',
-            pausedStatus: 'Pauza — dotknij ▶, aby słuchać dalej.',
-            detected: 'Usłyszałem: {word}!',
-            hearing: 'Słyszę: {text}',
-            heard: 'Słyszałem: {text} — spróbuj jeszcze raz!',
-            tryAgain: 'Spróbuj jeszcze raz! Dasz radę!',
-            startLead: 'Powiedz każde słowo na głos. Kiedy gra je usłyszy, karta zniknie!',
-            steps: ['Dotknij przycisku i pozwól na mikrofon', 'Powiedz słowo z planszy', 'Zbierz wszystkie 20 kart'],
-            startButton: 'Zaczynamy!',
-            starting: 'Zaczynam...',
-            listeningButton: 'Słucham...',
-            tryAgainButton: 'Spróbuj ponownie',
-            modelNote: 'Model mowy pobiera się raz, potem działa offline.',
-            privacy: '🔒 Dźwięk jest przetwarzany na tym urządzeniu. Nic nie jest wysyłane.',
-            prepareEngine: 'Przygotowuję mikrofon i model mowy...',
-            turnOnMic: 'Włączam mikrofon...',
-            engineReload: 'Przygotowuję silnik mowy... Strona odświeży się raz. Potem dotknij przycisku jeszcze raz.',
-            engineFail: 'Ta przeglądarka nie może włączyć silnika mowy. Otwórz grę przez HTTPS lub localhost i sprawdź, czy service worker jest dozwolony.',
-            modelCached: 'Ładuję model mowy...',
-            modelDownloading: 'Pobieram model mowy (tylko pierwszy raz, około {size})...',
-            modelBuilding: 'Przygotowuję model mowy (tylko pierwszy raz)...',
-            modelFile: 'Przygotowuję model mowy ({current}/{total})...',
-            modelPreparing: 'Przygotowuję model mowy...',
-            recognizer: 'Uruchamiam rozpoznawanie słów...',
-            change: 'Zmień',
-            changeLanguage: 'Zmień język',
-            changeLanguageAria: 'Zmień język',
-            pauseAria: 'Wstrzymaj słuchanie',
-            resumeAria: 'Wznów słuchanie',
-            fullscreenAria: 'Pełny ekran',
-            exitFullscreenAria: 'Wyjdź z pełnego ekranu',
-            scoreAria: 'Punkty: {score}',
-            clearedAria: 'Zebrano {done} z {total} słów',
-            greatJob: 'Brawo!',
-            clearedAll: 'Wszystkie {total} kart zebrane!',
-            points: 'punktów',
-            playAgain: 'Zagraj jeszcze raz',
-            backToGames: 'Wróć do gier',
-            winStatus: 'Udało się!',
-            burstEmojis: ['⭐', '✨', '🎉', '💫', '🌟'],
-            errorPermission: 'Brak dostępu do mikrofonu. Zezwól na mikrofon w ustawieniach przeglądarki i dotknij Spróbuj ponownie.',
-            errorNoMic: 'Nie znaleziono mikrofonu. Podłącz mikrofon i spróbuj ponownie.',
-            errorModelMissing: 'Nie znaleziono plików modelu mowy w games/speak/models/. Sprawdź folder modelu i spróbuj ponownie.',
-            errorModelFetch: 'Nie udało się pobrać modelu mowy. Sprawdź połączenie i spróbuj ponownie.',
-            errorIsolation: 'Silnik mowy potrzebuje izolacji. Otwórz grę przez HTTPS lub localhost i odśwież stronę.',
-            errorFile: 'Otwórz grę przez lokalny serwer, a nie przez dwuklik pliku HTML.',
-            errorGeneric: 'Nie udało się uruchomić rozpoznawania mowy: {text}'
-        }
+    accurate: {
+        key: 'vosk-model-en-us-0.22-lgraph',
+        file: 'models/vosk-model-en-us-0.22-lgraph.tar.gz',
+        kind: 'archive',
+        fast: false,
+        grammar: true,
+        size: '128 MB',
+        sourceDir: 'models/vosk-model-en-us-0.22-lgraph/',
+        root: 'vosk-model-en-us-0.22-lgraph',
+        dirs: ['am', 'conf', 'graph', 'graph/phones', 'ivector'],
+        files: [
+            'am/final.mdl',
+            'am/tree',
+            'conf/mfcc.conf',
+            'conf/model.conf',
+            'graph/Gr.fst',
+            'graph/HCLr.fst',
+            'graph/disambig_tid.int',
+            'graph/phones.txt',
+            'graph/phones/word_boundary.int',
+            'graph/words.txt',
+            'ivector/final.dubm',
+            'ivector/final.ie',
+            'ivector/final.mat',
+            'ivector/global_cmvn.stats',
+            'ivector/online_cmvn.conf',
+            'ivector/splice.conf'
+        ]
     }
 };
 
+const ICON_BASE = '../../static/imgs/words/fl_big/';
+const DISPLAY_MODES = ['icon', 'text', 'blank'];
+const MODE_LABELS = { icon: 'Pictures', text: 'Text', blank: 'Blank' };
+
+const UI = {
+    title: 'Speak & Disappear',
+    tagline: 'Say it. Clear it.',
+    hint: 'Say a word clearly. When the game hears it, the card disappears!',
+    tapStart: 'Tap Start to play',
+    listening: 'Listening...',
+    pausedStatus: 'Paused — tap ▶ to listen again.',
+    detected: 'Detected: {word}!',
+    hearing: 'Hearing: {text}',
+    heard: 'Heard: {text} — try again!',
+    tryAgain: 'Try again! You can do it!',
+    startLead: 'Pick a book and a unit. Then choose how the words are shown, and say each word to make it disappear!',
+    startButton: 'Start speaking',
+    starting: 'Starting...',
+    listeningButton: 'Listening...',
+    tryAgainButton: 'Try again',
+    modelNote: 'The speech model downloads once, then works offline.',
+    privacy: '🔒 Audio is processed on this device. Nothing is uploaded.',
+    prepareEngine: 'Preparing the microphone and speech model...',
+    turnOnMic: 'Turning on the microphone...',
+    engineReload: 'Preparing the speech engine... The page will reload once. Then tap Start again.',
+    engineFail: 'This browser could not enable the speech engine. Serve the game over HTTPS or localhost, and make sure service workers are allowed.',
+    modelCached: 'Loading the speech model...',
+    modelDownloading: 'Downloading the speech model (first time only, about {size})...',
+    modelBuilding: 'Preparing the speech model (first time only)...',
+    modelFile: 'Preparing the speech model ({current}/{total})...',
+    modelPreparing: 'Preparing the speech model...',
+    recognizer: 'Starting the word recognizer...',
+    changeWords: 'Change words',
+    menuAria: 'Change words',
+    closeMenuAria: 'Close menu',
+    book: 'Book',
+    unit: 'Unit',
+    showAs: 'Show words as',
+    summary: '{count} words ready',
+    summaryEmpty: 'No words in this unit.',
+    pauseAria: 'Pause listening',
+    resumeAria: 'Resume listening',
+    fullscreenAria: 'Toggle fullscreen',
+    exitFullscreenAria: 'Exit fullscreen',
+    scoreAria: 'Score: {score}',
+    clearedAria: 'Cleared {done} of {total} words',
+    greatJob: 'Great job!',
+    clearedAll: 'You cleared all {total} words!',
+    points: 'points',
+    playAgain: 'Play again',
+    backToGames: 'Back to games',
+    winStatus: 'You did it!',
+    burstEmojis: ['⭐', '✨', '🎉', '💫', '🌟'],
+    errorPermission: 'Microphone permission was denied. Allow the microphone in your browser settings, then tap Try again.',
+    errorNoMic: 'No microphone was found. Connect a microphone, then try again.',
+    errorModelMissing: 'The speech model files were not found. Put the model inside games/speak/models/, then try again.',
+    errorModelFetch: 'The speech model could not be downloaded. Check the connection and try again.',
+    errorIsolation: 'The speech engine needs cross-origin isolation. Open the game over HTTPS or localhost and reload the page.',
+    errorFile: 'Open the game through a local web server, not by double-clicking the HTML file.',
+    errorGeneric: 'Could not start speech recognition: {text}'
+};
+
 const params = new URLSearchParams(window.location.search);
-const paramLanguage = LANGUAGES[params.get('lang')] ? params.get('lang') : '';
 const FORCE_ACCURATE_MODEL = params.get('model') === 'accurate';
 const POINTS_PER_WORD = 10;
 const FEEDBACK_LOCK_MS = 1900;
 const AUDIO_BUFFER_SIZE = 128 * 32;
 const utf8Encoder = new TextEncoder();
 
-function readStoredLanguage() {
+function readStored(key, fallback) {
     try {
-        const stored = localStorage.getItem('speakLanguage');
-        if (stored && LANGUAGES[stored]) return stored;
+        const value = localStorage.getItem(key);
+        if (value !== null) return value;
     } catch (error) {}
-    return 'en';
+    return fallback;
 }
 
-let selectedLanguage = paramLanguage || readStoredLanguage();
-let WORDS = LANGUAGES[selectedLanguage].words;
+function readStoredInt(key, fallback, allowed) {
+    const value = Number(readStored(key, String(fallback)));
+    if (!Number.isInteger(value)) return fallback;
+    if (allowed && !allowed.includes(value)) return fallback;
+    return value;
+}
+
+function levelKeys() {
+    if (typeof levelUnits === 'undefined' || !levelUnits) return ['0'];
+    return Object.keys(levelUnits).sort((a, b) => Number(a) - Number(b));
+}
+
+function unitKeys(level) {
+    const units = (typeof levelUnits !== 'undefined' && levelUnits && levelUnits[level]) || null;
+    if (!units) return ['0'];
+    return Object.keys(units).sort((a, b) => Number(a) - Number(b));
+}
+
+let selectedLevel = readStoredInt('speakLevel', 0, levelKeys().map(Number));
+if (!levelKeys().includes(String(selectedLevel))) selectedLevel = Number(levelKeys()[0]);
+let selectedUnit = readStoredInt('speakUnit', 0, unitKeys(selectedLevel).map(Number));
+if (!unitKeys(selectedLevel).includes(String(selectedUnit))) selectedUnit = Number(unitKeys(selectedLevel)[0]);
+let displayMode = readStored('speakDisplayMode', 'icon');
+if (!DISPLAY_MODES.includes(displayMode)) displayMode = 'icon';
+
+function buildWords(level, unit) {
+    const list = (typeof levelUnits !== 'undefined' && levelUnits && levelUnits[level] && levelUnits[level][unit]) || [];
+    const icons = (typeof levelWordIcons !== 'undefined' && levelWordIcons && levelWordIcons[level + '-' + unit]) || [];
+    return list.map((word, index) => ({ word: String(word), file: icons[index] || null }));
+}
+
+let WORDS = buildWords(selectedLevel, selectedUnit);
 
 const boardEl = document.getElementById('board');
 const statusPanel = document.getElementById('status-panel');
@@ -255,9 +158,16 @@ const totalCount = document.getElementById('total-count');
 const progressFill = document.getElementById('progress-fill');
 const listenBtn = document.getElementById('listen-btn');
 const fullscreenBtn = document.getElementById('fullscreen-btn');
+const menuBtn = document.getElementById('menu-btn');
 const startOverlay = document.getElementById('start-overlay');
+const menuClose = document.getElementById('menu-close');
 const startBtn = document.getElementById('start-btn');
 const startStatus = document.getElementById('start-status');
+const levelSelect = document.getElementById('level-select');
+const unitSelect = document.getElementById('unit-select');
+const modeOptions = document.getElementById('mode-options');
+const modeChoices = Array.from(document.querySelectorAll('.mode-choice'));
+const menuSummary = document.getElementById('menu-summary');
 const celebration = document.getElementById('celebration');
 const confettiEl = document.getElementById('confetti');
 const playAgainBtn = document.getElementById('play-again-btn');
@@ -266,22 +176,13 @@ const celebrateLead = document.getElementById('celebrate-lead');
 const celebrateScoreValue = document.getElementById('celebrate-score-value');
 const celebrateScoreLabel = document.getElementById('celebrate-score-label');
 const celebrateGames = document.getElementById('celebrate-games');
-const changeLangCelebrate = document.getElementById('change-lang-celebrate');
+const changeWordsCelebrate = document.getElementById('change-words-celebrate');
 const brandTitle = document.getElementById('brand-title');
 const brandTagline = document.getElementById('brand-tagline');
 const hintBar = document.getElementById('hint-bar');
 const backBtn = document.getElementById('back-btn');
-const langBtn = document.getElementById('lang-btn');
-const langFlag = document.getElementById('lang-flag');
-const langOverlay = document.getElementById('lang-overlay');
-const langClose = document.getElementById('lang-close');
-const langChoices = Array.from(document.querySelectorAll('.lang-choice'));
 const startTitle = document.getElementById('start-title');
 const startLead = document.getElementById('start-lead');
-const startSteps = document.getElementById('start-steps');
-const startFlag = document.getElementById('start-flag');
-const startLangName = document.getElementById('start-lang-name');
-const changeLangStart = document.getElementById('change-lang-start');
 const privacyNote = document.getElementById('privacy-note');
 const scorePill = document.getElementById('score-pill');
 const scoreValue = document.getElementById('score-value');
@@ -293,6 +194,7 @@ let model = null;
 let activeModelPath = '';
 let activeModelId = '';
 let recognizer = null;
+let recognizerSignature = '';
 let audioCtx = null;
 let micStream = null;
 let micNode = null;
@@ -300,7 +202,7 @@ let transferer = null;
 let cardEls = [];
 let pending = new Set();
 let engineReady = false;
-let grammarMode = LANGUAGES[selectedLanguage].models.fast.grammar;
+let grammarMode = true;
 let started = false;
 let paused = false;
 let gameWon = false;
@@ -310,7 +212,7 @@ let statusTimer = 0;
 let statusLockUntil = 0;
 let feedbackLockUntil = 0;
 let flashTimer = 0;
-let resumeAfterLang = false;
+let resumeAfterMenu = false;
 let score = 0;
 let fxCtx = null;
 let applauseBuffer = null;
@@ -322,21 +224,22 @@ function format(text, vars) {
 }
 
 function t(key, vars) {
-    const value = LANGUAGES[selectedLanguage].ui[key];
+    const value = UI[key];
     if (Array.isArray(value)) return value;
     const text = value === undefined ? key : value;
     return vars ? format(text, vars) : text;
 }
 
+function currentSignature() {
+    return selectedLevel + '-' + selectedUnit;
+}
+
 function wordLabel(count) {
-    if (selectedLanguage === 'pl') {
-        if (count === 1) return 'słowo';
-        const last = count % 10;
-        const lastTwo = count % 100;
-        if (last >= 2 && last <= 4 && (lastTwo < 12 || lastTwo > 14)) return 'słowa';
-        return 'słów';
-    }
     return count === 1 ? 'word' : 'words';
+}
+
+function iconPath(file) {
+    return ICON_BASE + file;
 }
 
 function modelPath(config) {
@@ -346,7 +249,6 @@ function modelPath(config) {
 function normalizeText(text) {
     const source = String(text || '')
         .toLowerCase()
-        .replace(/ł/g, 'l')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
     return source
@@ -401,28 +303,65 @@ function parseDetail(detail) {
     return detail;
 }
 
+function boardColumns(count) {
+    const narrow = window.innerWidth < 620;
+    let cols;
+    if (count <= 1) cols = 1;
+    else if (count <= 4) cols = 2;
+    else if (count <= 6) cols = 3;
+    else if (count <= 8) cols = 4;
+    else if (count <= 10) cols = 5;
+    else cols = 4;
+    if (narrow) cols = Math.min(cols, 3);
+    return cols;
+}
+
+function layoutBoard() {
+    boardEl.style.setProperty('--cols', String(boardColumns(WORDS.length)));
+}
+
 function renderBoard() {
     boardEl.innerHTML = '';
+    boardEl.dataset.mode = displayMode;
     cardEls = [];
     WORDS.forEach((item, index) => {
         const card = document.createElement('article');
         card.className = 'word-card';
         card.dataset.index = String(index);
         card.dataset.word = item.word;
+        card.tabIndex = 0;
 
         const art = document.createElement('div');
         art.className = 'card-art';
-        art.textContent = item.emoji || '⭐';
         art.setAttribute('aria-hidden', 'true');
 
-        const word = document.createElement('div');
-        word.className = 'card-word';
-        word.textContent = item.word;
+        if (displayMode === 'blank') {
+            art.classList.add('card-art--blank');
+            card.setAttribute('aria-label', 'Hidden word ' + (index + 1));
+        } else if (displayMode === 'text') {
+            art.classList.add('card-art--text');
+            art.textContent = item.word;
+            card.setAttribute('aria-label', item.word);
+        } else if (item.file) {
+            const img = document.createElement('img');
+            img.className = 'card-icon';
+            img.src = iconPath(item.file);
+            img.alt = '';
+            img.loading = 'lazy';
+            img.decoding = 'async';
+            art.appendChild(img);
+            card.setAttribute('aria-label', item.word);
+        } else {
+            art.classList.add('card-art--text');
+            art.textContent = item.word;
+            card.setAttribute('aria-label', item.word);
+        }
 
-        card.append(art, word);
+        card.append(art);
         boardEl.appendChild(card);
         cardEls.push(card);
     });
+    layoutBoard();
 }
 
 function setStatus(text, mode) {
@@ -445,7 +384,7 @@ function updateProgress() {
     const done = total - left;
 
     remainingCount.textContent = String(left);
-    remainingLabel.textContent = selectedLanguage === 'en' ? `${wordLabel(left)} left` : wordLabel(left);
+    remainingLabel.textContent = wordLabel(left) + ' left';
     clearedCount.textContent = String(done);
     totalCount.textContent = String(total);
     progressFill.style.width = total ? `${(done / total) * 100}%` : '0%';
@@ -486,43 +425,82 @@ function updateStartButton(label, disabled) {
     startBtn.disabled = disabled;
 }
 
-function updateLangChoiceHighlight() {
-    langChoices.forEach((button) => {
-        button.classList.toggle('is-current', button.dataset.lang === selectedLanguage);
+function populateLevelSelect() {
+    levelSelect.innerHTML = '';
+    levelKeys().forEach((level) => {
+        const option = document.createElement('option');
+        option.value = level;
+        option.textContent = t('book') + ' ' + level;
+        levelSelect.appendChild(option);
     });
+    levelSelect.value = String(selectedLevel);
+}
+
+function populateUnitSelect() {
+    unitSelect.innerHTML = '';
+    unitKeys(selectedLevel).forEach((unit) => {
+        const option = document.createElement('option');
+        option.value = unit;
+        option.textContent = t('unit') + ' ' + unit;
+        unitSelect.appendChild(option);
+    });
+    if (!unitKeys(selectedLevel).includes(String(selectedUnit))) {
+        selectedUnit = Number(unitKeys(selectedLevel)[0]);
+    }
+    unitSelect.value = String(selectedUnit);
+}
+
+function updateModeHighlight() {
+    modeChoices.forEach((button) => {
+        const active = button.dataset.mode === displayMode;
+        button.classList.toggle('is-current', active);
+        button.setAttribute('aria-checked', active ? 'true' : 'false');
+    });
+    modeOptions.dataset.mode = displayMode;
+}
+
+function updateSummary() {
+    const count = WORDS.length;
+    if (!count) {
+        menuSummary.textContent = t('summaryEmpty');
+        return;
+    }
+    menuSummary.textContent = format(t('summary'), { count }) + ' · ' + MODE_LABELS[displayMode];
+}
+
+function refreshFromSelection() {
+    WORDS = buildWords(selectedLevel, selectedUnit);
+    score = 0;
+    updateScore();
+    renderBoard();
+    pending = new Set(WORDS.map((item, index) => index));
+    updateProgress();
+    updateSummary();
 }
 
 function updateStaticText() {
-    const lang = LANGUAGES[selectedLanguage];
-    document.documentElement.lang = selectedLanguage;
     document.title = t('title');
     brandTitle.textContent = t('title');
     brandTagline.textContent = t('tagline');
     hintBar.textContent = t('hint');
     backBtn.setAttribute('aria-label', t('backToGames'));
-
     startTitle.textContent = t('title');
     startLead.textContent = t('startLead');
-    startSteps.innerHTML = '';
-    t('steps').forEach((step, index) => {
-        const item = document.createElement('li');
-        const number = document.createElement('span');
-        number.textContent = String(index + 1);
-        item.append(number, document.createTextNode(` ${step}`));
-        startSteps.appendChild(item);
-    });
     privacyNote.textContent = t('privacy');
-    startFlag.className = `flag flag-${selectedLanguage}`;
-    startLangName.textContent = lang.name;
-    changeLangStart.textContent = t('change');
-    langFlag.className = `flag flag-${selectedLanguage}`;
-    langBtn.setAttribute('aria-label', t('changeLanguageAria'));
-    langBtn.title = t('changeLanguageAria');
     celebrateTitle.textContent = t('greatJob');
     playAgainBtn.textContent = t('playAgain');
-    changeLangCelebrate.textContent = t('changeLanguage');
+    changeWordsCelebrate.textContent = t('changeWords');
     celebrateGames.textContent = t('backToGames');
     celebrateScoreLabel.textContent = t('points');
+    menuBtn.setAttribute('aria-label', t('menuAria'));
+    menuClose.setAttribute('aria-label', t('closeMenuAria'));
+    document.querySelectorAll('.menu-field-label').forEach((label, index) => {
+        label.textContent = index === 0 ? t('book') : (index === 1 ? t('unit') : t('showAs'));
+    });
+    modeChoices.forEach((button) => {
+        const name = button.querySelector('.mode-name');
+        if (name) name.textContent = MODE_LABELS[button.dataset.mode];
+    });
     fullscreenBtn.setAttribute('aria-label', document.fullscreenElement ? t('exitFullscreenAria') : t('fullscreenAria'));
 
     if (!busy && startStatus.dataset.mode !== 'loading' && startStatus.dataset.mode !== 'error') {
@@ -536,7 +514,7 @@ function updateStaticText() {
     }
     updateProgress();
     updateListenButton();
-    updateLangChoiceHighlight();
+    updateModeHighlight();
 }
 
 function friendlyError(error) {
@@ -600,25 +578,17 @@ async function modelAvailability(config) {
 }
 
 async function selectModel() {
-    const lang = LANGUAGES[selectedLanguage];
-
-    if (selectedLanguage === 'pl') {
-        const fast = await modelAvailability(lang.models.fast);
-        if (fast) return { cfg: lang.models.fast, ...fast };
-        throw new Error('MODEL_FILES_MISSING');
-    }
-
     if (FORCE_ACCURATE_MODEL) {
-        const accurate = await modelAvailability(lang.models.accurate);
-        if (accurate) return { cfg: lang.models.accurate, ...accurate };
+        const accurate = await modelAvailability(MODEL_CONFIG.accurate);
+        if (accurate) return { cfg: MODEL_CONFIG.accurate, ...accurate };
         throw new Error('MODEL_FILES_MISSING');
     }
 
-    const fast = await modelAvailability(lang.models.fast);
-    if (fast) return { cfg: lang.models.fast, ...fast };
+    const fast = await modelAvailability(MODEL_CONFIG.fast);
+    if (fast) return { cfg: MODEL_CONFIG.fast, ...fast };
 
-    const accurate = await modelAvailability(lang.models.accurate);
-    if (accurate) return { cfg: lang.models.accurate, ...accurate };
+    const accurate = await modelAvailability(MODEL_CONFIG.accurate);
+    if (accurate) return { cfg: MODEL_CONFIG.accurate, ...accurate };
 
     throw new Error('MODEL_FILES_MISSING');
 }
@@ -699,7 +669,8 @@ async function buildModelArchive(config) {
 }
 
 async function ensureEngine() {
-    if (engineReady) return;
+    const signature = currentSignature();
+    if (engineReady && recognizer && recognizerSignature === signature) return;
 
     if (!window.isSecureContext) {
         throw new Error('FILE_PROTOCOL');
@@ -729,7 +700,6 @@ async function ensureEngine() {
         const selected = await selectModel();
         activeModelPath = selected.path;
         activeModelId = selected.cfg.key;
-        grammarMode = selected.cfg.grammar;
 
         let source = activeModelPath;
         let blobUrl = '';
@@ -752,19 +722,26 @@ async function ensureEngine() {
         }
     }
 
-    if (grammarMode) {
-        try {
-            const missing = [...new Set(
-                WORDS.flatMap((item) => item.word.toLowerCase().split(' ')).filter(Boolean)
-            )].filter((word) => model.findWord(word) < 0);
-
-            if (missing.length) grammarMode = false;
-        } catch (error) {
-            grammarMode = false;
+    if (!recognizer || recognizerSignature !== signature) {
+        if (recognizer) {
+            const old = recognizer;
+            recognizer = null;
+            try { await old.delete(); } catch (error) {}
         }
-    }
+        grammarMode = MODEL_CONFIG.fast.grammar;
 
-    if (!recognizer) {
+        if (grammarMode) {
+            try {
+                const missing = [...new Set(
+                    WORDS.flatMap((item) => item.word.toLowerCase().split(' ')).filter(Boolean)
+                )].filter((word) => model.findWord(word) < 0);
+
+                if (missing.length) grammarMode = false;
+            } catch (error) {
+                grammarMode = false;
+            }
+        }
+
         setStartStatus(t('recognizer'), 'loading');
         if (grammarMode) {
             try {
@@ -781,6 +758,7 @@ async function ensureEngine() {
         }
         recognizer.addEventListener('partialResult', onPartialResult);
         recognizer.addEventListener('result', onResult);
+        recognizerSignature = signature;
     }
 
     engineReady = true;
@@ -860,11 +838,12 @@ function findMatches(text) {
     const tokens = normalized.split(' ').filter(Boolean);
     const hits = new Set();
 
+    pending.forEach((index) => {
+        const target = normalizeText(WORDS[index].word);
+        if (target && padded.includes(` ${target} `)) hits.add(index);
+    });
+
     if (grammarMode) {
-        pending.forEach((index) => {
-            const target = normalizeText(WORDS[index].word);
-            if (target && padded.includes(` ${target} `)) hits.add(index);
-        });
         return [...hits];
     }
 
@@ -1238,6 +1217,17 @@ function finishGame() {
 async function beginSession() {
     if (busy) return;
     ensureFxContext();
+
+    const signature = currentSignature();
+    const isResume = engineReady && recognizer && recognizerSignature === signature && pending.size > 0 && pending.size < WORDS.length;
+    if (!isResume) {
+        refreshFromSelection();
+    }
+    if (!WORDS.length) {
+        setStartStatus(t('summaryEmpty'), 'error');
+        return;
+    }
+
     busy = true;
     startBtn.disabled = true;
 
@@ -1280,15 +1270,15 @@ async function beginSession() {
         setStartStatus(t('modelNote'), 'idle');
         updateListenButton();
         updateStartButton(t('startButton'), false);
-        startOverlay.classList.add('closed');
-        startOverlay.setAttribute('aria-hidden', 'true');
+        closeMenu(false);
+        celebration.classList.remove('show');
+        celebration.setAttribute('aria-hidden', 'true');
         startBtn.blur();
     } catch (error) {
         busy = false;
         setStartStatus(friendlyError(error), 'error');
         updateStartButton(engineReady ? t('tryAgainButton') : t('startButton'), false);
-        startOverlay.classList.remove('closed');
-        startOverlay.setAttribute('aria-hidden', 'false');
+        openMenu(false);
         console.error(error);
     }
 }
@@ -1337,8 +1327,7 @@ async function resetRound() {
 
     if (engineReady && recognizer) {
         setStatus(t('listening'), 'listening');
-        startOverlay.classList.add('closed');
-        startOverlay.setAttribute('aria-hidden', 'true');
+        closeMenu(false);
         try {
             if (!micStream) await connectMicrophone();
             if (audioCtx && audioCtx.state === 'suspended') await audioCtx.resume();
@@ -1349,102 +1338,46 @@ async function resetRound() {
             paused = true;
             updateListenButton();
             setStartStatus(friendlyError(error), 'error');
-            startOverlay.classList.remove('closed');
-            startOverlay.setAttribute('aria-hidden', 'false');
+            openMenu(false);
         }
     } else {
         started = false;
         setStartStatus(t('modelNote'), 'idle');
         updateStartButton(t('startButton'), false);
-        startOverlay.classList.remove('closed');
-        startOverlay.setAttribute('aria-hidden', 'false');
+        openMenu(false);
         updateListenButton();
     }
 }
 
-function applyLanguage(code, showStart) {
-    if (!LANGUAGES[code]) return;
-    window.clearTimeout(statusTimer);
-    selectedLanguage = code;
-    WORDS = LANGUAGES[code].words;
-    grammarMode = LANGUAGES[code].models.fast.grammar;
-    try {
-        localStorage.setItem('speakLanguage', code);
-    } catch (error) {}
-    document.documentElement.lang = code;
-    score = 0;
-    updateScore();
-    renderBoard();
-    pending = new Set(WORDS.map((item, index) => index));
-    updateStaticText();
-    updateProgress();
-    updateListenButton();
-    setStartStatus(t('modelNote'), 'idle');
-    updateStartButton(t('startButton'), false);
-    langOverlay.classList.add('closed');
-    langOverlay.setAttribute('aria-hidden', 'true');
-    updateLangChoiceHighlight();
-
-    if (showStart) {
-        startOverlay.classList.remove('closed');
-        startOverlay.setAttribute('aria-hidden', 'false');
+function openMenu(focusInside) {
+    ensureFxContext();
+    resumeAfterMenu = started && !paused && !gameWon;
+    if (resumeAfterMenu) pauseListening();
+    celebration.classList.remove('show');
+    celebration.setAttribute('aria-hidden', 'true');
+    menuClose.hidden = !started;
+    populateLevelSelect();
+    populateUnitSelect();
+    updateModeHighlight();
+    updateSummary();
+    startOverlay.classList.remove('closed');
+    startOverlay.setAttribute('aria-hidden', 'false');
+    if (focusInside !== false) {
         window.setTimeout(() => {
-            if (!startOverlay.classList.contains('closed')) startBtn.focus();
-        }, 350);
-    } else {
-        startOverlay.classList.add('closed');
-        startOverlay.setAttribute('aria-hidden', 'true');
+            if (startOverlay.classList.contains('closed')) return;
+            startBtn.focus();
+        }, 120);
     }
 }
 
-function reloadWithLanguage(code) {
-    try {
-        localStorage.setItem('speakLanguage', code);
-    } catch (error) {}
-    const url = new URL(window.location.href);
-    url.searchParams.set('lang', code);
-    window.location.replace(url.href);
-}
-
-function chooseLanguage(code) {
-    if (!LANGUAGES[code]) return;
-    ensureFxContext();
-    playPop();
-    const engineActive = started || engineReady || Boolean(model) || busy;
-
-    if (engineActive) {
-        if (code === selectedLanguage) {
-            closeLanguageChooser();
-        } else {
-            reloadWithLanguage(code);
-        }
-        return;
-    }
-
-    applyLanguage(code, true);
-}
-
-function openLanguageChooser() {
-    ensureFxContext();
-    resumeAfterLang = started && !paused && !gameWon;
-    if (resumeAfterLang) pauseListening();
-    langClose.hidden = !started;
-    updateLangChoiceHighlight();
-    langOverlay.classList.remove('closed');
-    langOverlay.setAttribute('aria-hidden', 'false');
-    window.setTimeout(() => {
-        if (langOverlay.classList.contains('closed')) return;
-        const current = langChoices.find((button) => button.classList.contains('is-current')) || langChoices[0];
-        if (current) current.focus();
-    }, 80);
-}
-
-function closeLanguageChooser() {
-    langOverlay.classList.add('closed');
-    langOverlay.setAttribute('aria-hidden', 'true');
-    if (resumeAfterLang) {
-        resumeAfterLang = false;
+function closeMenu(resume) {
+    startOverlay.classList.add('closed');
+    startOverlay.setAttribute('aria-hidden', 'true');
+    if (resume !== false && resumeAfterMenu) {
+        resumeAfterMenu = false;
         resumeListening();
+    } else {
+        resumeAfterMenu = false;
     }
 }
 
@@ -1456,20 +1389,49 @@ function toggleFullscreen() {
     }
 }
 
+function onLevelChange() {
+    selectedLevel = Number(levelSelect.value);
+    if (!levelKeys().includes(String(selectedLevel))) selectedLevel = Number(levelKeys()[0]);
+    selectedUnit = Number(unitKeys(selectedLevel)[0]);
+    try { localStorage.setItem('speakLevel', String(selectedLevel)); } catch (error) {}
+    try { localStorage.setItem('speakUnit', String(selectedUnit)); } catch (error) {}
+    populateUnitSelect();
+    refreshFromSelection();
+}
+
+function onUnitChange() {
+    selectedUnit = Number(unitSelect.value);
+    if (!unitKeys(selectedLevel).includes(String(selectedUnit))) selectedUnit = Number(unitKeys(selectedLevel)[0]);
+    try { localStorage.setItem('speakUnit', String(selectedUnit)); } catch (error) {}
+    refreshFromSelection();
+}
+
+function onModeChange(mode) {
+    if (!DISPLAY_MODES.includes(mode)) return;
+    displayMode = mode;
+    try { localStorage.setItem('speakDisplayMode', mode); } catch (error) {}
+    updateModeHighlight();
+    renderBoard();
+    updateSummary();
+    playPop();
+}
+
 startBtn.addEventListener('click', beginSession);
 playAgainBtn.addEventListener('click', resetRound);
-changeLangStart.addEventListener('click', openLanguageChooser);
-changeLangCelebrate.addEventListener('click', openLanguageChooser);
-langBtn.addEventListener('click', openLanguageChooser);
-langClose.addEventListener('click', closeLanguageChooser);
-langChoices.forEach((button) => {
-    button.addEventListener('click', () => chooseLanguage(button.dataset.lang));
+changeWordsCelebrate.addEventListener('click', () => openMenu(true));
+menuBtn.addEventListener('click', () => openMenu(true));
+menuClose.addEventListener('click', () => closeMenu(true));
+levelSelect.addEventListener('change', onLevelChange);
+unitSelect.addEventListener('change', onUnitChange);
+modeChoices.forEach((button) => {
+    button.addEventListener('click', () => onModeChange(button.dataset.mode));
 });
 listenBtn.addEventListener('click', () => {
     if (paused) resumeListening();
     else pauseListening();
 });
 fullscreenBtn.addEventListener('click', toggleFullscreen);
+window.addEventListener('resize', layoutBoard);
 document.addEventListener('fullscreenchange', () => {
     const active = Boolean(document.fullscreenElement);
     fullscreenBtn.textContent = active ? '⤢' : '⛶';
@@ -1483,20 +1445,9 @@ window.addEventListener('pagehide', () => {
     }
 });
 
-pending = new Set(WORDS.map((item, index) => index));
-renderBoard();
-updateScore();
-
-if (paramLanguage) {
-    applyLanguage(paramLanguage, true);
-} else {
-    updateStaticText();
-    updateProgress();
-    updateListenButton();
-    updateLangChoiceHighlight();
-    startOverlay.classList.add('closed');
-    startOverlay.setAttribute('aria-hidden', 'true');
-    langOverlay.classList.remove('closed');
-    langOverlay.setAttribute('aria-hidden', 'false');
-    langClose.hidden = true;
-}
+updateStaticText();
+populateLevelSelect();
+populateUnitSelect();
+updateModeHighlight();
+refreshFromSelection();
+openMenu(false);
