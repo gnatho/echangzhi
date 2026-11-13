@@ -209,6 +209,16 @@
       "games/routines/routines.css"
     ]
   },
+  "town-game": {
+    "name": "Town",
+    "version": "1.0.0",
+    "date": "2026-11-13",
+    "files": [
+      "games/town/index.html",
+      "games/town/town.js",
+      "games/town/town.css"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",
