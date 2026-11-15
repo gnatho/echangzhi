@@ -219,6 +219,20 @@
       "games/town/town.css"
     ]
   },
+  "stories": {
+    "name": "Stories",
+    "version": "1.0.0",
+    "date": "2026-11-15",
+    "files": [
+      "stories.html",
+      "stories.css",
+      "story-data.js",
+      "stories.js",
+      "sequencer.js",
+      "quiz.js",
+      "storyteller.js"
+    ]
+  },
   "data-phonems": {
     "name": "Phoneme Data",
     "version": "1.0.0",

@@ -62,9 +62,10 @@
         }
 
         .buttons-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(2, 1fr);
+            display: flex;
+            flex-wrap: wrap;
+            align-content: stretch;
+            justify-content: center;
             gap: clamp(8px, 2vmin, 20px);
             width: 100%;
             flex: 1;
@@ -75,7 +76,9 @@
             border: none;
             border-radius: 25px;
             padding: 15px;
-            font-size: clamp(2rem, 6vw, 5rem);
+            flex: 1 1 210px;
+            max-width: 340px;
+            font-size: clamp(1.6rem, 4.2vw, 3.8rem);
             font-weight: 700;
             color: white;
             cursor: pointer;
@@ -87,6 +90,7 @@
             align-items: center;
             justify-content: center;
             font-family: inherit;
+            text-align: center;
         }
 
         .gateway-btn:active {
@@ -94,7 +98,7 @@
         }
 
         .gateway-btn span {
-            font-size: clamp(0.9rem, 2.5vw, 2rem);
+            font-size: clamp(0.8rem, 1.5vw, 1.25rem);
             font-weight: 400;
             opacity: 0.9;
             margin-top: clamp(3px, 1vh, 10px);
@@ -112,6 +116,10 @@
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
         }
 
+        .btn-stories {
+            background: linear-gradient(135deg, #00b4d8 0%, #0077b6 100%);
+        }
+
         .btn-spinner {
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
             color: #333;
@@ -127,14 +135,15 @@
 
         @media (max-width: 499px) {
             .gateway-btn {
-                font-size: clamp(1.4rem, 8vw, 2rem);
+                flex: 1 1 45%;
+                max-width: 48%;
+                font-size: clamp(1.25rem, 7vw, 1.8rem);
             }
             .gateway-btn span {
-                font-size: clamp(0.7rem, 3vw, 0.9rem);
+                font-size: clamp(0.65rem, 2.6vw, 0.85rem);
             }
             .buttons-grid {
-                grid-template-columns: repeat(2, 1fr);
-                grid-template-rows: repeat(3, 1fr);
+                gap: 8px;
             }
         }
 
@@ -603,6 +612,11 @@
             <a class="gateway-btn btn-games" href="games/index.html">
                 🎮 Games
                 <span>Mini Games</span>
+            </a>
+
+            <a class="gateway-btn btn-stories" href="stories.html">
+                📚 Stories
+                <span>Read &amp; Retell</span>
             </a>
 
             <a class="gateway-btn btn-spinner" href="bottle.html">

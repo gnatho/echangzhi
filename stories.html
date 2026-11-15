@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en" data-component="stories">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#0b2a4a">
+    <meta name="description" content="Interactive story activities for Superminds: sequencing, comprehension quizzes and creative storytelling.">
+    <title>Stories</title>
+    <link rel="icon" href="static/imgs/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="stories.css">
+</head>
+<body>
+
+    <!-- Portrait devices see this full-screen message instead of the app. -->
+    <div class="rotate-overlay" id="rotate-overlay" role="alert">
+        <div class="rotate-icon" aria-hidden="true">
+            <span class="rotate-tablet">▭</span>
+            <span class="rotate-arrow">↻</span>
+        </div>
+        <p>Please rotate your tablet to landscape mode to play!</p>
+    </div>
+
+    <div class="app" id="app">
+
+        <header class="topbar">
+            <button class="icon-btn back-btn" id="back-btn" type="button" aria-label="Back">←</button>
+            <div class="brand">
+                <span class="brand-emoji" aria-hidden="true">📚</span>
+                <span class="brand-name" id="brand-title">Stories</span>
+            </div>
+            <div class="top-actions">
+                <button class="icon-btn" id="vocab-btn" type="button" aria-label="Vocabulary" title="Vocabulary" hidden>📖</button>
+                <button class="icon-btn" id="fs-btn" type="button" aria-label="Fullscreen" title="Fullscreen">⛶</button>
+            </div>
+        </header>
+
+        <main class="screens">
+
+            <!-- ==================== BOOKS ==================== -->
+            <section class="screen" id="screen-books">
+                <div class="screen-head">
+                    <h1>Choose a book</h1>
+                    <p>Tap a book to see the stories inside.</p>
+                </div>
+                <div class="book-grid" id="book-grid"></div>
+            </section>
+
+            <!-- ==================== UNITS ==================== -->
+            <section class="screen" id="screen-units">
+                <div class="screen-head">
+                    <h1 id="units-title">Select a unit</h1>
+                    <p id="units-subtitle">Tap a unit to find a story.</p>
+                </div>
+                <div class="unit-grid" id="unit-grid"></div>
+            </section>
+
+            <!-- ==================== STORY ==================== -->
+            <section class="screen" id="screen-story">
+                <div class="story-list-view" id="story-list-view" hidden>
+                    <div class="screen-head">
+                        <h1 id="story-list-title">Choose a story</h1>
+                        <p>Tap a story to start.</p>
+                    </div>
+                    <div class="story-list" id="story-list"></div>
+                </div>
+
+                <div class="story-detail" id="story-detail-view">
+                    <section class="story-hero">
+                        <div class="hero-scene" aria-hidden="true">
+                            <div class="sun"></div>
+                            <div class="cloud cloud-a"></div>
+                            <div class="cloud cloud-b"></div>
+                            <div class="cloud cloud-c"></div>
+                            <div class="mountain mountain-back"></div>
+                            <div class="mountain mountain-front"></div>
+                            <div class="flying-jetpack">🚀</div>
+                            <div class="flying-parachute">🪂</div>
+                        </div>
+                        <div class="hero-copy">
+                            <div class="hero-eyebrow" id="story-eyebrow">Superminds 6 · Unit 2</div>
+                            <h1 id="story-title">A Problem for Patrick</h1>
+                            <p id="story-blurb"></p>
+                        </div>
+                    </section>
+
+                    <section class="story-side">
+                        <div class="activity-list">
+                            <button class="activity-card activity-sequencer" id="activity-sequencer" type="button" data-activity="sequencer">
+                                <span class="activity-icon" aria-hidden="true">🧩</span>
+                                <span class="activity-copy">
+                                    <strong>Story Sequencer</strong>
+                                    <small>Put the ten events in the correct order.</small>
+                                </span>
+                                <span class="activity-status" id="status-sequencer">Not started</span>
+                            </button>
+
+                            <button class="activity-card activity-quiz" id="activity-quiz" type="button" data-activity="quiz">
+                                <span class="activity-icon" aria-hidden="true">❓</span>
+                                <span class="activity-copy">
+                                    <strong>Story Quiz</strong>
+                                    <small>Answer comprehension questions about the story.</small>
+                                </span>
+                                <span class="activity-status" id="status-quiz">Not started</span>
+                            </button>
+
+                            <button class="activity-card activity-storyteller" id="activity-storyteller" type="button" data-activity="storyteller">
+                                <span class="activity-icon" aria-hidden="true">✍️</span>
+                                <span class="activity-copy">
+                                    <strong>Interactive Storyteller</strong>
+                                    <small>Choose sentence blocks and build your own version.</small>
+                                </span>
+                                <span class="activity-status" id="status-storyteller">Not started</span>
+                            </button>
+                        </div>
+
+                        <div class="story-extra">
+                            <button class="btn btn-soft" id="story-vocab" type="button">📖 Vocabulary</button>
+                            <button class="btn btn-soft" id="story-read" type="button">📄 Read the story</button>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- ==================== SEQUENCER ==================== -->
+            <section class="screen" id="screen-sequencer">
+                <div class="activity-shell">
+                    <div class="activity-head">
+                        <div class="activity-head-copy">
+                            <h1>Story Sequencer</h1>
+                            <p>Can you put the story in the correct order?</p>
+                        </div>
+                        <div class="head-stats">
+                            <div class="stat-pill" id="seq-score">Score: –</div>
+                            <button class="icon-btn" id="seq-help-btn" type="button" aria-label="How to play" title="How to play">?</button>
+                        </div>
+                    </div>
+
+                    <div class="feedback-banner" id="seq-feedback" hidden>
+                        <div class="feedback-copy">
+                            <strong id="seq-feedback-title">Nicely done!</strong>
+                            <span id="seq-feedback-text"></span>
+                        </div>
+                        <button class="btn btn-primary" id="seq-read" type="button">Read the complete story</button>
+                    </div>
+
+                    <div class="seq-layout">
+                        <section class="panel">
+                            <header class="panel-head">
+                                <h2>Story line</h2>
+                                <span class="panel-meta" id="seq-placed">0 / 10 placed</span>
+                            </header>
+                            <div class="slot-list" id="seq-slots"></div>
+                        </section>
+
+                        <section class="panel">
+                            <header class="panel-head">
+                                <h2>Sentence bank</h2>
+                                <button class="btn btn-small" id="seq-shuffle" type="button">Shuffle</button>
+                            </header>
+                            <div class="bank-list" id="seq-bank"></div>
+                        </section>
+                    </div>
+
+                    <div class="seq-controls">
+                        <p class="instruction" id="seq-instruction">Tap a sentence, then tap where you want to place it.</p>
+                        <div class="control-row">
+                            <button class="btn" id="seq-undo" type="button">Undo</button>
+                            <button class="btn" id="seq-reset" type="button">Reset</button>
+                            <button class="btn btn-primary" id="seq-check" type="button">Check answer</button>
+                            <button class="btn" id="seq-correct" type="button">Show correct order</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== QUIZ ==================== -->
+            <section class="screen" id="screen-quiz">
+                <div class="activity-shell">
+                    <div class="activity-head">
+                        <div class="activity-head-copy">
+                            <h1>Story Quiz</h1>
+                            <p>Show what you remember about the story.</p>
+                        </div>
+                        <div class="head-stats">
+                            <div class="stat-pill" id="quiz-score-pill">Score: 0</div>
+                        </div>
+                    </div>
+
+                    <!-- Start / mode choice -->
+                    <div class="quiz-start" id="quiz-start">
+                        <div class="mode-grid">
+                            <button class="mode-card mode-quick" id="quiz-quick" type="button">
+                                <span class="mode-emoji" aria-hidden="true">⚡</span>
+                                <strong>Quick Quiz</strong>
+                                <small>10 random questions</small>
+                                <span class="mode-best" id="quick-best"></span>
+                            </button>
+                            <button class="mode-card mode-full" id="quiz-full" type="button">
+                                <span class="mode-emoji" aria-hidden="true">📚</span>
+                                <strong>Full Quiz</strong>
+                                <small>All 25 questions</small>
+                                <span class="mode-best" id="full-best"></span>
+                            </button>
+                        </div>
+                        <button class="btn btn-primary resume-btn" id="quiz-resume" type="button" hidden>Continue last quiz</button>
+                        <p class="quiz-note">Take your time. You can read every question twice.</p>
+                    </div>
+
+                    <!-- Playing -->
+                    <div class="quiz-play" id="quiz-play" hidden>
+                        <div class="quiz-progress-row">
+                            <span class="quiz-counter" id="quiz-counter">Question 1 of 10</span>
+                            <div class="progress-bar"><div class="progress-fill" id="quiz-progress-fill"></div></div>
+                            <span class="quiz-live-score" id="quiz-live-score">0 correct</span>
+                        </div>
+
+                        <div class="quiz-body">
+                            <section class="panel quiz-question-panel">
+                                <div class="q-index" id="quiz-q-index">Question 1</div>
+                                <h2 class="q-text" id="quiz-q-text"></h2>
+                                <div class="explanation" id="quiz-explanation" hidden>
+                                    <strong id="quiz-verdict"></strong>
+                                    <span id="quiz-explanation-text"></span>
+                                </div>
+                            </section>
+
+                            <section class="panel quiz-answers-panel">
+                                <div class="answer-list" id="quiz-options"></div>
+                                <div class="quiz-actions">
+                                    <button class="btn btn-primary" id="quiz-submit" type="button" disabled>Submit</button>
+                                    <button class="btn btn-primary" id="quiz-continue" type="button" hidden>Continue</button>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="quiz-results" id="quiz-results" hidden>
+                        <div class="results-card">
+                            <div class="results-emoji" id="quiz-results-emoji" aria-hidden="true">🌟</div>
+                            <h2 id="quiz-results-title">Excellent work!</h2>
+                            <p class="results-message" id="quiz-results-message"></p>
+
+                            <div class="results-stats">
+                                <div class="result-stat">
+                                    <span class="result-value" id="quiz-result-score">0</span>
+                                    <span class="result-label">Correct</span>
+                                </div>
+                                <div class="result-stat">
+                                    <span class="result-value" id="quiz-result-wrong">0</span>
+                                    <span class="result-label">Incorrect</span>
+                                </div>
+                                <div class="result-stat">
+                                    <span class="result-value" id="quiz-result-percent">0%</span>
+                                    <span class="result-label">Score</span>
+                                </div>
+                                <div class="result-stat">
+                                    <span class="result-value" id="quiz-result-total">0</span>
+                                    <span class="result-label">Questions</span>
+                                </div>
+                            </div>
+
+                            <div class="results-actions">
+                                <button class="btn btn-primary" id="quiz-review-btn" type="button">Review mistakes</button>
+                                <button class="btn btn-blue" id="quiz-again" type="button">Try again</button>
+                                <button class="btn btn-ghost-dark" id="quiz-modes" type="button">Change quiz</button>
+                                <button class="btn btn-ghost-dark" id="quiz-back" type="button">Back to activities</button>
+                            </div>
+
+                            <div class="review-list" id="quiz-review-list" hidden></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ==================== STORYTELLER ==================== -->
+            <section class="screen" id="screen-storyteller">
+                <div class="activity-shell">
+                    <div class="activity-head">
+                        <div class="activity-head-copy">
+                            <h1>Build Your Own Story</h1>
+                            <p id="st-subtitle">Choose your favourite sentences and create your own version of A Problem for Patrick!</p>
+                        </div>
+                        <div class="head-stats">
+                            <div class="stat-pill" id="st-progress-pill">Step 1 of 10</div>
+                            <button class="btn btn-small btn-on-dark" id="st-random" type="button">🎲 Random story</button>
+                        </div>
+                    </div>
+
+                    <div class="st-layout" id="st-editor">
+                        <section class="panel st-options-panel">
+                            <div class="st-steps" id="st-steps"></div>
+
+                            <div class="st-stage">
+                                <div class="st-stage-kicker" id="st-stage-kicker">Step 1 of 10</div>
+                                <h2 id="st-stage-title">Introduce the characters</h2>
+                                <p id="st-stage-question">How would you like to start your story?</p>
+                            </div>
+
+                            <div class="st-options" id="st-options"></div>
+
+                            <div class="st-actions">
+                                <button class="btn" id="st-skip" type="button">Skip this step</button>
+                            </div>
+                        </section>
+
+                        <section class="panel st-preview-panel">
+                            <header class="panel-head">
+                                <h2>Your story</h2>
+                                <span class="panel-meta" id="st-count">0 of 10 steps</span>
+                            </header>
+                            <div class="st-preview" id="st-preview"></div>
+                            <div class="st-preview-actions">
+                                <button class="btn btn-primary" id="st-read" type="button" disabled>Read my story</button>
+                                <button class="btn" id="st-restart" type="button">Start again</button>
+                            </div>
+                        </section>
+                    </div>
+
+                    <div class="st-reading" id="st-reading" hidden>
+                        <article class="reading-card">
+                            <div class="reading-eyebrow">My story</div>
+                            <h1 id="st-reading-title">A Problem for Patrick</h1>
+                            <div class="reading-body" id="st-reading-body"></div>
+                        </article>
+
+                        <aside class="reading-actions">
+                            <button class="btn btn-primary" id="st-copy" type="button">📋 Copy story</button>
+                            <button class="btn" id="st-print" type="button">🖨️ Print</button>
+                            <button class="btn" id="st-edit" type="button">✏️ Edit story</button>
+                            <button class="btn" id="st-restart-2" type="button">Start again</button>
+                            <button class="btn btn-blue" id="st-done" type="button">Back to activities</button>
+                        </aside>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ==================== MODALS ==================== -->
+    <div class="modal" id="reader-modal" hidden>
+        <div class="modal-card reader-card-modal" role="dialog" aria-modal="true" aria-labelledby="reader-title">
+            <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+            <div class="reading-eyebrow" id="reader-eyebrow">The story</div>
+            <h2 id="reader-title">A Problem for Patrick</h2>
+            <div class="reader-body" id="reader-body"></div>
+        </div>
+    </div>
+
+    <div class="modal" id="vocab-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="vocab-title">
+            <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+            <h2 id="vocab-title">Story vocabulary</h2>
+            <p class="modal-sub">Tap a word to see what it means.</p>
+            <div class="vocab-layout">
+                <div class="vocab-list" id="vocab-list"></div>
+                <div class="vocab-detail" id="vocab-detail">
+                    <div class="vocab-detail-word">Tap a word</div>
+                    <p class="vocab-detail-text">The meaning will appear here.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="placeholder-modal" hidden>
+        <div class="modal-card placeholder-card" role="dialog" aria-modal="true" aria-labelledby="placeholder-title">
+            <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+            <div class="placeholder-emoji" aria-hidden="true">🗺️</div>
+            <h2 id="placeholder-title">No story available yet</h2>
+            <p>More stories are coming soon!</p>
+            <button class="btn btn-primary" type="button" data-close>Got it</button>
+        </div>
+    </div>
+
+    <div class="modal" id="confirm-modal" hidden>
+        <div class="modal-card confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-text">
+            <h2 id="confirm-text">Are you sure?</h2>
+            <div class="confirm-actions">
+                <button class="btn" id="confirm-no" type="button">Cancel</button>
+                <button class="btn btn-primary" id="confirm-yes" type="button">Yes, continue</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="order-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="order-title">
+            <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+            <h2 id="order-title">Correct order</h2>
+            <p class="modal-sub">This is the order of events in the story.</p>
+            <ol class="order-list" id="order-body"></ol>
+        </div>
+    </div>
+
+    <div class="modal" id="seq-help-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="seq-help-title">
+            <button class="modal-x" type="button" data-close aria-label="Close">✕</button>
+            <h2 id="seq-help-title">How to play</h2>
+            <ol class="help-list">
+                <li><span class="n">1</span> Tap a sentence in the bank.</li>
+                <li><span class="n">2</span> Tap a numbered position to place it.</li>
+                <li><span class="n">3</span> To move a sentence, tap it and then tap a new position.</li>
+                <li><span class="n">4</span> Tap <b>Check answer</b> when all ten positions are full.</li>
+            </ol>
+            <p class="help-tip">Every sentence in the right position earns one point.</p>
+            <button class="btn btn-primary" type="button" data-close>Got it</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div class="confetti-layer" id="confetti" aria-hidden="true"></div>
+    <div class="print-area" id="print-area" aria-hidden="true"></div>
+
+    <script src="story-data.js"></script>
+    <script src="stories.js"></script>
+    <script src="sequencer.js"></script>
+    <script src="quiz.js"></script>
+    <script src="storyteller.js"></script>
+    <script src="version-display.js"></script>
+</body>
+</html>
