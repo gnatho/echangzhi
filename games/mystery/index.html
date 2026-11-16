@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en" data-component="mystery-game">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mystery Animal - Guess Who?</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+html { color-scheme: light !important; }
+
+html, body {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  font-family: 'Baloo 2', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Rounded', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #8fd6ff 0%, #b8ecff 42%, #d9ffd0 100%);
+  position: relative;
+}
+
+/* ── Playful floating background ── */
+.bg-decor { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.bg-decor span { position: absolute; opacity: .85; filter: drop-shadow(0 6px 10px rgba(0,0,0,.08)); }
+.sun  { top: 4%; right: 6%; font-size: clamp(42px, 9vmin, 110px); animation: spinSlow 26s linear infinite; }
+.cloud{ font-size: clamp(40px, 9vmin, 120px); animation: drift 16s ease-in-out infinite; }
+.c1 { top: 8%;  left: 4%;  animation-duration: 18s; }
+.c2 { top: 20%; left: 62%; animation-duration: 22s; animation-delay: -6s; transform: scale(.8); }
+.leaf { font-size: clamp(30px, 7vmin, 90px); transform-origin: bottom center; animation: sway 5s ease-in-out infinite; }
+.l1 { bottom: 2%; left: 3%; }
+.l2 { bottom: 1%; left: 46%; animation-delay: -1.6s; }
+.l3 { bottom: 3%; right: 4%; animation-delay: -3s; }
+
+@keyframes drift { 0%,100% { transform: translateX(0); } 50% { transform: translateX(26px); } }
+@keyframes sway  { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(5deg); } }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+
+/* ── Tablet frame ── */
+.tablet {
+  position: relative;
+  z-index: 2;
+  width: 96vw;
+  height: 94vh;
+  max-width: 1500px;
+  border-radius: clamp(22px, 3.4vmin, 44px);
+  padding: clamp(8px, 1.6vmin, 18px);
+  background: linear-gradient(160deg, #2b3040 0%, #171a24 100%);
+  box-shadow: 0 26px 60px rgba(20, 30, 60, .42), 0 4px 0 rgba(255,255,255,.06) inset, 0 -6px 18px rgba(0,0,0,.5) inset;
+  display: flex;
+  animation: floatTablet 6s ease-in-out infinite;
+}
+.tablet::before {
+  content: "";
+  position: absolute;
+  top: 50%; left: clamp(2px, .7vmin, 8px);
+  width: 5px; height: 16%;
+  transform: translateY(-50%);
+  border-radius: 4px;
+  background: #0c0e14;
+}
+@keyframes floatTablet { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+
+.camera {
+  position: absolute;
+  top: clamp(9px, 1.7vmin, 19px);
+  left: 50%;
+  width: clamp(6px, 1.1vmin, 11px);
+  height: clamp(6px, 1.1vmin, 11px);
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: #0a0c12;
+  box-shadow: 0 0 0 2px rgba(255,255,255,.06) inset;
+  z-index: 3;
+}
+
+/* ── Screen ── */
+.screen {
+  position: relative;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: clamp(14px, 2.2vmin, 30px);
+  overflow: hidden;
+  background: linear-gradient(180deg, #fffdf5 0%, #eefaf0 100%);
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.35);
+}
+
+/* ── HUD ── */
+.hud {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: clamp(8px, 1.4vmin, 16px) clamp(12px, 2.2vmin, 26px);
+  background: linear-gradient(180deg, rgba(255,255,255,.9), rgba(255,255,255,.55));
+  border-bottom: 2px solid rgba(120, 180, 140, .25);
+}
+.hud-left, .hud-right { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+.hud-center { flex: 1 1 auto; text-align: center; min-width: 0; }
+
+.hud-title {
+  font-size: clamp(1rem, 2.6vmin, 1.7rem);
+  font-weight: 900;
+  color: #2f8f5b;
+  letter-spacing: .5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 2px 0 rgba(255,255,255,.7);
+}
+
+.progress { display: flex; gap: clamp(3px, .8vmin, 8px); justify-content: center; margin-top: clamp(4px, .9vmin, 9px); flex-wrap: wrap; }
+.dot {
+  width: clamp(8px, 1.5vmin, 14px);
+  height: clamp(8px, 1.5vmin, 14px);
+  border-radius: 50%;
+  background: #d5e4d8;
+  box-shadow: 0 1px 0 rgba(0,0,0,.08) inset;
+  transition: background .25s ease, transform .25s ease;
+}
+.dot.done { background: #57c98a; }
+.dot.current { background: #ffb703; transform: scale(1.35); box-shadow: 0 0 0 3px rgba(255,183,3,.28); }
+
+.hud-btn {
+  border: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 800;
+  color: #2f8f5b;
+  background: rgba(120, 200, 150, .18);
+  border-radius: 14px;
+  width: clamp(38px, 5.4vmin, 54px);
+  height: clamp(38px, 5.4vmin, 54px);
+  font-size: clamp(1.1rem, 2.8vmin, 1.7rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: transform .12s ease, background .18s ease;
+}
+.hud-btn:active { transform: scale(.9); background: rgba(120, 200, 150, .32); }
+
+/* ── Stage ── */
+.stage-area {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(8px, 1.6vmin, 20px);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.7), transparent 60%),
+    linear-gradient(180deg, #eafaf0, #dff3e4);
+  position: relative;
+}
+
+.stage-wrap {
+  position: relative;
+  width: 60vmin;
+  height: 60vmin;
+  max-width: 100%;
+  max-height: 100%;
+}
+
+.stage {
+  position: absolute;
+  inset: 0;
+  border-radius: clamp(10px, 2vmin, 24px);
+  overflow: hidden;
+  background: #2b3040;
+  box-shadow: 0 18px 40px rgba(40, 70, 60, .28), 0 0 0 clamp(4px, .9vmin, 9px) #fff, 0 0 0 clamp(6px, 1.1vmin, 11px) #cfe9d6;
+  cursor: pointer;
+}
+
+.animal-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+
+.stage.pop-in .animal-img { animation: imgPop .55s cubic-bezier(.2,.8,.3,1.2); }
+@keyframes imgPop { 0% { transform: scale(1.12); opacity: .2; } 100% { transform: scale(1); opacity: 1; } }
+
+/* ── Puzzle tiles ── */
+.tiles {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.tile {
+  position: relative;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  box-shadow:
+    inset 0 0 0 2px rgba(255,255,255,.4),
+    inset 0 0 22px rgba(0,0,0,.16);
+  transition: transform .12s ease, filter .12s ease;
+  will-change: transform, opacity;
+}
+.tile:active { transform: scale(.88); filter: brightness(1.18); }
+.tile .mark {
+  font-size: clamp(16px, 5.5vmin, 46px);
+  font-weight: 900;
+  color: rgba(255,255,255,.92);
+  text-shadow: 0 2px 0 rgba(0,0,0,.22);
+  pointer-events: none;
+}
+.tile.gone { animation: pop .5s cubic-bezier(.3,.7,.4,1) forwards; pointer-events: none; }
+@keyframes pop {
+  0%   { transform: scale(1) rotate(0); opacity: 1; }
+  38%  { transform: scale(1.16) rotate(7deg); opacity: 1; }
+  100% { transform: scale(0) rotate(-24deg); opacity: 0; }
+}
+
+/* ── Name banner ── */
+.name-banner {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(8px, 2vmin, 22px);
+  transform: translate(-50%, 140%);
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  gap: clamp(6px, 1.4vmin, 14px);
+  padding: clamp(6px, 1.2vmin, 14px) clamp(16px, 3.4vmin, 34px);
+  background: rgba(255,255,255,.95);
+  border-radius: 999px;
+  box-shadow: 0 10px 26px rgba(0,0,0,.28);
+  pointer-events: none;
+  white-space: nowrap;
+  transition: transform .5s cubic-bezier(.2,.9,.3,1.4), opacity .4s ease;
+  z-index: 4;
+}
+.name-banner.show { transform: translate(-50%, 0); opacity: 1; }
+.name-banner .en { font-size: clamp(1.5rem, 4.4vmin, 3rem); line-height: 1; }
+.name-banner .nm {
+  font-size: clamp(1.4rem, 4vmin, 2.7rem);
+  font-weight: 900;
+  color: #2f8f5b;
+  letter-spacing: .5px;
+}
+
+/* ── Controls ── */
+.controls {
+  flex: 0 0 auto;
+  display: flex;
+  gap: clamp(10px, 2vmin, 22px);
+  justify-content: center;
+  align-items: center;
+  padding: clamp(10px, 1.8vmin, 22px) clamp(12px, 2vmin, 26px) clamp(12px, 2.2vmin, 26px);
+  background: linear-gradient(0deg, rgba(255,255,255,.92), rgba(255,255,255,.5));
+  border-top: 2px solid rgba(120, 180, 140, .22);
+}
+
+.btn {
+  font-family: inherit;
+  border: 0;
+  cursor: pointer;
+  font-weight: 900;
+  color: #fff;
+  border-radius: 999px;
+  padding: clamp(10px, 2vmin, 18px) clamp(22px, 4.4vmin, 46px);
+  font-size: clamp(1rem, 2.8vmin, 1.7rem);
+  letter-spacing: .4px;
+  display: inline-flex;
+  align-items: center;
+  gap: clamp(6px, 1.2vmin, 12px);
+  transition: transform .12s ease, box-shadow .18s ease, filter .18s ease;
+  text-shadow: 0 2px 0 rgba(0,0,0,.16);
+  box-shadow: 0 8px 0 rgba(0,0,0,.14), 0 14px 24px rgba(0,0,0,.18);
+  -webkit-appearance: none;
+  appearance: none;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 4px 0 rgba(0,0,0,.14), 0 8px 14px rgba(0,0,0,.18); }
+
+.btn.reveal { background: linear-gradient(180deg, #5fd39a, #2fa873); }
+.btn.reveal:hover { filter: brightness(1.05); }
+
+.btn.next { background: linear-gradient(180deg, #ffb347, #f77f00); }
+.btn.next:hover { filter: brightness(1.05); }
+
+.btn.next.ready { animation: readyPulse 1.1s ease-in-out infinite; }
+@keyframes readyPulse {
+  0%,100% { box-shadow: 0 8px 0 rgba(0,0,0,.14), 0 0 0 0 rgba(247,127,0,.5); }
+  50%     { box-shadow: 0 8px 0 rgba(0,0,0,.14), 0 0 0 14px rgba(247,127,0,0); }
+}
+
+/* ── Overlays ── */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: clamp(14px, 3vmin, 30px);
+  text-align: center;
+  padding: 6vmin;
+  background: radial-gradient(circle at 50% 40%, rgba(255,255,255,.96), rgba(224,246,232,.98));
+  animation: fadeIn .3s ease;
+}
+.overlay.hidden { display: none; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.start-paw {
+  font-size: clamp(3.4rem, 12vmin, 9rem);
+  animation: bouncePaw 1.3s ease-in-out infinite;
+  filter: drop-shadow(0 10px 16px rgba(0,0,0,.15));
+}
+@keyframes bouncePaw { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-18px) rotate(5deg); } }
+
+.overlay h1 {
+  font-size: clamp(1.8rem, 6vmin, 4rem);
+  color: #2f8f5b;
+  font-weight: 900;
+  letter-spacing: .5px;
+  line-height: 1.05;
+}
+.overlay p {
+  font-size: clamp(1rem, 3vmin, 1.9rem);
+  color: #4c7a63;
+  font-weight: 700;
+}
+
+.tap-hint {
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: clamp(10px, 2vmin, 18px) clamp(26px, 5vmin, 52px);
+  border-radius: 999px;
+  background: linear-gradient(180deg, #5fd39a, #2fa873);
+  color: #fff;
+  font-weight: 900;
+  font-size: clamp(1.1rem, 3.2vmin, 2rem);
+  box-shadow: 0 8px 0 #1e7d55, 0 16px 26px rgba(0,0,0,.2);
+  animation: hintPulse 1.4s ease-in-out infinite;
+}
+@keyframes hintPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+
+.complete-emoji { font-size: clamp(4rem, 14vmin, 10rem); animation: bouncePaw 1.2s ease-in-out infinite; }
+
+/* ── Confetti canvas ── */
+#confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* ── Rotate hint ── */
+.rotate-hint {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  background: #17352a;
+  color: #fff;
+  text-align: center;
+  padding: 30px;
+}
+.rotate-hint .ic { font-size: 64px; animation: rotatePhone 2s ease-in-out infinite; }
+.rotate-hint strong { font-size: 22px; }
+.rotate-hint span { opacity: .8; font-size: 15px; }
+@keyframes rotatePhone { 0%,40% { transform: rotate(0); } 60%,100% { transform: rotate(90deg); } }
+
+@media (orientation: portrait) and (max-width: 900px) {
+  .rotate-hint { display: flex; }
+}
+</style>
+</head>
+<body>
+
+<div class="bg-decor" aria-hidden="true">
+  <span class="sun">🌤️</span>
+  <span class="cloud c1">☁️</span>
+  <span class="cloud c2">☁️</span>
+  <span class="leaf l1">🌿</span>
+  <span class="leaf l2">🌿</span>
+  <span class="leaf l3">🌿</span>
+</div>
+
+<div class="tablet" id="tablet">
+  <div class="camera" aria-hidden="true"></div>
+  <div class="screen">
+
+    <header class="hud">
+      <div class="hud-left">
+        <a class="hud-btn" href="../index.html" title="Back to games" aria-label="Back to games">&#8592;</a>
+      </div>
+      <div class="hud-center">
+        <div class="hud-title">🐾 Mystery Animal</div>
+        <div class="progress" id="progress"></div>
+      </div>
+      <div class="hud-right">
+        <button class="hud-btn" id="fsBtn" title="Fullscreen" aria-label="Fullscreen">&#9974;</button>
+      </div>
+    </header>
+
+    <main class="stage-area" id="stageArea">
+      <div class="stage-wrap" id="stageWrap">
+        <div class="stage" id="stage">
+          <img class="animal-img" id="animalImg" alt="" draggable="false">
+          <div class="tiles" id="tiles"></div>
+          <div class="name-banner" id="nameBanner"></div>
+        </div>
+      </div>
+    </main>
+
+    <footer class="controls">
+      <button class="btn reveal" id="revealBtn">&#128064; Reveal</button>
+      <button class="btn next" id="nextBtn">&#10145;&#65039; Next Animal</button>
+    </footer>
+
+    <!-- Start overlay -->
+    <div class="overlay" id="startOverlay">
+      <div class="start-paw">&#128062;</div>
+      <h1>Tap the tablet!</h1>
+      <p>A mystery animal is hiding. Tap the tiles to find out who it is!</p>
+      <div class="tap-hint">&#128072; Tap to start</div>
+    </div>
+
+    <!-- Game complete overlay -->
+    <div class="overlay hidden" id="completeOverlay">
+      <div class="complete-emoji">&#127881;</div>
+      <h1>You did it!</h1>
+      <p>You guessed all 9 mystery animals!</p>
+      <div class="tap-hint" id="playAgainBtn" role="button" tabindex="0">&#128260; Play again</div>
+    </div>
+
+  </div>
+</div>
+
+<canvas id="confetti"></canvas>
+
+<div class="rotate-hint">
+  <div class="ic">&#128241;</div>
+  <strong>Turn the tablet sideways</strong>
+  <span>This game plays in landscape. Rotate your device!</span>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Animal data (matches SM2 Unit 2 "The Zoo") ── */
+  var ANIMALS = [
+    { key: 'polar_bear', name: 'Polar Bear', file: 'SM2_U2_W1_polar_bear_1.jpg', audio: 'polar_bear.mp3', emoji: '\uD83D\uDC3B\u200D\u2744\uFE0F' },
+    { key: 'bear',       name: 'Bear',       file: 'SM2_U2_W2_bear_1.jpg',       audio: 'bear.mp3',       emoji: '\uD83D\uDC3B' },
+    { key: 'zebra',      name: 'Zebra',      file: 'SM2_U2_W3_zebra_1.jpg',      audio: 'zebra.mp3',      emoji: '\uD83E\uDD93' },
+    { key: 'crocodile',  name: 'Crocodile',  file: 'SM2_U2_W4_crocodile_1.jpg',  audio: 'crocodile.mp3',  emoji: '\uD83D\uDC0A' },
+    { key: 'hippo',      name: 'Hippo',      file: 'SM2_U2_W5_hippo_1.jpg',      audio: 'hippo.mp3',      emoji: '\uD83E\uDD9B' },
+    { key: 'tiger',      name: 'Tiger',      file: 'SM2_U2_W6_tiger_1.jpg',      audio: 'tiger.mp3',      emoji: '\uD83D\uDC2F' },
+    { key: 'parrot',     name: 'Parrot',     file: 'SM2_U2_W7_parrot_1.jpg',     audio: 'parrot.mp3',     emoji: '\uD83E\uDD9C' },
+    { key: 'monkey',     name: 'Monkey',     file: 'SM2_U2_W8_monkey_1.jpg',     audio: 'monkey.mp3',     emoji: '\uD83D\uDC35' },
+    { key: 'snake',      name: 'Snake',      file: 'SM2_U2_W9_snake_1.jpg',      audio: 'snake.mp3',      emoji: '\uD83D\uDC0D' }
+  ];
+
+  var IMG_BASE = '../../static/imgs/words/fl_big/';
+  var AUDIO_BASE = '../../static/audio/';
+
+  var COLS = 4;
+  var ROWS = 3;
+  var TOTAL_TILES = COLS * ROWS;
+
+  var TILE_COLORS = [
+    '#ff6b6b', '#ffa94d', '#ffd43b', '#69db7c',
+    '#38d9a9', '#4dabf7', '#9775fa', '#f783ac',
+    '#ff922b', '#74c0fc', '#a9e34b', '#ffc078'
+  ];
+
+  /* ── Elements ── */
+  var tablet      = document.getElementById('tablet');
+  var stageArea   = document.getElementById('stageArea');
+  var stageWrap   = document.getElementById('stageWrap');
+  var stage       = document.getElementById('stage');
+  var animalImg   = document.getElementById('animalImg');
+  var tilesEl     = document.getElementById('tiles');
+  var nameBanner  = document.getElementById('nameBanner');
+  var progressEl  = document.getElementById('progress');
+  var revealBtn   = document.getElementById('revealBtn');
+  var nextBtn     = document.getElementById('nextBtn');
+  var startOverlay    = document.getElementById('startOverlay');
+  var completeOverlay = document.getElementById('completeOverlay');
+  var playAgainBtn    = document.getElementById('playAgainBtn');
+  var fsBtn       = document.getElementById('fsBtn');
+  var confettiCanvas = document.getElementById('confetti');
+
+  /* ── State ── */
+  var order = [];
+  var round = 0;
+  var revealed = 0;
+  var fullyRevealed = false;
+  var started = false;
+  var advancing = false;
+  var advanceTimer = null;
+
+  /* ═══════════ Audio (Web Audio API) ═══════════ */
+  var actx = null;
+  function ac() {
+    if (!actx) {
+      try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { actx = null; }
+    }
+    if (actx && actx.state === 'suspended') { actx.resume(); }
+    return actx;
+  }
+
+  function tone(freq, dur, type, vol, delay) {
+    var c = ac();
+    if (!c) return;
+    var t0 = c.currentTime + (delay || 0);
+    var osc = c.createOscillator();
+    var gain = c.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.setValueAtTime(freq, t0);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(vol || 0.18, t0 + 0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    osc.connect(gain);
+    gain.connect(c.destination);
+    osc.start(t0);
+    osc.stop(t0 + dur + 0.03);
+  }
+
+  function sfxPop() { tone(520 + Math.random() * 300, 0.12, 'triangle', 0.16); }
+  function sfxClick() { tone(360, 0.08, 'square', 0.1); }
+  function sfxWhoosh() {
+    var c = ac(); if (!c) return;
+    var t0 = c.currentTime;
+    var osc = c.createOscillator();
+    var gain = c.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(220, t0);
+    osc.frequency.exponentialRampToValueAtTime(880, t0 + 0.35);
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.12, t0 + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.4);
+    osc.connect(gain); gain.connect(c.destination);
+    osc.start(t0); osc.stop(t0 + 0.42);
+  }
+  function sfxTada() {
+    [523, 659, 784, 1047].forEach(function (f, i) { tone(f, 0.2, 'triangle', 0.18, i * 0.09); });
+  }
+
+  function playWord(animal) {
+    try {
+      var au = new Audio(AUDIO_BASE + animal.audio);
+      au.volume = 1;
+      au.addEventListener('error', function () {
+        if (window.speechSynthesis) {
+          try {
+            var u = new SpeechSynthesisUtterance(animal.name);
+            u.rate = 0.85; u.pitch = 1.1;
+            window.speechSynthesis.speak(u);
+          } catch (e) {}
+        }
+      });
+      var p = au.play();
+      if (p && p.catch) { p.catch(function () {}); }
+    } catch (e) {}
+  }
+
+  /* ═══════════ Confetti ═══════════ */
+  var cctx = confettiCanvas.getContext('2d');
+  var parts = [];
+  var confettiRaf = null;
+
+  function sizeCanvas() {
+    confettiCanvas.width = window.innerWidth;
+    confettiCanvas.height = window.innerHeight;
+  }
+  sizeCanvas();
+
+  function confettiBurst(count) {
+    count = count || 130;
+    var colors = ['#ff5d8f', '#ffb703', '#8ecae6', '#90be6d', '#c77dff', '#ff9770', '#4cc9f0', '#ffd166', '#ef476f'];
+    var ox = window.innerWidth / 2;
+    var oy = window.innerHeight * 0.42;
+    for (var i = 0; i < count; i++) {
+      parts.push({
+        x: ox + (Math.random() - 0.5) * 60,
+        y: oy + (Math.random() - 0.5) * 30,
+        vx: (Math.random() - 0.5) * 15,
+        vy: Math.random() * -15 - 4,
+        g: 0.35 + Math.random() * 0.25,
+        s: 6 + Math.random() * 9,
+        c: colors[(Math.random() * colors.length) | 0],
+        rot: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 0.45,
+        life: 1
+      });
+    }
+    if (!confettiRaf) { confettiRaf = requestAnimationFrame(confettiLoop); }
+  }
+
+  function confettiLoop() {
+    cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    for (var i = parts.length - 1; i >= 0; i--) {
+      var p = parts[i];
+      p.vy += p.g;
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vx *= 0.995;
+      p.rot += p.vr;
+      p.life -= 0.008;
+      if (p.life <= 0 || p.y > confettiCanvas.height + 50) { parts.splice(i, 1); continue; }
+      cctx.save();
+      cctx.globalAlpha = Math.max(0, p.life);
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = p.c;
+      cctx.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * 0.62);
+      cctx.restore();
+    }
+    if (parts.length) {
+      confettiRaf = requestAnimationFrame(confettiLoop);
+    } else {
+      confettiRaf = null;
+      cctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    }
+  }
+
+  /* ═══════════ Helpers ═══════════ */
+  function shuffle(arr) {
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--) {
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  function freshOrder() {
+    var base = [];
+    for (var i = 0; i < ANIMALS.length; i++) { base.push(i); }
+    return shuffle(base);
+  }
+
+  function sizeStage() {
+    var cs = window.getComputedStyle(stageArea);
+    var padX = (parseFloat(cs.paddingLeft) || 0) + (parseFloat(cs.paddingRight) || 0);
+    var padY = (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    var availW = stageArea.clientWidth - padX;
+    var availH = stageArea.clientHeight - padY;
+    var size = Math.floor(Math.min(availW, availH));
+    if (size > 0) {
+      stageWrap.style.width = size + 'px';
+      stageWrap.style.height = size + 'px';
+    }
+  }
+
+  /* ═══════════ Progress ═══════════ */
+  function updateProgress() {
+    progressEl.innerHTML = '';
+    for (var i = 0; i < ANIMALS.length; i++) {
+      var d = document.createElement('span');
+      d.className = 'dot' + (i < round ? ' done' : (i === round ? ' current' : ''));
+      progressEl.appendChild(d);
+    }
+  }
+
+  /* ═══════════ Tiles ═══════════ */
+  function buildTiles() {
+    tilesEl.innerHTML = '';
+    for (var i = 0; i < TOTAL_TILES; i++) {
+      var t = document.createElement('button');
+      t.type = 'button';
+      t.className = 'tile';
+      t.style.background = TILE_COLORS[i % TILE_COLORS.length];
+      t.setAttribute('aria-label', 'Reveal puzzle piece');
+      var mark = document.createElement('span');
+      mark.className = 'mark';
+      mark.textContent = '?';
+      t.appendChild(mark);
+      t.addEventListener('click', onTileClick);
+      tilesEl.appendChild(t);
+    }
+    revealed = 0;
+    fullyRevealed = false;
+    nextBtn.classList.remove('ready');
+  }
+
+  function revealTile(el) {
+    if (!el || el.classList.contains('gone')) { return; }
+    el.classList.add('gone');
+    revealed++;
+    sfxPop();
+    if (revealed >= TOTAL_TILES && !fullyRevealed) {
+      fullyRevealed = true;
+      onFullyRevealed();
+    }
+  }
+
+  function onTileClick(e) {
+    if (!started || fullyRevealed) { return; }
+    revealTile(e.currentTarget);
+  }
+
+  function revealAll() {
+    var tiles = tilesEl.querySelectorAll('.tile:not(.gone)');
+    var n = tiles.length;
+    for (var i = 0; i < n; i++) {
+      (function (el, idx) {
+        setTimeout(function () { revealTile(el); }, idx * 55);
+      })(tiles[i], i);
+    }
+  }
+
+  /* ═══════════ Round flow ═══════════ */
+  function onFullyRevealed() {
+    nextBtn.classList.add('ready');
+    showName();
+    sfxTada();
+    confettiBurst(140);
+    playWord(ANIMALS[order[round]]);
+  }
+
+  function showName() {
+    var a = ANIMALS[order[round]];
+    nameBanner.innerHTML = '<span class="en">' + a.emoji + '</span><span class="nm">' + a.name + '</span>';
+    nameBanner.classList.add('show');
+  }
+
+  function loadRound() {
+    var animal = ANIMALS[order[round]];
+    animalImg.src = IMG_BASE + animal.file;
+    animalImg.alt = '';
+    nameBanner.classList.remove('show');
+    nameBanner.innerHTML = '';
+    buildTiles();
+    updateProgress();
+    sizeStage();
+
+    stage.classList.remove('pop-in');
+    void stage.offsetWidth;
+    stage.classList.add('pop-in');
+  }
+
+  function advance() {
+    advancing = false;
+    round++;
+    if (round >= order.length) {
+      showComplete();
+      return;
+    }
+    loadRound();
+  }
+
+  function onNext() {
+    if (!started || advancing) { return; }
+    if (!fullyRevealed) {
+      advancing = true;
+      sfxWhoosh();
+      revealAll();
+      if (advanceTimer) { clearTimeout(advanceTimer); }
+      advanceTimer = setTimeout(function () {
+        advanceTimer = null;
+        advance();
+      }, 1700);
+    } else {
+      advance();
+    }
+  }
+
+  function startGame() {
+    if (started) { return; }
+    started = true;
+    startOverlay.classList.add('hidden');
+    order = freshOrder();
+    round = 0;
+    loadRound();
+    sfxClick();
+  }
+
+  function showComplete() {
+    completeOverlay.classList.remove('hidden');
+    updateProgress();
+    sfxTada();
+    confettiBurst(180);
+    setTimeout(function () { confettiBurst(140); }, 320);
+  }
+
+  function playAgain() {
+    completeOverlay.classList.add('hidden');
+    if (advanceTimer) { clearTimeout(advanceTimer); advanceTimer = null; }
+    advancing = false;
+    order = freshOrder();
+    round = 0;
+    loadRound();
+    sfxClick();
+  }
+
+  /* ═══════════ Fullscreen ═══════════ */
+  function toggleFs() {
+    try {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        var el = document.documentElement;
+        (el.requestFullscreen || el.webkitRequestFullscreen || function () {}).call(el);
+      } else {
+        (document.exitFullscreen || document.webkitExitFullscreen || function () {}).call(document);
+      }
+    } catch (e) {}
+  }
+
+  /* ═══════════ Events ═══════════ */
+  revealBtn.addEventListener('click', function () {
+    if (!started || fullyRevealed) { return; }
+    sfxWhoosh();
+    revealAll();
+  });
+
+  nextBtn.addEventListener('click', onNext);
+
+  playAgainBtn.addEventListener('click', playAgain);
+  playAgainBtn.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); playAgain(); }
+  });
+
+  fsBtn.addEventListener('click', toggleFs);
+
+  // Tap anywhere on the tablet (bezel or start overlay) to begin
+  tablet.addEventListener('click', function () {
+    if (!started) { startGame(); }
+  });
+
+  animalImg.addEventListener('error', function () {
+    // graceful: leave the stage background if an image is missing
+    animalImg.style.opacity = '0';
+  });
+  animalImg.addEventListener('load', function () {
+    animalImg.style.opacity = '1';
+  });
+
+  window.addEventListener('resize', function () {
+    sizeCanvas();
+    sizeStage();
+  });
+  window.addEventListener('orientationchange', function () {
+    setTimeout(function () { sizeCanvas(); sizeStage(); }, 250);
+  });
+  window.addEventListener('load', function () {
+    sizeCanvas();
+    sizeStage();
+  });
+
+  // Prevent iOS double-tap zoom / drag ghosting on the play surface
+  document.addEventListener('gesturestart', function (e) { e.preventDefault(); });
+  document.addEventListener('contextmenu', function (e) {
+    if (e.target.closest && e.target.closest('.screen')) { e.preventDefault(); }
+  });
+
+  // Initial paint
+  updateProgress();
+  sizeStage();
+})();
+</script>
+
+<script src="../../version-display.js"></script>
+</body>
+</html>

@@ -23,6 +23,7 @@
     "likes-game":{"n":"Likes & Dislikes","v":"1.0.0","d":"2026-10-23"},
     "routines-game":{"n":"Daily Routines","v":"1.0.0","d":"2026-10-24"},
     "town-game":{"n":"Town","v":"1.0.0","d":"2026-11-13"},
+    "mystery-game":{"n":"Mystery Animal","v":"1.0.0","d":"2026-11-16"},
     "stories":{"n":"Stories","v":"1.0.0","d":"2026-11-15"},
     "data-phonems":{"n":"Phoneme Data","v":"1.0.0","d":"2026-05-07"},
     "data-level-words":{"n":"Level Words Data","v":"1.0.0","d":"2026-05-07"},
