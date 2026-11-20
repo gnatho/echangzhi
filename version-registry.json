@@ -219,6 +219,16 @@
       "games/town/town.css"
     ]
   },
+  "wordmap-game": {
+    "name": "Word Map",
+    "version": "1.0.0",
+    "date": "2026-11-20",
+    "files": [
+      "games/wordmap/index.html",
+      "games/wordmap/script.js",
+      "games/wordmap/style.css"
+    ]
+  },
   "stories": {
     "name": "Stories",
     "version": "1.0.0",

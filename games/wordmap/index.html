@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en" data-component="wordmap-game">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Word Map</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- ── Orientation Warning ─────────────────────────────────────────── -->
+    <div id="orientation-warning">
+        <div class="rotate-icon">📱</div>
+        <p>Please rotate your device to landscape mode</p>
+    </div>
+
+    <!-- ── Start Screen ────────────────────────────────────────────────── -->
+    <div id="start-screen" class="screen active">
+        <a class="back-btn" href="../index.html">← Back</a>
+        <button class="fullscreen-btn" onclick="toggleFullscreen()" title="Toggle Fullscreen">⛶</button>
+
+        <div id="start-content" class="glass-panel">
+            <h1>🗺️ Word Map</h1>
+            <p class="subtitle">Find the word hiding in the map! Pick your books, then tap the matching word.</p>
+
+            <div class="settings-columns">
+                <div class="settings-panel">
+                    <h3>📚 Choose Levels</h3>
+                    <div id="level-buttons" class="level-buttons"></div>
+                </div>
+
+                <div class="settings-panel">
+                    <h3>⚙️ Settings</h3>
+                    <div class="setting-group">
+                        <label for="num-words">Words to practice</label>
+                        <select id="num-words">
+                            <option value="5">5 words</option>
+                            <option value="10">10 words</option>
+                            <option value="15">15 words</option>
+                            <option value="20" selected>20 words</option>
+                            <option value="30">30 words</option>
+                        </select>
+                    </div>
+                    <div class="setting-group">
+                        <label for="map-size">Words in the map</label>
+                        <select id="map-size">
+                            <option value="4">4 words</option>
+                            <option value="6">6 words</option>
+                            <option value="8" selected>8 words</option>
+                            <option value="10">10 words</option>
+                            <option value="12">12 words</option>
+                            <option value="16">16 words</option>
+                            <option value="20">20 words</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <p class="menu-summary" id="menu-summary"></p>
+            <button id="begin-btn" class="begin-btn" onclick="startGame()">▶ Begin Game</button>
+        </div>
+    </div>
+
+    <!-- ── Game Screen ─────────────────────────────────────────────────── -->
+    <div id="game-screen" class="screen">
+
+        <header id="hud">
+            <a class="hud-btn back-btn" id="back-btn" href="../index.html" aria-label="Back to games">←</a>
+
+            <div class="target-panel">
+                <span class="target-label">FIND</span>
+                <span class="target-word" id="target-word">—</span>
+            </div>
+
+            <div class="hud-stats">
+                <div class="stat"><span class="stat-label">Score</span><span class="stat-val" id="score">0</span></div>
+                <div class="stat"><span class="stat-label">Mistakes</span><span class="stat-val" id="mistakes">0</span></div>
+                <div class="stat"><span class="stat-label">Word</span><span class="stat-val" id="progress">1 / 20</span></div>
+                <div class="stat"><span class="stat-label">Time</span><span class="stat-val" id="timer">0:00</span></div>
+            </div>
+
+            <button class="hud-btn fullscreen-btn" id="fullscreen-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen">⛶</button>
+        </header>
+
+        <main id="board" aria-label="Word map"></main>
+    </div>
+
+    <!-- ── End Screen ──────────────────────────────────────────────────── -->
+    <div id="end-screen" class="screen">
+        <div id="end-content" class="glass-panel">
+            <div class="celebrate-emoji" aria-hidden="true">🎉</div>
+            <h1>Nicely done!</h1>
+
+            <div class="final-score">
+                <span class="final-star" aria-hidden="true">⭐</span>
+                <span id="final-score">0</span>
+                <span class="final-score-label">points</span>
+            </div>
+
+            <div class="result-stats">
+                <div class="result-box">
+                    <span class="result-icon">⏱️</span>
+                    <span class="result-value" id="final-time">0:00</span>
+                    <span class="result-label">Time</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-icon">❌</span>
+                    <span class="result-value" id="final-mistakes">0</span>
+                    <span class="result-label">Mistakes</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-icon">🎯</span>
+                    <span class="result-value" id="final-accuracy">100%</span>
+                    <span class="result-label">Accuracy</span>
+                </div>
+                <div class="result-box">
+                    <span class="result-icon">📝</span>
+                    <span class="result-value" id="final-words">0</span>
+                    <span class="result-label">Words</span>
+                </div>
+            </div>
+
+            <div class="end-actions">
+                <button class="btn-primary" id="play-again-btn" onclick="restartGame()">🔁 Play Again</button>
+                <button class="btn-secondary" id="change-btn" onclick="returnToMenu()">⚙️ Change Settings</button>
+            </div>
+            <a class="end-games" href="../index.html">← Back to games</a>
+        </div>
+    </div>
+
+    <!-- ── Floating +points / -penalty layer ───────────────────────────── -->
+    <div id="fx-layer" aria-hidden="true"></div>
+
+    <script src="../../data/level_words.js"></script>
+    <script src="script.js"></script>
+    <script src="../../version-display.js"></script>
+</body>
+</html>
