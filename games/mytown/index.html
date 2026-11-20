@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en" data-component="mytown-game">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="color-scheme" content="light">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>In My Town</title>
+    <link rel="stylesheet" href="mytown.css">
+</head>
+<body>
+
+    <div class="app">
+        <header class="topbar">
+            <a class="icon-btn" href="../index.html" title="Back to games" aria-label="Back to games">←</a>
+            <div class="brand">
+                <span class="brand-emoji" aria-hidden="true">🏗️</span>
+                <span class="brand-name">In My Town</span>
+            </div>
+            <div class="top-actions">
+                <button class="new-town" id="new-town" type="button">
+                    <span aria-hidden="true">🔄</span> New town
+                </button>
+                <button class="icon-btn" id="help-btn" type="button" title="How to play" aria-label="How to play">?</button>
+                <button class="icon-btn" id="fs-btn" type="button" title="Fullscreen" aria-label="Fullscreen">⛶</button>
+            </div>
+        </header>
+
+        <main class="scene" id="scene">
+            <div class="sky" aria-hidden="true"></div>
+            <div class="clouds" aria-hidden="true">
+                <div class="cloud c1"></div>
+                <div class="cloud c2"></div>
+            </div>
+            <div class="hills" aria-hidden="true">
+                <div class="hill h1"></div>
+                <div class="hill h2"></div>
+            </div>
+
+            <div class="lots" id="lots" aria-label="Town building plots"></div>
+
+            <div class="ground" aria-hidden="true">
+                <div class="lawn"></div>
+                <div class="sidewalk"></div>
+                <div class="road">
+                    <div class="road-line"></div>
+                    <div class="car">🚗</div>
+                </div>
+            </div>
+
+            <div class="toast" id="toast" role="status" aria-live="polite"></div>
+        </main>
+
+        <section class="console">
+            <div class="bank-head">
+                <span class="bank-title"><span aria-hidden="true">🏘️</span> Places — drag or tap to build</span>
+            </div>
+
+            <div class="palette" id="palette"></div>
+
+            <div class="sentence-panel" id="sentence-panel" aria-live="polite">
+                <div class="sentence-empty" id="sentence-empty">
+                    <span aria-hidden="true">✏️</span> Build your town to make sentences!
+                </div>
+                <div class="sentences" id="sentences"></div>
+            </div>
+        </section>
+    </div>
+
+    <div class="modal" id="help-modal" hidden>
+        <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="help-title">
+            <button class="modal-x" id="help-x" type="button" aria-label="Close">✕</button>
+            <h2 id="help-title">How to play</h2>
+            <ol class="help-list">
+                <li><span class="n">1</span> Drag a place, or tap it then tap an empty spot.</li>
+                <li><span class="n">2</span> Fill your town with places! You can add lots of the same place.</li>
+                <li><span class="n">3</span> Tap a building in your town to remove it.</li>
+                <li><span class="n">4</span> Read the sentences and say them out loud!</li>
+            </ol>
+            <p class="help-tip">Try it: "There is a park." "There are two hospitals."</p>
+            <button class="help-ok" id="help-close" type="button">Got it</button>
+        </div>
+    </div>
+
+    <script src="mytown.js"></script>
+</body>
+</html>
