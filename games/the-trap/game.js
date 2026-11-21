@@ -276,13 +276,14 @@
     const overlay = $('#result-overlay');
     if (!overlay) return;
     overlay.classList.remove('show');
-    overlay.style.display = 'none';
+    overlay.style.display = '';
     overlay.innerHTML = '';
   }
 
   function showResult(opts) {
     const overlay = $('#result-overlay');
     if (!overlay) return;
+    overlay.style.display = '';
     const stars = opts.stars || 1;
     const actions = [];
     actions.push('<button class="btn primary" data-res="replay" type="button">Play Again</button>');
@@ -508,6 +509,12 @@
     return best || shuffle(events.map(function (e) { return e.id; }));
   }
 
+  /* Story Sequencer is text only by default (CONFIG.sequenceArt === false).
+     The illustrations are still inserted into the page, they are only hidden. */
+  function seqWrapClass() {
+    return 'seq-wrap' + (CONFIG.sequenceArt === false ? ' no-art' : '');
+  }
+
   function renderSequence() {
     const s = state.sequence;
     const body = document.getElementById('body-sequence');
@@ -516,7 +523,7 @@
     const n = s.orderedIds.length;
     const slotCols = [4, 4, 4, 4, 4, 3, 4, 4][n - 1] || 4;
 
-    body.innerHTML = '<div class="seq-wrap">' +
+    body.innerHTML = '<div class="' + seqWrapClass() + '">' +
       '<div class="progress-wrap">' +
       '<span class="progress-text" id="seq-progress-text"></span>' +
       '<div class="progress-bar"><span id="seq-progress"></span></div>' +
@@ -766,7 +773,7 @@
     if (!s || !body) return;
     const n = s.orderedIds.length;
 
-    body.innerHTML = '<div class="seq-wrap">' +
+    body.innerHTML = '<div class="' + seqWrapClass() + '">' +
       '<div class="task-banner">🏆 <strong>Fantastic! You know the story!</strong> Read it from start to end.</div>' +
       '<div class="seq-strip" id="seq-strip"></div>' +
       '<div class="seq-hand" id="seq-hand" data-count="' + n + '"></div>' +

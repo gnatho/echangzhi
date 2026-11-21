@@ -1388,6 +1388,100 @@ a:focus-visible {
 }
 
 /* ============================================================
+   Story Sequencer — TEXT ONLY mode
+   .no-art is added when CONFIG.sequenceArt === false.
+   The <svg> illustrations stay in the DOM; they are only hidden,
+   so the sentences get the whole card and never overlap a picture.
+   ============================================================ */
+.seq-wrap.no-art .art,
+.seq-wrap.no-art .card-pic,
+.seq-wrap.no-art .slot-pic {
+  display: none !important;
+}
+
+.seq-wrap.no-art .seq-card,
+.seq-wrap.no-art .seq-slot {
+  justify-content: center;
+  gap: clamp(4px, .8vmin, 10px);
+  padding: clamp(6px, 1.2vmin, 14px) clamp(6px, 1.1vmin, 12px);
+}
+
+.seq-wrap.no-art .seq-card .card-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  align-items: center;
+  font-size: clamp(.82rem, 2.25vmin, 1.45rem);
+  line-height: 1.16;
+}
+
+.seq-wrap.no-art .seq-slot {
+  min-height: clamp(64px, 13vmin, 150px);
+}
+
+.seq-wrap.no-art .seq-slot .slot-text {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(.78rem, 2.1vmin, 1.32rem);
+  line-height: 1.14;
+}
+
+.seq-wrap.no-art .seq-slot.filled {
+  padding: clamp(6px, 1.1vmin, 12px);
+}
+
+/* wider cards: fewer columns, more rows, so sentences stay readable */
+.seq-wrap.no-art .seq-hand[data-count="8"] {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.seq-wrap.no-art .seq-hand[data-count="6"] {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.seq-wrap.no-art .seq-hand[data-count="4"] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+}
+
+.seq-wrap.no-art .seq-hand.recap .seq-card {
+  flex: 0 0 clamp(150px, 19vmin, 300px);
+}
+
+/* text-only recap: two tidy rows instead of one overflowing row */
+.seq-wrap.no-art .seq-hand.recap {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-rows: repeat(2, minmax(0, 1fr));
+  gap: clamp(5px, 1.1vmin, 12px);
+  overflow: hidden;
+}
+
+.seq-wrap.no-art .seq-hand.recap .seq-card {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+.seq-wrap.no-art .seq-slot .slot-num {
+  flex: 0 0 auto;
+  min-height: 1.05em;
+  line-height: 1;
+}
+
+/* the recap is a summary, so it may use slightly smaller sentences */
+.seq-wrap.no-art .seq-strip .slot-text {
+  font-size: clamp(.72rem, 1.85vmin, 1.15rem);
+}
+
+/* the recap caption still shows the short title under the sentence */
+.seq-wrap.no-art .seq-card.reveal .card-caption {
+  margin-top: 0;
+}
+
+/* ============================================================
    Shared: toast, result overlay, buttons
    ============================================================ */
 .toast {

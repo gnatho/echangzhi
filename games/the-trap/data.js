@@ -20,6 +20,11 @@ const TRAP_DATA = (function () {
     devOverride: false,
     // Synthetic sound effects only. There is no speech of any kind.
     sound: true,
+    // Story Sequencer: false = TEXT ONLY cards.
+    // The illustrations are still built and kept in the page, they are just
+    // hidden (disabled) so nothing overlaps the sentences. Set to true to
+    // bring the pictures back.
+    sequenceArt: false,
     // Smallest side of the screen (CSS px) that counts as a tablet.
     minTabletShortSide: 600
   };
