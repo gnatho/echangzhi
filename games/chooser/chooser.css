@@ -14,7 +14,7 @@ body {
     font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f4f8; color: #2c3e50;
     display: flex; flex-direction: column; align-items: center;
-    height: 100vh; overflow: hidden;
+    height: 100vh; height: 100dvh; overflow: hidden;
 }
 
 .fullscreen-btn {

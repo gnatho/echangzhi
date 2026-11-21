@@ -27,7 +27,7 @@ function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
 }
-window.addEventListener('resize', () => { resize(); if (gameRunning) positionArena(); });
+window.addEventListener('resize', () => { resize(); needsDraw = true; if (gameRunning) positionArena(); });
 resize();
 
 // --- Arena ---
@@ -521,6 +521,10 @@ let gameRunning   = false;
 let selectedPlayers = 3;
 let winScore    = 10;
 let pupTimer    = 0;
+// Set when a one-off redraw is needed while the game is not running
+// (resize, menu frames). Prevents the render loop from painting the
+// hidden arena 60 times a second behind the opaque menu overlay.
+let needsDraw   = true;
 
 // ============================================================
 //  COLLISIONS
@@ -700,6 +704,7 @@ function startGame() {
     }
 
     orbs.push(new Orb(), new Orb());
+    needsDraw = true; // paint the fresh arena during the countdown
     doCountdown(3);
 }
 
@@ -853,7 +858,10 @@ function draw() {
 
 function loop() {
     update();
-    draw();
+    if (gameRunning || particles.length > 0 || needsDraw) {
+        draw();
+        needsDraw = false;
+    }
     requestAnimationFrame(loop);
 }
 

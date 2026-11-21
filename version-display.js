@@ -14,7 +14,7 @@
     "chooser-game":{"n":"Word Chooser","v":"1.0.0","d":"2026-05-07"},
     "memory-game":{"n":"Memory Game","v":"1.0.0","d":"2026-05-07"},
     "shooter-game":{"n":"Crosshair Assault","v":"1.0.0","d":"2026-05-07"},
-    "snakes-game":{"n":"Snakes & Ladders","v":"1.1.0","d":"2026-09-26"},
+    "snakes-game":{"n":"Snakes & Ladders","v":"1.2.0","d":"2026-11-21"},
     "bomberman-game":{"n":"Bomber Battle","v":"1.0.0","d":"2026-05-07"},
     "scrambler-game":{"n":"Sentence Scrambler","v":"1.0.0","d":"2026-05-07"},
     "baamboozle-game":{"n":"ESL Baamboozle","v":"1.0.0","d":"2026-05-07"},

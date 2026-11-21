@@ -708,8 +708,12 @@ body {
 }
 .token {
     position: absolute;
-    transform: translate(-50%, -50%);
-    will-change: left, top;
+    top: 0;
+    left: 0;
+    /* Positioned with translate3d so movement stays on the compositor.
+       Animating left/top forces a layout of the whole board every frame. */
+    transform: translate3d(0, 0, 0) translate(-50%, -50%);
+    will-change: transform;
 }
 .token-inner {
     width: 100%;
@@ -1261,6 +1265,12 @@ body {
     #board-wrap { width: min(52vh, 96vw); }
     .dice { width: 82px; height: 82px; border-radius: 19px; }
     #player-cards { grid-template-columns: 1fr; }
+}
+
+/* ===== Large landscape tablet (1920 × 1200) ===== */
+@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) {
+    .menu-card { max-width: 760px; padding: 36px 40px 30px; }
+    #panel { width: 340px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

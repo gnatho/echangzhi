@@ -1,0 +1,93 @@
+/* ==========================================================================
+   performance.css — shared display + GPU profile
+   Target classroom tablet:
+     11" IPS LCD · 1920 × 1200 · landscape
+     Qualcomm Snapdragon 685 (Adreno 610) · 8 GB RAM
+
+   Link this file LAST on every page (after the page's own stylesheet) so the
+   overrides below win. It never changes layout, copy or gameplay logic — it
+   only removes effects the target GPU cannot sustain at 60 fps.
+
+   Rules for new pages/games:
+   • Link this file after local CSS.
+   • Prefer transform/opacity animations; never animate background-position.
+   • No backdrop-filter on large panels for touch devices.
+   • No full-screen blurred decorative layers.
+   • Cap canvas backing stores at 1.5× devicePixelRatio.
+   ========================================================================== */
+
+/* ---------- Baseline ---------- */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  scroll-behavior: auto;
+}
+
+body {
+  overscroll-behavior: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 1920 × 1200 landscape: keep the 16 px base for predictable rem sizing. */
+@media (min-width: 1600px) and (min-height: 900px) and (orientation: landscape) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Touch devices: drop the GPU-expensive decoration ---------- */
+@media (any-pointer: coarse) {
+  /* Full-screen animated gradients repaint the whole viewport every frame. */
+  body,
+  body::before,
+  body::after {
+    animation: none !important;
+  }
+
+  /* Floating decoration layers (big blurred blobs, clouds, fish, bubbles). */
+  .bg-blobs,
+  .bg-decor {
+    display: none !important;
+  }
+
+  /* Backdrop blur re-samples the area behind every panel each frame.
+     Keep the translucent backgrounds, remove the blur. */
+  *,
+  *::before,
+  *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Infinite ambient animations that cost frames but add no information. */
+  .hero-badge,
+  .hero-emoji,
+  .roll-btn.ready,
+  .field-badge,
+  .cell.finish::after,
+  .token.current .token-inner::after,
+  .ladder-flow,
+  .snake-pattern,
+  .ph-emoji,
+  #win-token,
+  #win-content::before,
+  .hero-scene *,
+  html[data-component="town-game"] .car,
+  html[data-component="mytown-game"] .car {
+    animation: none !important;
+  }
+
+  /* SVG filters are re-rasterised while the board animates. */
+  .ladder-rail,
+  .ladder-rung,
+  .snake-body,
+  .snake-head {
+    filter: none !important;
+  }
+
+  .bg-blobs *,
+  .bg-decor * {
+    filter: none !important;
+    animation: none !important;
+  }
+}

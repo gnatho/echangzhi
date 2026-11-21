@@ -67,6 +67,7 @@
     var state = null;
     var audioCtx = null;
     var confettiStop = null;
+    var confettiActive = false;
 
     var wait = function (ms) { return new Promise(function (r) { setTimeout(r, ms); }); };
 
@@ -437,7 +438,7 @@
                 state.boardPx = tokenLayer.clientWidth || 1;
                 relayoutTokens();
             }
-            sizeFxCanvas();
+            if (confettiActive) sizeFxCanvas();
         });
 
         syncPlayerCount();
@@ -833,10 +834,9 @@
         var y = (v.row + 0.5) * cellPx + o[1] * cellPx;
         var size = cellPx * 0.62;
         p.el.style.transition = animate
-            ? "left " + STEP_MS + "ms cubic-bezier(.34,1.3,.5,1), top " + STEP_MS + "ms cubic-bezier(.34,1.3,.5,1)"
+            ? "transform " + STEP_MS + "ms cubic-bezier(.34,1.3,.5,1)"
             : "none";
-        p.el.style.left = x + "px";
-        p.el.style.top = y + "px";
+        p.el.style.transform = "translate3d(" + x + "px, " + y + "px, 0) translate(-50%, -50%)";
         p.el.style.width = size + "px";
         p.el.style.height = size + "px";
         p.el.style.fontSize = (size * 0.52) + "px";
@@ -875,8 +875,7 @@
                 var y = pts[i0].y + (pts[i1].y - pts[i0].y) * f;
                 if (p.el) {
                     p.el.style.transition = "none";
-                    p.el.style.left = x + "px";
-                    p.el.style.top = y + "px";
+                    p.el.style.transform = "translate3d(" + x + "px, " + y + "px, 0) translate(-50%, -50%)";
                 }
                 if (t < 1) requestAnimationFrame(frame);
                 else {
@@ -1221,7 +1220,9 @@
     function sizeFxCanvas() {
         var canvas = document.getElementById("fx-canvas");
         if (!canvas) return;
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        // Cap the backing store: a full-screen 2× canvas is expensive on the
+        // target tablet (Adreno 610) and the particles are only decorative.
+        var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         canvas.width = Math.floor(window.innerWidth * dpr);
         canvas.height = Math.floor(window.innerHeight * dpr);
     }
@@ -1229,17 +1230,18 @@
     function launchConfetti() {
         var canvas = document.getElementById("fx-canvas");
         if (!canvas || prefersReducedMotion()) return;
-        sizeFxCanvas();
         var ctx = canvas.getContext("2d");
         if (!ctx) return;
 
         stopConfetti();
+        sizeFxCanvas();
 
         var colors = ["#fbbf24", "#f43f5e", "#10b981", "#4f7cff", "#a78bfa", "#22d3ee", "#fb923c", "#e879f9"];
-        var dpr = Math.min(window.devicePixelRatio || 1, 2);
+        var dpr = Math.min(window.devicePixelRatio || 1, 1.5);
         var w = window.innerWidth, h = window.innerHeight;
         var parts = [];
-        var count = 170;
+        var count = 120;
+        confettiActive = true;
 
         for (var i = 0; i < count; i++) {
             parts.push({
@@ -1282,12 +1284,22 @@
             if (now - startedAt < 6200) requestAnimationFrame(frame);
             else {
                 running = false;
+                confettiActive = false;
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
+                canvas.width = 1;
+                canvas.height = 1;
                 confettiStop = null;
             }
         }
 
-        confettiStop = function () { running = false; ctx.clearRect(0, 0, canvas.width, canvas.height); confettiStop = null; };
+        confettiStop = function () {
+            running = false;
+            confettiActive = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            canvas.width = 1;
+            canvas.height = 1;
+            confettiStop = null;
+        };
         requestAnimationFrame(frame);
     }
 

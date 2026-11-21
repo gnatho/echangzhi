@@ -1,5 +1,5 @@
 /* Phonics Game Service Worker — offline support */
-const VERSION = '1.2.0';
+const VERSION = '1.3.0';
 const PRECACHE = 'phonics-precache-' + VERSION;
 const RUNTIME  = 'phonics-runtime-' + VERSION;
 const AUDIO    = 'phonics-audio-' + VERSION;
@@ -13,6 +13,7 @@ const PRECACHE_URLS = [
   'bottle.html',
   'audio.html',
   'styles.css',
+  'static/performance.css',
   'script.js',
   'data.js',
   'version-display.js',

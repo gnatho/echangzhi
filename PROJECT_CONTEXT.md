@@ -8,6 +8,40 @@
 
 ---
 
+## Target Device & Performance Profile
+
+All pages and games must run smoothly on the classroom tablet:
+
+| Spec | Value |
+|------|-------|
+| Screen | 11" IPS LCD, **1920 × 1200**, landscape |
+| Chipset | Qualcomm **Snapdragon 685** (Adreno 610 GPU) |
+| Memory | 8 GB RAM |
+| Input | Touch only (no hover, no mouse assumptions) |
+
+### Performance rules (mandatory for new games/pages)
+
+1. **Link `static/performance.css` last** in `<head>`, after the page's own
+   stylesheet. It removes GPU-heavy decoration automatically on touch
+   devices while leaving desktop rendering unchanged.
+2. **Never animate `background-position`/gradients** full-screen. Static
+   gradients only.
+3. **No `backdrop-filter`** on large panels. Use a solid or lightly
+   translucent background instead.
+4. **No full-screen blurred decorative layers** (large `filter: blur()`
+   blobs). Decorative layers belong in `.bg-decor` / `.bg-blobs`, which the
+   performance profile hides on touch devices.
+5. **Animate only `transform` and `opacity`.** Avoid animating `box-shadow`,
+   `left`/`top`, SVG `stroke-dashoffset`, or layout properties.
+6. **Cap canvas backing stores at `1.5 × devicePixelRatio`** (Snakes uses
+   this for its win confetti).
+7. Avoid infinite ambient animations on large elements; finite feedback
+   animations (dice, token hop, correct/incorrect) are fine.
+8. Test at **1920 × 1200 landscape**; use `dvh` units and `clamp()` so the
+   layout fills the 16:10 screen without clipping.
+
+---
+
 ## Architecture Map
 
 ```
@@ -28,7 +62,8 @@ PHONICS GAME/
 │   └── bomberman/          # Bomberman-style game (WIP)
 └── static/
     ├── audio/              # MP3 audio files for words
-    └── imgs/               # Image assets (words/)
+    ├── imgs/               # Image assets (words/)
+    └── performance.css     # Shared tablet GPU/performance profile
 ```
 
 ### Key Files
