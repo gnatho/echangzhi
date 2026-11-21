@@ -30,7 +30,7 @@ body {
   height: 100%;
   width: 100%;
   overflow: hidden;
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Rounded', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: 'CastleDown', 'Comic Sans MS', 'Chalkboard SE', 'Segoe UI Rounded', 'Segoe UI', system-ui, -apple-system, sans-serif;
   color: #0b2b45;
   background: linear-gradient(180deg, #032c57 0%, #0b5a9c 34%, #1189c4 66%, #36c3dd 100%);
   -webkit-user-select: none;

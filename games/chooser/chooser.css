@@ -2,8 +2,16 @@
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { color-scheme: light !important; }
 
+@font-face {
+    font-family: 'CastleDown';
+    src: url('../../static/fonts/castledown.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f0f4f8; color: #2c3e50;
     display: flex; flex-direction: column; align-items: center;
     height: 100vh; overflow: hidden;

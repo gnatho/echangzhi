@@ -5,8 +5,17 @@
     -webkit-tap-highlight-color: transparent;
 }
 html { color-scheme: light !important; }
+
+@font-face {
+    font-family: 'CastleDown';
+    src: url('../../static/fonts/castledown.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(160deg, #7cb342 0%, #558b2f 55%, #33691e 100%);
     color: #fff;
     height: 100dvh;

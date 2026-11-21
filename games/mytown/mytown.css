@@ -7,8 +7,16 @@
 
 html { color-scheme: light !important; }
 
+@font-face {
+    font-family: 'CastleDown';
+    src: url('../../static/fonts/castledown.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #0f1c3f;
     color: #1f2d3d;
     height: 100dvh;

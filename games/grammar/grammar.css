@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'CastleDown';
+    src: url('../../static/fonts/castledown.woff2') format('woff2');
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -13,7 +21,7 @@ html { color-scheme: light !important; }
 }
 
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: 'CastleDown', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #f2994a, #f2c94c);
     color: #2c3e50;
     height: 100dvh;
