@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 200" role="img" aria-label="Tuna">
+  <ellipse cx="110" cy="184" rx="60" ry="8" fill="#bae6fd" opacity=".65"/>
+  <path d="M28 100 Q62 52 124 52 Q170 52 190 100 Q170 148 124 148 Q62 148 28 100 Z" fill="#2b7fd4"/>
+  <path d="M28 100 Q62 122 124 122 Q166 122 190 100 Q166 142 124 142 Q62 142 28 100 Z" fill="#dbeafe"/>
+  <path d="M190 100 L218 68 L208 100 L218 132 Z" fill="#1f5fa8"/>
+  <path d="M92 52 L108 20 L124 52 Z" fill="#1f5fa8"/>
+  <path d="M82 148 L98 176 L114 148 Z" fill="#1f5fa8"/>
+  <path d="M132 58 L154 40 L148 64 Z" fill="#ffd166"/>
+  <path d="M150 140 L170 156 L164 134 Z" fill="#ffd166"/>
+  <circle cx="64" cy="92" r="7" fill="#ffffff"/>
+  <circle cx="64" cy="92" r="3.5" fill="#10233a"/>
+  <path d="M46 104 Q57 111 68 104" stroke="#10233a" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M58 122 Q102 138 148 122" stroke="#93c5fd" stroke-width="2" fill="none" opacity=".75"/>
+</svg>

@@ -219,6 +219,28 @@
       "games/town/town.css"
     ]
   },
+  "mystery-game": {
+    "name": "Mystery Animal",
+    "version": "1.0.0",
+    "date": "2026-11-16",
+    "files": [
+      "games/mystery/index.html"
+    ]
+  },
+  "habitat-quest": {
+    "name": "Habitat Quest",
+    "version": "1.0.0",
+    "date": "2026-11-20",
+    "files": [
+      "games/habitat-quest/index.html",
+      "games/habitat-quest/style.css",
+      "games/habitat-quest/data.js",
+      "games/habitat-quest/game.js",
+      "games/habitat-quest/img/penguin.svg",
+      "games/habitat-quest/img/tuna.svg",
+      "games/habitat-quest/img/butterfly.svg"
+    ]
+  },
   "wordmap-game": {
     "name": "Word Map",
     "version": "1.0.0",
@@ -227,6 +249,30 @@
       "games/wordmap/index.html",
       "games/wordmap/script.js",
       "games/wordmap/style.css"
+    ]
+  },
+  "town-quest": {
+    "name": "Town Quest",
+    "version": "1.0.0",
+    "date": "2026-11-21",
+    "files": [
+      "games/town-quest/index.html",
+      "games/town-quest/style.css",
+      "games/town-quest/data.js",
+      "games/town-quest/town.js",
+      "games/town-quest/game.js"
+    ]
+  },
+  "the-trap": {
+    "name": "The Trap — Story Challenge",
+    "version": "1.0.0",
+    "date": "2026-11-21",
+    "files": [
+      "games/the-trap/index.html",
+      "games/the-trap/style.css",
+      "games/the-trap/assets.js",
+      "games/the-trap/data.js",
+      "games/the-trap/game.js"
     ]
   },
   "stories": {

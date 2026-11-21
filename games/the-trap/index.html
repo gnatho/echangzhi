@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en" data-component="the-trap">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#0a4f8c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="description" content="The Trap Story Challenge: story sequencing, who said it and S or SH phonics games for young English learners.">
+  <title>The Trap — Story Challenge</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8A%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- ---------- Underwater background: light rays, bubbles, coral, plants ---------- -->
+  <div class="bg-decor" aria-hidden="true">
+    <span class="sun-rays"></span>
+    <span class="fishy f1">🐠</span>
+    <span class="fishy f2">🐟</span>
+    <span class="fishy f3">🐡</span>
+    <span class="fishy f4">🐠</span>
+    <div class="bubble-field" id="bubbles"></div>
+    <div class="seafloor">
+      <span class="coral c1"></span>
+      <span class="coral c2"></span>
+      <span class="coral c3"></span>
+      <span class="weed w1"></span>
+      <span class="weed w2"></span>
+      <span class="weed w3"></span>
+      <span class="weed w4"></span>
+      <span class="rock r1"></span>
+      <span class="rock r2"></span>
+      <span class="starfish">⭐</span>
+    </div>
+  </div>
+
+  <div id="app">
+
+    <!-- ===================== MAIN MENU ===================== -->
+    <section id="screen-menu" class="screen active">
+      <header class="menu-topbar">
+        <a class="menu-back" href="../index.html" aria-label="Back to all games">← Back</a>
+        <div class="menu-top-actions">
+          <button class="round-btn" data-action="sound" type="button" aria-label="Toggle sound" aria-pressed="true">🔊</button>
+          <button class="round-btn" data-action="fullscreen" type="button" aria-label="Fullscreen">⛶</button>
+        </div>
+      </header>
+
+      <div class="menu-title-wrap">
+        <h1 class="menu-title"><span aria-hidden="true">🌊</span> THE TRAP</h1>
+        <p class="menu-subtitle">Story Challenge</p>
+        <p class="menu-tagline">Help Lucy and Ben find the mysterious letter!</p>
+      </div>
+
+      <div class="menu-cast" id="menu-cast" aria-hidden="true"></div>
+
+      <div class="activity-grid">
+        <button class="activity-card" data-activity="sequence" type="button" style="--c1:#38bdf8;--c2:#0369a1">
+          <span class="activity-icon" aria-hidden="true">📖</span>
+          <span class="activity-text">
+            <strong>Story Sequencer</strong>
+            <small>Put the story in the correct order.</small>
+          </span>
+          <span class="card-art" data-art="sequence" aria-hidden="true"></span>
+        </button>
+
+        <button class="activity-card" data-activity="said" type="button" style="--c1:#f472b6;--c2:#9d174d">
+          <span class="activity-icon" aria-hidden="true">💬</span>
+          <span class="activity-text">
+            <strong>Who Said It?</strong>
+            <small>Match the dialogue to the correct character.</small>
+          </span>
+          <span class="card-art" data-art="said" aria-hidden="true"></span>
+        </button>
+
+        <button class="activity-card" data-activity="phonics" type="button" style="--c1:#fbbf24;--c2:#c2410c">
+          <span class="activity-icon" aria-hidden="true">🔤</span>
+          <span class="activity-text">
+            <strong>S or SH?</strong>
+            <small>Find the correct phonics sound.</small>
+          </span>
+          <span class="card-art" data-art="phonics" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <p class="menu-footnote">Tap a game to start. Use 🏠 Menu to come back.</p>
+    </section>
+
+    <!-- ===================== STORY SEQUENCER ===================== -->
+    <section id="screen-sequence" class="screen">
+      <header class="hud">
+        <div class="hud-left">
+          <button class="hud-btn" data-action="menu" type="button" aria-label="The Trap menu">🏠 <span>Menu</span></button>
+          <button class="hud-btn" data-action="hub" type="button" aria-label="All games">🎮 <span>Games</span></button>
+        </div>
+        <div class="hud-center">
+          <div class="hud-title">📖 Story Sequencer</div>
+          <div class="hud-sub"><span class="hud-progress" id="progress-sequence">Ready</span><span class="hud-score" id="score-sequence">⭐ 0</span></div>
+        </div>
+        <div class="hud-right">
+          <button class="hud-btn" data-action="sound" type="button" aria-label="Toggle sound" aria-pressed="true">🔊</button>
+          <button class="hud-btn" data-action="restart" type="button" aria-label="Restart">🔄</button>
+          <button class="hud-btn" data-action="fullscreen" type="button" aria-label="Fullscreen">⛶</button>
+        </div>
+      </header>
+      <div class="game-body" id="body-sequence"></div>
+    </section>
+
+    <!-- ===================== WHO SAID IT? ===================== -->
+    <section id="screen-said" class="screen">
+      <header class="hud">
+        <div class="hud-left">
+          <button class="hud-btn" data-action="menu" type="button" aria-label="The Trap menu">🏠 <span>Menu</span></button>
+          <button class="hud-btn" data-action="hub" type="button" aria-label="All games">🎮 <span>Games</span></button>
+        </div>
+        <div class="hud-center">
+          <div class="hud-title">💬 Who Said It?</div>
+          <div class="hud-sub"><span class="hud-progress" id="progress-said">Ready</span><span class="hud-score" id="score-said">⭐ 0</span></div>
+        </div>
+        <div class="hud-right">
+          <button class="hud-btn" data-action="sound" type="button" aria-label="Toggle sound" aria-pressed="true">🔊</button>
+          <button class="hud-btn" data-action="restart" type="button" aria-label="Restart">🔄</button>
+          <button class="hud-btn" data-action="fullscreen" type="button" aria-label="Fullscreen">⛶</button>
+        </div>
+      </header>
+      <div class="game-body" id="body-said"></div>
+    </section>
+
+    <!-- ===================== S OR SH? ===================== -->
+    <section id="screen-phonics" class="screen">
+      <header class="hud">
+        <div class="hud-left">
+          <button class="hud-btn" data-action="menu" type="button" aria-label="The Trap menu">🏠 <span>Menu</span></button>
+          <button class="hud-btn" data-action="hub" type="button" aria-label="All games">🎮 <span>Games</span></button>
+        </div>
+        <div class="hud-center">
+          <div class="hud-title">🔤 S or SH?</div>
+          <div class="hud-sub"><span class="hud-progress" id="progress-phonics">Ready</span><span class="hud-score" id="score-phonics">⭐ 0</span></div>
+        </div>
+        <div class="hud-right">
+          <button class="hud-btn" data-action="sound" type="button" aria-label="Toggle sound" aria-pressed="true">🔊</button>
+          <button class="hud-btn" data-action="restart" type="button" aria-label="Restart">🔄</button>
+          <button class="hud-btn" data-action="fullscreen" type="button" aria-label="Fullscreen">⛶</button>
+        </div>
+      </header>
+      <div class="game-body" id="body-phonics"></div>
+    </section>
+
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <div id="result-overlay" class="result-overlay" role="dialog" aria-modal="true"></div>
+  <canvas id="confetti" aria-hidden="true"></canvas>
+
+  <!-- Portrait warning -->
+  <div id="rotate-gate" class="gate" role="alertdialog" aria-modal="true" aria-live="assertive">
+    <div class="gate-card">
+      <div class="gate-icon rotate-icon" aria-hidden="true">📱</div>
+      <h2>Please rotate your tablet to landscape.</h2>
+      <p>THE TRAP is made for landscape screens.</p>
+    </div>
+  </div>
+
+  <!-- Device compatibility message -->
+  <div id="device-gate" class="gate" role="alertdialog" aria-modal="true">
+    <div class="gate-card">
+      <div class="gate-icon" aria-hidden="true">📱</div>
+      <h2>This game is made for Android tablets.</h2>
+      <p>Open THE TRAP on a tablet (10 inches or bigger) with a touch screen, in landscape, for the best experience.</p>
+      <p class="gate-note">Developer? Set <code>devOverride: true</code> in <code>data.js</code>, or add <code>?dev=1</code> to the page URL.</p>
+      <a class="gate-link" href="../index.html">← Back to all games</a>
+    </div>
+  </div>
+
+  <script src="assets.js"></script>
+  <script src="data.js"></script>
+  <script src="game.js"></script>
+  <script src="../../version-display.js"></script>
+</body>
+</html>

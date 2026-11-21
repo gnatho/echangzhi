@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Butterfly">
+  <ellipse cx="100" cy="182" rx="48" ry="8" fill="#bae6fd" opacity=".6"/>
+  <path d="M100 92 C62 38 18 42 24 84 C28 112 62 122 100 110 Z" fill="#ff8fab"/>
+  <path d="M100 92 C138 38 182 42 176 84 C172 112 138 122 100 110 Z" fill="#ff8fab"/>
+  <path d="M100 106 C66 132 34 152 44 172 C54 190 90 166 100 126 Z" fill="#ffc2d1"/>
+  <path d="M100 106 C134 132 166 152 156 172 C146 190 110 166 100 126 Z" fill="#ffc2d1"/>
+  <circle cx="60" cy="78" r="11" fill="#ffffff" opacity=".85"/>
+  <circle cx="140" cy="78" r="11" fill="#ffffff" opacity=".85"/>
+  <circle cx="60" cy="78" r="4.5" fill="#c9184a"/>
+  <circle cx="140" cy="78" r="4.5" fill="#c9184a"/>
+  <circle cx="55" cy="150" r="7" fill="#ffffff" opacity=".7"/>
+  <circle cx="145" cy="150" r="7" fill="#ffffff" opacity=".7"/>
+  <ellipse cx="100" cy="114" rx="9" ry="40" fill="#5a3a2e"/>
+  <circle cx="100" cy="72" r="11" fill="#5a3a2e"/>
+  <path d="M94 64 Q80 44 68 40" stroke="#5a3a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M106 64 Q120 44 132 40" stroke="#5a3a2e" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="68" cy="40" r="4" fill="#5a3a2e"/>
+  <circle cx="132" cy="40" r="4" fill="#5a3a2e"/>
+</svg>

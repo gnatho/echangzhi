@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" role="img" aria-label="Penguin">
+  <ellipse cx="100" cy="183" rx="54" ry="10" fill="#bae6fd" opacity=".75"/>
+  <ellipse cx="100" cy="122" rx="56" ry="62" fill="#22303f"/>
+  <ellipse cx="100" cy="134" rx="38" ry="46" fill="#ffffff"/>
+  <circle cx="100" cy="62" r="42" fill="#22303f"/>
+  <ellipse cx="84" cy="58" rx="16" ry="20" fill="#ffffff"/>
+  <ellipse cx="116" cy="58" rx="16" ry="20" fill="#ffffff"/>
+  <circle cx="86" cy="60" r="5" fill="#22303f"/>
+  <circle cx="114" cy="60" r="5" fill="#22303f"/>
+  <circle cx="87.5" cy="58" r="1.8" fill="#ffffff"/>
+  <circle cx="115.5" cy="58" r="1.8" fill="#ffffff"/>
+  <path d="M100 72 L113 82 L100 93 L87 82 Z" fill="#ff9f1c"/>
+  <ellipse cx="57" cy="130" rx="12" ry="35" fill="#1a2530" transform="rotate(18 57 130)"/>
+  <ellipse cx="143" cy="130" rx="12" ry="35" fill="#1a2530" transform="rotate(-18 143 130)"/>
+  <ellipse cx="79" cy="176" rx="19" ry="8" fill="#ff9f1c"/>
+  <ellipse cx="121" cy="176" rx="19" ry="8" fill="#ff9f1c"/>
+</svg>
